@@ -3,13 +3,26 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Moysidis Mobile Massage — practice management API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: clients
+    description: Client management
+  - name: medical-history
+    description: Client medical history
+  - name: appointments
+    description: Appointment management
+  - name: expenses
+    description: Expense tracking
+  - name: finance
+    description: Financial reporting
+  - name: reviews
+    description: Client reviews
+
 paths:
   /healthz:
     get:
@@ -24,6 +37,517 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Clients ──────────────────────────────────────────────────────────────
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List all clients
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Register a new client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+      responses:
+        "201":
+          description: Created client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{clientId}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get a single client
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update a client
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientUpdate"
+      responses:
+        "200":
+          description: Updated client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Delete a client
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Medical History ───────────────────────────────────────────────────────
+  /clients/{clientId}/medical-history:
+    get:
+      operationId: getMedicalHistory
+      tags: [medical-history]
+      summary: Get medical history for a client
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalHistory"
+        "404":
+          description: Not found
+    post:
+      operationId: createMedicalHistory
+      tags: [medical-history]
+      summary: Submit client medical history (tablet intake form)
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicalHistoryInput"
+      responses:
+        "201":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalHistory"
+
+  /clients/{clientId}/medical-history/{historyId}:
+    patch:
+      operationId: updateMedicalHistory
+      tags: [medical-history]
+      summary: Update medical history
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: historyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicalHistoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalHistory"
+
+  # ── Appointments ──────────────────────────────────────────────────────────
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List appointments
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Create a new appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentInput"
+      responses:
+        "201":
+          description: Created appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{appointmentId}:
+    get:
+      operationId: getAppointment
+      tags: [appointments]
+      summary: Get a single appointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateAppointment
+      tags: [appointments]
+      summary: Update appointment details
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentUpdate"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    delete:
+      operationId: deleteAppointment
+      tags: [appointments]
+      summary: Delete an appointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /appointments/{appointmentId}/complete:
+    post:
+      operationId: completeAppointment
+      tags: [appointments]
+      summary: Mark appointment as completed and schedule thank-you email
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{appointmentId}/cancel:
+    post:
+      operationId: cancelAppointment
+      tags: [appointments]
+      summary: Cancel an appointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  # ── Expenses ──────────────────────────────────────────────────────────────
+  /expenses:
+    get:
+      operationId: listExpenses
+      tags: [expenses]
+      summary: List expenses
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: string
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Add an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Created expense
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
+  /expenses/{expenseId}:
+    patch:
+      operationId: updateExpense
+      tags: [expenses]
+      summary: Update an expense
+      parameters:
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseUpdate"
+      responses:
+        "200":
+          description: Updated expense
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+    delete:
+      operationId: deleteExpense
+      tags: [expenses]
+      summary: Delete an expense
+      parameters:
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Finance (wow endpoints) ───────────────────────────────────────────────
+  /finance/summary:
+    get:
+      operationId: getFinanceSummary
+      tags: [finance]
+      summary: Financial summary — income, expenses, profit
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, month, year]
+        - name: date
+          in: query
+          description: ISO date string — scope for the period
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Finance summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinanceSummary"
+
+  /finance/monthly-breakdown:
+    get:
+      operationId: getMonthlyBreakdown
+      tags: [finance]
+      summary: Monthly income vs expenses for a year
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Monthly breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyBreakdownItem"
+
+  /finance/top-services:
+    get:
+      operationId: getTopServices
+      tags: [finance]
+      summary: Revenue breakdown by service type
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Top services by revenue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServiceRevenue"
+
+  # ── Reviews ───────────────────────────────────────────────────────────────
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: List reviews
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+
+  /reviews/{reviewId}:
+    patch:
+      operationId: updateReview
+      tags: [reviews]
+      summary: Submit or update a review (star rating)
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewUpdate"
+      responses:
+        "200":
+          description: Updated review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [finance]
+      summary: Top-level dashboard stats card
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +558,360 @@ components:
       required:
         - status
 
+    # ── Client ────────────────────────────────────────────────────────────
+    Client:
+      type: object
+      required: [id, firstName, lastName, email, phone, createdAt]
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dateOfBirth:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        hasMedicalHistory:
+          type: boolean
+
+    ClientInput:
+      type: object
+      required: [firstName, lastName, email, phone]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dateOfBirth:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    ClientUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dateOfBirth:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    # ── Medical History ───────────────────────────────────────────────────
+    MedicalHistory:
+      type: object
+      required: [id, clientId, gdprAccepted, createdAt]
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        conditions:
+          type: ["string", "null"]
+        allergies:
+          type: ["string", "null"]
+        immuneIssues:
+          type: ["string", "null"]
+        otherHealthIssues:
+          type: ["string", "null"]
+        medications:
+          type: ["string", "null"]
+        painAreas:
+          type: ["string", "null"]
+        previousMassageExperience:
+          type: boolean
+        preferredPressure:
+          type: ["string", "null"]
+        massageGoals:
+          type: ["string", "null"]
+        gdprAccepted:
+          type: boolean
+        gdprAcceptedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    MedicalHistoryInput:
+      type: object
+      required: [gdprAccepted]
+      properties:
+        conditions:
+          type: string
+        allergies:
+          type: string
+        immuneIssues:
+          type: string
+        otherHealthIssues:
+          type: string
+        medications:
+          type: string
+        painAreas:
+          type: string
+        previousMassageExperience:
+          type: boolean
+        preferredPressure:
+          type: string
+        massageGoals:
+          type: string
+        gdprAccepted:
+          type: boolean
+
+    MedicalHistoryUpdate:
+      type: object
+      properties:
+        conditions:
+          type: string
+        allergies:
+          type: string
+        immuneIssues:
+          type: string
+        otherHealthIssues:
+          type: string
+        medications:
+          type: string
+        painAreas:
+          type: string
+        previousMassageExperience:
+          type: boolean
+        preferredPressure:
+          type: string
+        massageGoals:
+          type: string
+
+    # ── Appointment ───────────────────────────────────────────────────────
+    Appointment:
+      type: object
+      required: [id, clientId, date, startTime, serviceType, status, price, createdAt]
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        clientName:
+          type: ["string", "null"]
+        clientEmail:
+          type: ["string", "null"]
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: ["string", "null"]
+        durationMinutes:
+          type: integer
+        serviceType:
+          type: string
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled, no_show]
+        price:
+          type: number
+        notes:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        emailScheduledFor:
+          type: ["string", "null"]
+        emailSentAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AppointmentInput:
+      type: object
+      required: [clientId, date, startTime, serviceType, price]
+      properties:
+        clientId:
+          type: integer
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: ["string", "null"]
+        durationMinutes:
+          type: integer
+        serviceType:
+          type: string
+        price:
+          type: number
+        notes:
+          type: ["string", "null"]
+
+    AppointmentUpdate:
+      type: object
+      properties:
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: ["string", "null"]
+        durationMinutes:
+          type: integer
+        serviceType:
+          type: string
+        price:
+          type: number
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled, no_show]
+        notes:
+          type: ["string", "null"]
+
+    # ── Expense ───────────────────────────────────────────────────────────
+    Expense:
+      type: object
+      required: [id, category, description, amount, date, createdAt]
+      properties:
+        id:
+          type: integer
+        category:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+        createdAt:
+          type: string
+
+    ExpenseInput:
+      type: object
+      required: [category, description, amount, date]
+      properties:
+        category:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+
+    ExpenseUpdate:
+      type: object
+      properties:
+        category:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+
+    # ── Finance ───────────────────────────────────────────────────────────
+    FinanceSummary:
+      type: object
+      required: [period, totalIncome, totalExpenses, profit, appointmentCount]
+      properties:
+        period:
+          type: string
+        totalIncome:
+          type: number
+        totalExpenses:
+          type: number
+        profit:
+          type: number
+        appointmentCount:
+          type: integer
+
+    MonthlyBreakdownItem:
+      type: object
+      required: [month, year, income, expenses, profit]
+      properties:
+        month:
+          type: integer
+        year:
+          type: integer
+        income:
+          type: number
+        expenses:
+          type: number
+        profit:
+          type: number
+
+    ServiceRevenue:
+      type: object
+      required: [serviceType, revenue, count]
+      properties:
+        serviceType:
+          type: string
+        revenue:
+          type: number
+        count:
+          type: integer
+
+    # ── Review ────────────────────────────────────────────────────────────
+    Review:
+      type: object
+      required: [id, appointmentId, createdAt]
+      properties:
+        id:
+          type: integer
+        appointmentId:
+          type: integer
+        clientId:
+          type: ["integer", "null"]
+        clientName:
+          type: ["string", "null"]
+        rating:
+          type: ["integer", "null"]
+        comment:
+          type: ["string", "null"]
+        emailSentAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ReviewUpdate:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+
+    # ── Dashboard ─────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [todayIncome, todayAppointments, monthIncome, monthExpenses, monthProfit, totalClients, avgRating]
+      properties:
+        todayIncome:
+          type: number
+        todayAppointments:
+          type: integer
+        monthIncome:
+          type: number
+        monthExpenses:
+          type: number
+        monthProfit:
+          type: number
+        totalClients:
+          type: integer
+        avgRating:
+          type: number
+        pendingAppointments:
+          type: integer

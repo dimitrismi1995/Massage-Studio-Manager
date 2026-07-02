@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Moysidis Mobile Massage"
+version = "1.0.0"
+id = "artifacts/moysidis-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19762
+
+[services.development]
+run = "pnpm --filter @workspace/moysidis-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/moysidis-app", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/moysidis-app/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19762"
+BASE_PATH = "/"
