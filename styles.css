@@ -147,6 +147,14 @@ header h1 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.logo {
+    height: 40px;
+    width: auto;
 }
 
 /* Navigation */

@@ -1,6 +1,6 @@
-# Massage Studio Manager
+# Moysidis Mobile Massage - Studio Manager
 
-A fully accessible web application for managing massage studio operations, including client management, appointment scheduling, and service catalog management.
+A fully accessible web application for managing Moysidis Mobile Massage studio operations, including client management, appointment scheduling, and service catalog management.
 
 ## Features
 
@@ -186,6 +186,10 @@ Massage-Studio-Manager/
 - **UIController Class** - Manages UI interactions and rendering
 - **Separation of Concerns** - Data logic separate from UI logic
 
+## Branding
+
+This application features the **Moysidis Mobile Massage** brand identity with custom logo and styling.
+
 ## Customization
 
 ### Changing Colors
@@ -244,6 +248,7 @@ https://github.com/dimitrismi1995/Massage-Studio-Manager/issues
 - Built with accessibility as a core principle
 - Tested with multiple screen readers
 - Designed for real-world massage studio workflows
+- Branding by Moysidis Mobile Massage
 
 ---
 
