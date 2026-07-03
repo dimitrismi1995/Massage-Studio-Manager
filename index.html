@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Massage Studio Manager - Manage clients, appointments, and services efficiently">
+    <title>Massage Studio Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header role="banner">
+        <div class="container">
+            <h1>💆 Massage Studio Manager</h1>
+            <nav role="navigation" aria-label="Main navigation">
+                <ul>
+                    <li><a href="#dashboard" aria-current="page">Dashboard</a></li>
+                    <li><a href="#clients">Clients</a></li>
+                    <li><a href="#appointments">Appointments</a></li>
+                    <li><a href="#services">Services</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" role="main">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active" aria-labelledby="dashboard-heading">
+            <div class="container">
+                <h2 id="dashboard-heading">Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card" role="region" aria-labelledby="total-clients">
+                        <h3 id="total-clients">Total Clients</h3>
+                        <p class="stat-number" id="client-count">0</p>
+                    </div>
+                    <div class="stat-card" role="region" aria-labelledby="today-appointments">
+                        <h3 id="today-appointments">Today's Appointments</h3>
+                        <p class="stat-number" id="today-count">0</p>
+                    </div>
+                    <div class="stat-card" role="region" aria-labelledby="weekly-revenue">
+                        <h3 id="weekly-revenue">Weekly Revenue</h3>
+                        <p class="stat-number" id="revenue-count">$0</p>
+                    </div>
+                    <div class="stat-card" role="region" aria-labelledby="active-services">
+                        <h3 id="active-services">Active Services</h3>
+                        <p class="stat-number" id="services-count">0</p>
+                    </div>
+                </div>
+                <div class="upcoming-section">
+                    <h3>Upcoming Appointments (Next 7 Days)</h3>
+                    <div id="upcoming-list" class="appointment-list">
+                        <p class="empty-state">No upcoming appointments</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients Section -->
+        <section id="clients" class="section" aria-labelledby="clients-heading">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="clients-heading">Clients</h2>
+                    <button class="btn btn-primary" id="add-client-btn" aria-haspopup="dialog">
+                        + Add Client
+                    </button>
+                </div>
+                
+                <div class="search-bar" role="search">
+                    <label for="client-search" class="sr-only">Search clients</label>
+                    <input 
+                        type="search" 
+                        id="client-search" 
+                        placeholder="Search clients by name, phone, or email..."
+                        aria-describedby="search-help"
+                    >
+                    <span id="search-help" class="sr-only">Type to search through client records</span>
+                </div>
+
+                <div id="clients-list" class="cards-grid" role="list" aria-live="polite">
+                    <p class="empty-state">No clients added yet. Click "Add Client" to get started.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appointments Section -->
+        <section id="appointments" class="section" aria-labelledby="appointments-heading">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="appointments-heading">Appointments</h2>
+                    <button class="btn btn-primary" id="add-appointment-btn" aria-haspopup="dialog">
+                        + Schedule Appointment
+                    </button>
+                </div>
+
+                <div class="date-filter" role="group" aria-labelledby="filter-label">
+                    <label id="filter-label" class="sr-only">Filter appointments by date range</label>
+                    <input 
+                        type="date" 
+                        id="appointment-date-filter"
+                        aria-label="Filter by specific date"
+                    >
+                    <button class="btn btn-secondary" id="clear-filter">Clear Filter</button>
+                </div>
+
+                <div id="appointments-list" class="appointment-list" role="list" aria-live="polite">
+                    <p class="empty-state">No appointments scheduled yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="section" aria-labelledby="services-heading">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="services-heading">Services</h2>
+                    <button class="btn btn-primary" id="add-service-btn" aria-haspopup="dialog">
+                        + Add Service
+                    </button>
+                </div>
+
+                <div id="services-list" class="cards-grid" role="list" aria-live="polite">
+                    <p class="empty-state">No services configured yet. Click "Add Service" to get started.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Client Modal -->
+    <div id="client-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="client-modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="client-modal-title">Add New Client</h2>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="client-form" class="modal-form">
+                <div class="form-group">
+                    <label for="client-name">Full Name *</label>
+                    <input 
+                        type="text" 
+                        id="client-name" 
+                        required
+                        autocomplete="name"
+                        aria-required="true"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="client-phone">Phone Number *</label>
+                    <input 
+                        type="tel" 
+                        id="client-phone" 
+                        required
+                        autocomplete="tel"
+                        aria-required="true"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="client-email">Email</label>
+                    <input 
+                        type="email" 
+                        id="client-email"
+                        autocomplete="email"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="client-notes">Notes</label>
+                    <textarea 
+                        id="client-notes" 
+                        rows="3"
+                        placeholder="Allergies, preferences, medical conditions..."
+                    ></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div id="appointment-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="appointment-modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="appointment-modal-title">Schedule Appointment</h2>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="appointment-form" class="modal-form">
+                <div class="form-group">
+                    <label for="appointment-client">Client *</label>
+                    <select id="appointment-client" required aria-required="true">
+                        <option value="">Select a client</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-service">Service *</label>
+                    <select id="appointment-service" required aria-required="true">
+                        <option value="">Select a service</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="appointment-date">Date *</label>
+                        <input 
+                            type="date" 
+                            id="appointment-date" 
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="appointment-time">Time *</label>
+                        <input 
+                            type="time" 
+                            id="appointment-time" 
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-notes">Notes</label>
+                    <textarea 
+                        id="appointment-notes" 
+                        rows="2"
+                        placeholder="Special requests or notes..."
+                    ></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Service Modal -->
+    <div id="service-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="service-modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="service-modal-title">Add New Service</h2>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="service-form" class="modal-form">
+                <div class="form-group">
+                    <label for="service-name">Service Name *</label>
+                    <input 
+                        type="text" 
+                        id="service-name" 
+                        required
+                        placeholder="e.g., Swedish Massage, Deep Tissue"
+                        aria-required="true"
+                    >
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="service-duration">Duration (minutes) *</label>
+                        <input 
+                            type="number" 
+                            id="service-duration" 
+                            min="15"
+                            step="15"
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="service-price">Price ($) *</label>
+                        <input 
+                            type="number" 
+                            id="service-price" 
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="service-description">Description</label>
+                    <textarea 
+                        id="service-description" 
+                        rows="3"
+                        placeholder="Describe the service, benefits, techniques used..."
+                    ></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Service</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Client Modal -->
+    <div id="view-client-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="view-client-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="view-client-title">Client Details</h2>
+                <button class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <div id="view-client-content" class="modal-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert/Toast Container -->
+    <div id="toast-container" class="toast-container" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
