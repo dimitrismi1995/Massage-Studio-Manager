@@ -32,6 +32,100 @@
         <section id="dashboard" class="section active" aria-labelledby="dashboard-heading">
             <div class="container">
                 <h2 id="dashboard-heading">Dashboard</h2>
+                
+                <!-- Client Intake Form - First Priority -->
+                <div class="intake-section" role="region" aria-labelledby="intake-heading">
+                    <h3 id="intake-heading">📋 New Client Registration</h3>
+                    <p class="intake-description">Fill in your details below to get started with Moysidis Mobile Massage</p>
+                    
+                    <form id="dashboard-client-form" class="intake-form" aria-label="New client registration form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dash-first-name">First Name *</label>
+                                <input 
+                                    type="text" 
+                                    id="dash-first-name" 
+                                    required
+                                    autocomplete="given-name"
+                                    aria-required="true"
+                                    placeholder="John"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="dash-last-name">Last Name *</label>
+                                <input 
+                                    type="text" 
+                                    id="dash-last-name" 
+                                    required
+                                    autocomplete="family-name"
+                                    aria-required="true"
+                                    placeholder="Doe"
+                                >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dash-phone">Phone Number *</label>
+                            <input 
+                                type="tel" 
+                                id="dash-phone" 
+                                required
+                                autocomplete="tel"
+                                aria-required="true"
+                                placeholder="+353 87 123 4567"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="dash-email">Email</label>
+                            <input 
+                                type="email" 
+                                id="dash-email"
+                                autocomplete="email"
+                                placeholder="john@example.com"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="dash-health-conditions">Health Conditions</label>
+                            <textarea 
+                                id="dash-health-conditions" 
+                                rows="2"
+                                placeholder="e.g., Diabetes, Hypertension..."
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="dash-issues">Current Issues / Complaints</label>
+                            <textarea 
+                                id="dash-issues" 
+                                rows="2"
+                                placeholder="e.g., Back pain, Neck stiffness..."
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="dash-allergies">Allergies</label>
+                            <textarea 
+                                id="dash-allergies" 
+                                rows="2"
+                                placeholder="e.g., Latex, Essential oils, nuts..."
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input 
+                                    type="checkbox" 
+                                    id="dash-gdpr-consent" 
+                                    required
+                                    aria-required="true"
+                                >
+                                <label for="dash-gdpr-consent">
+                                    I consent to the processing of my personal data in accordance with GDPR regulations *
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-large">
+                            ✅ Register & Book Appointment
+                        </button>
+                    </form>
+                </div>
+
                 <div class="stats-grid">
                     <div class="stat-card" role="region" aria-labelledby="total-clients">
                         <h3 id="total-clients">Total Clients</h3>

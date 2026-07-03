@@ -211,6 +211,7 @@ class UIController {
         this.bindForms();
         this.bindSearch();
         this.bindDateFilter();
+        this.bindDashboardForm();
         this.renderAll();
         this.updateStats();
     }
@@ -388,6 +389,70 @@ class UIController {
             e.preventDefault();
             this.handleServiceSubmit();
         });
+    }
+
+    // Dashboard Client Intake Form
+    bindDashboardForm() {
+        const dashboardForm = document.getElementById('dashboard-client-form');
+        if (dashboardForm) {
+            dashboardForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleDashboardFormSubmit();
+            });
+        }
+    }
+
+    handleDashboardFormSubmit() {
+        const firstName = document.getElementById('dash-first-name').value.trim();
+        const lastName = document.getElementById('dash-last-name').value.trim();
+        const phone = document.getElementById('dash-phone').value.trim();
+        const email = document.getElementById('dash-email').value.trim();
+        const healthConditions = document.getElementById('dash-health-conditions').value.trim();
+        const issues = document.getElementById('dash-issues').value.trim();
+        const allergies = document.getElementById('dash-allergies').value.trim();
+        const gdprConsent = document.getElementById('dash-gdpr-consent').checked;
+
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (!firstName || !lastName || !phone) {
+            this.showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        if (!gdprConsent) {
+            this.showToast('GDPR consent is required', 'error');
+            return;
+        }
+
+        // Create client
+        const clientData = {
+            name: fullName,
+            firstName,
+            lastName,
+            phone,
+            email,
+            healthConditions,
+            issues,
+            allergies,
+            gdprConsent
+        };
+
+        this.store.addClient(clientData);
+        this.showToast('✅ Registration successful! Welcome to Moysidis Mobile Massage', 'success');
+
+        // Reset form
+        document.getElementById('dashboard-client-form').reset();
+
+        // Update stats
+        this.updateStats();
+        this.renderClients();
+        this.renderUpcomingAppointments();
+
+        // Scroll to stats to show success
+        const statsSection = document.querySelector('.stats-grid');
+        if (statsSection) {
+            statsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     handleClientSubmit() {
