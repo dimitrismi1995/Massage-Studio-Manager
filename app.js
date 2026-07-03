@@ -391,21 +391,48 @@ class UIController {
     }
 
     handleClientSubmit() {
-        const name = document.getElementById('client-name').value.trim();
+        const firstName = document.getElementById('client-first-name').value.trim();
+        const lastName = document.getElementById('client-last-name').value.trim();
         const phone = document.getElementById('client-phone').value.trim();
         const email = document.getElementById('client-email').value.trim();
+        const healthConditions = document.getElementById('client-health-conditions').value.trim();
+        const issues = document.getElementById('client-issues').value.trim();
+        const allergies = document.getElementById('client-allergies').value.trim();
+        const medicalHistory = document.getElementById('client-medical-history').value.trim();
         const notes = document.getElementById('client-notes').value.trim();
+        const gdprConsent = document.getElementById('client-gdpr-consent').checked;
 
-        if (!name || !phone) {
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (!firstName || !lastName || !phone) {
             this.showToast('Please fill in all required fields', 'error');
             return;
         }
 
+        if (!gdprConsent) {
+            this.showToast('GDPR consent is required', 'error');
+            return;
+        }
+
+        const clientData = {
+            name: fullName,
+            firstName,
+            lastName,
+            phone,
+            email,
+            healthConditions,
+            issues,
+            allergies,
+            medicalHistory,
+            notes,
+            gdprConsent
+        };
+
         if (this.editingClientId) {
-            this.store.updateClient(this.editingClientId, { name, phone, email, notes });
+            this.store.updateClient(this.editingClientId, clientData);
             this.showToast('Client updated successfully', 'success');
         } else {
-            this.store.addClient({ name, phone, email, notes });
+            this.store.addClient(clientData);
             this.showToast('Client added successfully', 'success');
         }
 
@@ -513,7 +540,10 @@ class UIController {
             clients = clients.filter(c => 
                 c.name.toLowerCase().includes(searchQuery) ||
                 c.phone.includes(searchQuery) ||
-                c.email.toLowerCase().includes(searchQuery)
+                (c.email && c.email.toLowerCase().includes(searchQuery)) ||
+                (c.allergies && c.allergies.toLowerCase().includes(searchQuery)) ||
+                (c.issues && c.issues.toLowerCase().includes(searchQuery)) ||
+                (c.healthConditions && c.healthConditions.toLowerCase().includes(searchQuery))
             );
         }
 
@@ -522,19 +552,26 @@ class UIController {
             return;
         }
 
-        clientsList.innerHTML = clients.map(client => `
-            <div class="client-card" role="listitem" data-id="${client.id}">
-                <h4>${this.escapeHtml(client.name)}</h4>
-                <p>📱 ${this.escapeHtml(client.phone)}</p>
-                ${client.email ? `<p>📧 ${this.escapeHtml(client.email)}</p>` : ''}
-                ${client.notes ? `<p>📝 ${this.escapeHtml(client.notes.substring(0, 50))}${client.notes.length > 50 ? '...' : ''}</p>` : ''}
-                <div class="card-actions">
-                    <button class="btn btn-secondary" onclick="app.editClient('${client.id}')">Edit</button>
-                    <button class="btn btn-secondary" onclick="app.viewClient('${client.id}')">View</button>
-                    <button class="btn btn-danger" onclick="app.deleteClient('${client.id}')">Delete</button>
+        clientsList.innerHTML = clients.map(client => {
+            const initials = client.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            return `
+                <div class="client-card" role="listitem" data-id="${client.id}">
+                    <div class="client-header">
+                        <div class="client-avatar">${initials}</div>
+                        <h4>${this.escapeHtml(client.name)}</h4>
+                    </div>
+                    <p>📱 ${this.escapeHtml(client.phone)}</p>
+                    ${client.email ? `<p>📧 ${this.escapeHtml(client.email)}</p>` : ''}
+                    ${client.allergies ? `<p>⚠️ Allergies: ${this.escapeHtml(client.allergies.substring(0, 40))}${client.allergies.length > 40 ? '...' : ''}</p>` : ''}
+                    ${client.issues ? `<p>🩺 Issues: ${this.escapeHtml(client.issues.substring(0, 40))}${client.issues.length > 40 ? '...' : ''}</p>` : ''}
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" onclick="app.editClient('${client.id}')">Edit</button>
+                        <button class="btn btn-secondary" onclick="app.viewClient('${client.id}')">View</button>
+                        <button class="btn btn-danger" onclick="app.deleteClient('${client.id}')">Delete</button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     renderAppointments() {
@@ -670,10 +707,22 @@ class UIController {
         if (!client) return;
         
         this.editingClientId = id;
-        document.getElementById('client-name').value = client.name;
+        
+        // Split name into first and last
+        const nameParts = client.name.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
+        document.getElementById('client-first-name').value = firstName;
+        document.getElementById('client-last-name').value = lastName;
         document.getElementById('client-phone').value = client.phone;
         document.getElementById('client-email').value = client.email || '';
+        document.getElementById('client-health-conditions').value = client.healthConditions || '';
+        document.getElementById('client-issues').value = client.issues || '';
+        document.getElementById('client-allergies').value = client.allergies || '';
+        document.getElementById('client-medical-history').value = client.medicalHistory || '';
         document.getElementById('client-notes').value = client.notes || '';
+        document.getElementById('client-gdpr-consent').checked = client.gdprConsent || false;
         document.getElementById('client-modal-title').textContent = 'Edit Client';
         
         this.openModal(document.getElementById('client-modal'));
@@ -687,7 +736,7 @@ class UIController {
         content.innerHTML = `
             <div class="modal-form">
                 <div class="form-group">
-                    <label><strong>Name:</strong></label>
+                    <label><strong>Full Name:</strong></label>
                     <p>${this.escapeHtml(client.name)}</p>
                 </div>
                 <div class="form-group">
@@ -700,10 +749,40 @@ class UIController {
                         <p>${this.escapeHtml(client.email)}</p>
                     </div>
                 ` : ''}
+                ${client.healthConditions ? `
+                    <div class="form-group">
+                        <label><strong>Health Conditions:</strong></label>
+                        <p>${this.escapeHtml(client.healthConditions)}</p>
+                    </div>
+                ` : ''}
+                ${client.issues ? `
+                    <div class="form-group">
+                        <label><strong>Current Issues / Complaints:</strong></label>
+                        <p>${this.escapeHtml(client.issues)}</p>
+                    </div>
+                ` : ''}
+                ${client.allergies ? `
+                    <div class="form-group">
+                        <label><strong>Allergies:</strong></label>
+                        <p>${this.escapeHtml(client.allergies)}</p>
+                    </div>
+                ` : ''}
+                ${client.medicalHistory ? `
+                    <div class="form-group">
+                        <label><strong>Medical History:</strong></label>
+                        <p>${this.escapeHtml(client.medicalHistory)}</p>
+                    </div>
+                ` : ''}
                 ${client.notes ? `
                     <div class="form-group">
-                        <label><strong>Notes:</strong></label>
+                        <label><strong>Additional Notes:</strong></label>
                         <p>${this.escapeHtml(client.notes)}</p>
+                    </div>
+                ` : ''}
+                ${client.gdprConsent ? `
+                    <div class="form-group">
+                        <label><strong>GDPR Consent:</strong></label>
+                        <p>✅ Consent given</p>
                     </div>
                 ` : ''}
                 <div class="modal-actions">

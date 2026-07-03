@@ -137,15 +137,27 @@
                 <button class="close-btn" aria-label="Close modal">&times;</button>
             </div>
             <form id="client-form" class="modal-form">
-                <div class="form-group">
-                    <label for="client-name">Full Name *</label>
-                    <input 
-                        type="text" 
-                        id="client-name" 
-                        required
-                        autocomplete="name"
-                        aria-required="true"
-                    >
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client-first-name">First Name *</label>
+                        <input 
+                            type="text" 
+                            id="client-first-name" 
+                            required
+                            autocomplete="given-name"
+                            aria-required="true"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="client-last-name">Last Name *</label>
+                        <input 
+                            type="text" 
+                            id="client-last-name" 
+                            required
+                            autocomplete="family-name"
+                            aria-required="true"
+                        >
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="client-phone">Phone Number *</label>
@@ -166,12 +178,57 @@
                     >
                 </div>
                 <div class="form-group">
-                    <label for="client-notes">Notes</label>
+                    <label for="client-health-conditions">Health Conditions</label>
+                    <textarea 
+                        id="client-health-conditions" 
+                        rows="2"
+                        placeholder="e.g., Diabetes, Hypertension..."
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="client-issues">Current Issues / Complaints</label>
+                    <textarea 
+                        id="client-issues" 
+                        rows="2"
+                        placeholder="e.g., Back pain, Neck stiffness..."
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="client-allergies">Allergies</label>
+                    <textarea 
+                        id="client-allergies" 
+                        rows="2"
+                        placeholder="e.g., Latex, Essential oils, nuts..."
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="client-medical-history">Medical History</label>
+                    <textarea 
+                        id="client-medical-history" 
+                        rows="3"
+                        placeholder="Surgeries, injuries, ongoing treatments..."
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="client-notes">Additional Notes</label>
                     <textarea 
                         id="client-notes" 
-                        rows="3"
-                        placeholder="Allergies, preferences, medical conditions..."
+                        rows="2"
+                        placeholder="Any other relevant information..."
                     ></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="client-gdpr-consent" 
+                            required
+                            aria-required="true"
+                        >
+                        <label for="client-gdpr-consent">
+                            I consent to the processing of my personal data in accordance with GDPR regulations *
+                        </label>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary close-modal">Cancel</button>
