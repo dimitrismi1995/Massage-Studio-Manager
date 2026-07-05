@@ -113,7 +113,7 @@ export default function ClientBooking() {
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
           </div>
           <h2 className="text-3xl font-bold text-primary mb-2">Booking Received!</h2>
-          <p className="text-muted-foreground mb-8">Thank you for booking with Moysiades Massage. We will contact you to confirm your appointment.</p>
+          <p className="text-muted-foreground mb-8">Thank you for booking with Moysidis Massage. We will contact you to confirm your appointment.</p>
           <Button onClick={() => window.location.reload()} variant="outline">
             Book Another Appointment
           </Button>
@@ -126,7 +126,7 @@ export default function ClientBooking() {
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex justify-center items-center mb-8">
         <Link href="/">
-          <img src={logoSrc} alt="Moysiades Massage" className="h-12 w-auto object-contain cursor-pointer" />
+          <img src={logoSrc} alt="Moysidis Massage" className="h-12 w-auto object-contain cursor-pointer" />
         </Link>
       </div>
 

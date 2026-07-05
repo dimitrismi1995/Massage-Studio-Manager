@@ -114,7 +114,7 @@ const translations: Translations = {
     'booking.title': 'Book Your Massage Appointment',
     'booking.subtitle': 'Fill in the table below and we will confirm your booking shortly.',
     'booking.thank_you': 'Booking Received!',
-    'booking.thank_you_msg': 'Thank you for booking with Moysiades Massage. We will contact you to confirm your appointment.',
+    'booking.thank_you_msg': 'Thank you for booking with Moysidis Massage. We will contact you to confirm your appointment.',
     'booking.back': 'Book Another Appointment',
     'booking.field.first_name': 'First Name',
     'booking.field.last_name': 'Last Name',
