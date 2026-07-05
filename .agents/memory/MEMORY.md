@@ -1,0 +1,1 @@
+- [Artifact registry vs running workflows](artifact-registry-quirk.md) — listArtifacts() can return empty even when workflows run fine; don't block on it, verify via curl/logs instead.

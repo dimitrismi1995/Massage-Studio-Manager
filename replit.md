@@ -1,6 +1,6 @@
 # Moysidis Mobile Massage — Practice Management App
 
-A bilingual (EN/DE) practice management web application for Moysidis Mobile Massage, a professional mobile massage therapy business in Switzerland.
+An English-only practice management web application for Moysidis Mobile Massage, a professional mobile massage therapy business in Switzerland.
 
 ## Run & Operate
 
@@ -21,8 +21,8 @@ A bilingual (EN/DE) practice management web application for Moysidis Mobile Mass
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (zod/v4), drizzle-zod
 - API codegen: Orval (from OpenAPI spec)
-- Email: Nodemailer (SMTP, optional)
-- i18n: Custom LanguageContext (EN / DE)
+- Email: Nodemailer (SMTP, optional — not configured; thank-you emails are logged only, per user's choice)
+- i18n: Custom LanguageContext (English only)
 
 ## Where Things Live
 
@@ -31,19 +31,21 @@ A bilingual (EN/DE) practice management web application for Moysidis Mobile Mass
 - `artifacts/api-server/src/routes/` — Backend route handlers
 - `artifacts/api-server/src/lib/email.ts` — Thank-you email logic
 - `artifacts/moysidis-app/src/pages/` — Frontend pages
-- `artifacts/moysidis-app/src/lib/i18n.tsx` — Translation system (EN/DE)
+- `artifacts/moysidis-app/src/lib/i18n.tsx` — Translation system (English only)
+- `artifacts/moysidis-app/src/pages/ClientBooking.tsx` — Public self-service booking page (`/book`), table-style form for clients
 - `attached_assets/IMG_2593_1782977930405.png` — Moysidis logo
 
 ## Features
 
-- **Dashboard** — Today's income (CHF), appointment count, monthly profit, total clients, quick complete/cancel buttons
-- **Appointments** — Create, view, complete, cancel appointments; status badges; date/status filtering
+- **Dashboard** — Today's income (CHF), appointment count, monthly profit, total clients, quick complete/cancel buttons; link to share the public booking page
+- **Appointments** — Manager can create appointments via a client picker dropdown (looked up from Clients), view, complete, cancel; status badges; date/status filtering
+- **Client Booking Page** (`/book`) — Public, standalone (no sidebar), table-style self-service form for clients to book their own appointment (name, email, phone, service, date, time, notes); looks up or creates the client record automatically
 - **Clients** — Searchable client list with medical history indicator; full client detail view
-- **Intake Form** (`/intake`) — Tablet-friendly client self-service medical history form with GDPR consent; supports EN/DE
+- **Intake Form** (`/intake`) — Tablet-friendly client self-service medical history form with GDPR consent
 - **Expenses** — Track business expenses by category (Oils, Transport, Equipment, Insurance, Marketing, etc.)
-- **Finance** — Monthly income vs expenses bar chart, service revenue breakdown, daily/monthly/yearly summaries in CHF
-- **Reviews** — Star rating display after session completion; post-session thank-you email with review link (scheduled 20 min after completion)
-- **Bilingual** — EN/DE toggle in sidebar; all UI strings translated
+- **Finance** — Day/Month/Year period toggle; income vs expenses chart, service revenue breakdown, summaries in CHF
+- **Reviews** — Star rating display after session completion; post-session thank-you email with review link (scheduled 20 min after completion) — currently logged only, no SMTP configured
+- **English only** — German has been fully removed; language switcher removed from UI
 
 ## Architecture Decisions
 
@@ -55,16 +57,18 @@ A bilingual (EN/DE) practice management web application for Moysidis Mobile Mass
 
 ## User Preferences
 
-- Language: English + German (Swiss)
+- Language: English only (German removed by user request)
 - Currency: CHF
-- Date format: DD.MM.YYYY
+- Date format: DD.MM.YYYY (uses date-fns `enUS` locale for formatting)
 - Logo: Moysidis Mobile Massage (attached_assets/IMG_2593_1782977930405.png)
+- Thank-you emails: user opted to skip real SMTP setup for now — kept as internal-log-only; ask before enabling real sending
 
 ## Gotchas
 
 - After any OpenAPI spec change, run `pnpm --filter @workspace/api-spec run codegen` before touching frontend or backend code
 - The `/intake` route is the client-facing tablet form — no sidebar, full-screen kiosk mode
-- Email only sends if all 4 SMTP env vars are set; it gracefully skips otherwise (logged as WARN)
+- The `/book` route is the client-facing self-booking form — also no sidebar, standalone
+- Email only sends if all 4 SMTP env vars are set; it gracefully skips otherwise (logged as WARN) — this is intentional per user's choice, not a bug
 - `mergeParams: true` on sub-routers works at runtime but TypeScript needs explicit `req.params as Record<string, string>` casts
 
 ## Pointers
