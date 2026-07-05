@@ -1,8 +1,10 @@
 import React from 'react';
-import { useCreateClient, useListClients, useCreateAppointment, getListClientsQueryKey } from '@workspace/api-client-react';
+import { Link } from 'wouter';
+import { useCreateClient, useListClients, useCreateAppointment, useCreateMedicalHistory, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, SESSION_PRICE } from '@/lib/utils';
@@ -13,12 +15,16 @@ const SERVICES = ['Swedish', 'Deep Tissue', 'Sports', 'Relaxation'];
 type FormValues = {
   firstName: string;
   lastName: string;
+  age: string;
   email: string;
   phone: string;
   serviceType: string;
   date: string;
   startTime: string;
   notes: string;
+  allergies: string;
+  medicalHistory: string;
+  gdprAccepted: boolean;
 };
 
 export default function ClientBooking() {
@@ -27,18 +33,23 @@ export default function ClientBooking() {
 
   const createClient = useCreateClient();
   const createAppointment = useCreateAppointment();
+  const createMedicalHistory = useCreateMedicalHistory();
   const { refetch: findClients } = useListClients(undefined, { query: { enabled: false, queryKey: getListClientsQueryKey() } });
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       firstName: '',
       lastName: '',
+      age: '',
       email: '',
       phone: '',
       serviceType: '',
       date: '',
       startTime: '',
       notes: '',
+      allergies: '',
+      medicalHistory: '',
+      gdprAccepted: false,
     },
   });
 
@@ -59,9 +70,21 @@ export default function ClientBooking() {
                 lastName: data.lastName,
                 email: data.email,
                 phone: data.phone,
+                age: data.age ? Number(data.age) : undefined,
               },
             })
           ).id;
+
+      if (data.allergies || data.medicalHistory || data.gdprAccepted) {
+        await createMedicalHistory.mutateAsync({
+          clientId,
+          data: {
+            allergies: data.allergies || undefined,
+            conditions: data.medicalHistory || undefined,
+            gdprAccepted: data.gdprAccepted,
+          },
+        });
+      }
 
       await createAppointment.mutateAsync({
         data: {
@@ -102,7 +125,9 @@ export default function ClientBooking() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex justify-center items-center mb-8">
-        <img src={logoSrc} alt="Moysiades Massage" className="h-12 w-auto object-contain" />
+        <Link href="/">
+          <img src={logoSrc} alt="Moysiades Massage" className="h-12 w-auto object-contain cursor-pointer" />
+        </Link>
       </div>
 
       <div className="mb-10 text-center">
@@ -156,6 +181,17 @@ export default function ClientBooking() {
                       className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
                     />
                     {errors.phone && <p className="text-destructive text-xs mt-1">Required</p>}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-semibold align-top pt-4">Age</TableCell>
+                  <TableCell>
+                    <input
+                      type="number"
+                      min={0}
+                      {...register('age')}
+                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                    />
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -216,13 +252,68 @@ export default function ClientBooking() {
               </TableBody>
             </Table>
 
+            <div className="mt-10 mb-2">
+              <h2 className="text-xl font-bold text-primary">Medical Intake</h2>
+              <p className="text-sm text-muted-foreground">
+                This information helps us provide a safe and appropriate massage. It is kept confidential.
+              </p>
+            </div>
+
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-semibold w-1/3 align-top pt-4">Allergies</TableCell>
+                  <TableCell>
+                    <textarea
+                      {...register('allergies')}
+                      placeholder="e.g. nut oils, latex, fragrances..."
+                      className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-semibold align-top pt-4">Medical History</TableCell>
+                  <TableCell>
+                    <textarea
+                      {...register('medicalHistory')}
+                      placeholder="Any conditions, injuries, surgeries, or medications we should know about..."
+                      className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-semibold align-top pt-4">Consent *</TableCell>
+                  <TableCell>
+                    <div className="flex items-start gap-3">
+                      <Controller
+                        name="gdprAccepted"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="mt-1"
+                          />
+                        )}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        I consent to Moysidis Mobile Massage storing my medical intake information for the purpose of providing safe treatment, in accordance with GDPR.
+                      </p>
+                    </div>
+                    {errors.gdprAccepted && <p className="text-destructive text-xs mt-1">Please confirm consent to continue</p>}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+
             {error && <p className="text-destructive text-sm mt-4">{error}</p>}
 
             <Button
               type="submit"
               size="lg"
               className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90 mt-8"
-              disabled={createClient.isPending || createAppointment.isPending}
+              disabled={createClient.isPending || createAppointment.isPending || createMedicalHistory.isPending}
             >
               Book Appointment
             </Button>
