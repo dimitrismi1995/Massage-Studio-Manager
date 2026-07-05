@@ -1,2 +1,3 @@
 - [Artifact registry vs running workflows](artifact-registry-quirk.md) — listArtifacts() can return empty even when workflows run fine; don't block on it, verify via curl/logs instead.
 - [Moysidis app business rules](moysidis-business-rules.md) — appointments are owner-manual only (phone/IG), flat €150/session, client-facing table form is for medical intake not booking.
+- [Duplicate workflow port conflicts](duplicate-workflow-port-conflicts.md) — legacy custom-named workflows in .replit can duplicate artifact-native ones on the same port, causing EADDRINUSE; remove the legacy ones, keep artifact-native.
