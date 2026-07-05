@@ -117,7 +117,6 @@ export default function ClientBooking() {
 
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold text-primary tracking-tight mb-3">Client Details Form</h1>
-        <p className="text-lg text-muted-foreground">Please fill in your details below. Moysidis Mobile Massage will contact you to arrange your appointment.</p>
       </div>
 
       <Card className="border-t-4 border-t-accent shadow-lg">
