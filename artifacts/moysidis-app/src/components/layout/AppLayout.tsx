@@ -6,8 +6,8 @@ import logoSrc from '@assets/IMG_2593_1782977930405.png';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   
-  // Standalone mode for intake form
-  if (location === '/intake') {
+  // Standalone mode for intake and client self-booking forms
+  if (location === '/intake' || location === '/book') {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 

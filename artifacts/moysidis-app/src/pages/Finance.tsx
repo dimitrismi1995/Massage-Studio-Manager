@@ -7,11 +7,18 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
+const PERIOD_LABELS: Record<'day' | 'month' | 'year', string> = {
+  day: 'Daily',
+  month: 'Monthly',
+  year: 'Yearly',
+};
+
 export default function FinancePage() {
   const { t } = useLanguage();
   const [year, setYear] = React.useState(new Date().getFullYear());
+  const [period, setPeriod] = React.useState<'day' | 'month' | 'year'>('month');
 
-  const { data: summary, isLoading: summaryLoading } = useGetFinanceSummary({ period: 'year' }, { query: { queryKey: getGetFinanceSummaryQueryKey({ period: 'year' }) } });
+  const { data: summary, isLoading: summaryLoading } = useGetFinanceSummary({ period }, { query: { queryKey: getGetFinanceSummaryQueryKey({ period }) } });
   const { data: monthly, isLoading: monthlyLoading } = useGetMonthlyBreakdown({ year }, { query: { queryKey: getGetMonthlyBreakdownQueryKey({ year }) } });
   const { data: topServices, isLoading: topLoading } = useGetTopServices({ year }, { query: { queryKey: getGetTopServicesQueryKey({ year }) } });
 
@@ -24,7 +31,7 @@ export default function FinancePage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-primary">{t('finance.title')}</h1>
         <select 
           className="bg-card border rounded px-3 py-1.5"
@@ -38,10 +45,22 @@ export default function FinancePage() {
         </select>
       </div>
 
+      <div className="flex bg-muted rounded-lg p-1 gap-1 w-fit">
+        {(['day', 'month', 'year'] as const).map((p) => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${period === p ? 'bg-card shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            {PERIOD_LABELS[p]}
+          </button>
+        ))}
+      </div>
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Yearly Income</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{PERIOD_LABELS[period]} Income</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">{summaryLoading ? '...' : formatCurrency(summary?.totalIncome || 0)}</div>
@@ -49,7 +68,7 @@ export default function FinancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Yearly Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{PERIOD_LABELS[period]} Expenses</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{summaryLoading ? '...' : formatCurrency(summary?.totalExpenses || 0)}</div>
@@ -57,7 +76,7 @@ export default function FinancePage() {
         </Card>
         <Card className="bg-accent/10 border-accent/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-accent">Yearly Profit</CardTitle>
+            <CardTitle className="text-sm font-medium text-accent">{PERIOD_LABELS[period]} Profit</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-accent">{summaryLoading ? '...' : formatCurrency(summary?.profit || 0)}</div>

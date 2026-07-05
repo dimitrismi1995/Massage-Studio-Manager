@@ -12,7 +12,7 @@ import { useForm, Controller } from 'react-hook-form';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 export default function IntakeForm() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const [submitted, setSubmitted] = React.useState(false);
   const createClient = useCreateClient();
   const createHistory = useCreateMedicalHistory();
@@ -95,26 +95,8 @@ export default function IntakeForm() {
 
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-center items-center mb-8">
         <img src={logoSrc} alt="Moysidis Logo" className="h-12 w-auto object-contain" />
-        <div className="flex bg-muted rounded-lg p-1 gap-1">
-          <button
-            onClick={() => setLanguage('en')}
-            title="English"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all ${language === 'en' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            <span className="text-base leading-none">🇬🇧</span>
-            <span>EN</span>
-          </button>
-          <button
-            onClick={() => setLanguage('de')}
-            title="Deutsch (Schweiz)"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all ${language === 'de' ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            <span className="text-base leading-none">🇨🇭</span>
-            <span>DE</span>
-          </button>
-        </div>
       </div>
 
       <div className="mb-10 text-center">

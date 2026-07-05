@@ -9,6 +9,7 @@ import Appointments from '@/pages/Appointments';
 import Clients from '@/pages/Clients';
 import ClientDetail from '@/pages/ClientDetail';
 import IntakeForm from '@/pages/IntakeForm';
+import ClientBooking from '@/pages/ClientBooking';
 import Expenses from '@/pages/Expenses';
 import Finance from '@/pages/Finance';
 import Reviews from '@/pages/Reviews';
@@ -39,6 +40,7 @@ function Router() {
         <Route path="/clients" component={Clients} />
         <Route path="/clients/:id" component={ClientDetail} />
         <Route path="/intake" component={IntakeForm} />
+        <Route path="/book" component={ClientBooking} />
         <Route path="/expenses" component={Expenses} />
         <Route path="/finance" component={Finance} />
         <Route path="/reviews" component={Reviews} />

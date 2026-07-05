@@ -41,8 +41,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-3xl font-bold tracking-tight text-primary">{t('nav.dashboard')}</h1>
+        <Link href="/book" target="_blank" className="text-sm font-medium text-accent hover:underline">
+          Share client booking page ↗
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

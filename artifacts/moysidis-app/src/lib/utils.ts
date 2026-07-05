@@ -1,9 +1,8 @@
 import React from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { useLanguage } from '@/lib/i18n';
 import { format } from 'date-fns';
-import { de, enUS } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,14 +18,11 @@ export const formatCurrency = (amount: number) => {
 };
 
 export const useDateFormatter = () => {
-  const { language } = useLanguage();
-  const locale = language === 'de' ? de : enUS;
-
   const formatDate = (dateString: string | Date, formatStr: string = 'dd.MM.yyyy') => {
     if (!dateString) return '';
     try {
       const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-      return format(date, formatStr, { locale });
+      return format(date, formatStr, { locale: enUS });
     } catch (e) {
       return '';
     }

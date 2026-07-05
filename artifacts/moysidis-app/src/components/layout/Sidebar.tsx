@@ -24,7 +24,7 @@ const navItems = [
 
 export function Sidebar() {
   const [location] = useLocation();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
@@ -48,26 +48,6 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="border-t border-sidebar-border p-4">
-        <div className="flex items-center justify-between rounded-lg bg-sidebar-accent p-1 gap-1">
-          <button
-            onClick={() => setLanguage('en')}
-            title="English"
-            className={`flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-xs font-medium transition-all ${language === 'en' ? 'bg-sidebar text-sidebar-foreground shadow-sm' : 'text-sidebar-foreground/50 hover:text-sidebar-foreground'}`}
-          >
-            <span className="text-base leading-none">🇬🇧</span>
-            <span>EN</span>
-          </button>
-          <button
-            onClick={() => setLanguage('de')}
-            title="Deutsch (Schweiz)"
-            className={`flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-xs font-medium transition-all ${language === 'de' ? 'bg-sidebar text-sidebar-foreground shadow-sm' : 'text-sidebar-foreground/50 hover:text-sidebar-foreground'}`}
-          >
-            <span className="text-base leading-none">🇨🇭</span>
-            <span>DE</span>
-          </button>
-        </div>
-      </div>
     </aside>
   );
 }

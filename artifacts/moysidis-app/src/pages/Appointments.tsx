@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useCreateAppointment, useDeleteAppointment, useUpdateAppointment } from '@workspace/api-client-react';
+import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useCreateAppointment, useDeleteAppointment, useUpdateAppointment, useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, useDateFormatter, getStatusColor } from '@/lib/utils';
@@ -37,6 +37,7 @@ export default function AppointmentsPage() {
     dateFilter ? { date: dateFilter } : undefined,
     { query: { queryKey: getListAppointmentsQueryKey(dateFilter ? { date: dateFilter } : undefined) } }
   );
+  const { data: clients } = useListClients(undefined, { query: { queryKey: getListClientsQueryKey() } });
   const completeAppt = useCompleteAppointment();
   const cancelAppt = useCancelAppointment();
   const createAppt = useCreateAppointment();
@@ -106,8 +107,24 @@ export default function AppointmentsPage() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Client ID</Label>
-                    <Input {...form.register('clientId')} placeholder="e.g. 1" />
+                    <Label>Client</Label>
+                    <Controller
+                      name="clientId"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value ? String(field.value) : undefined}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select client..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {clients?.map((c) => (
+                              <SelectItem key={c.id} value={String(c.id)}>{c.firstName} {c.lastName}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {form.formState.errors.clientId && <p className="text-destructive text-xs">Required</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>{t('appointments.service')}</Label>
