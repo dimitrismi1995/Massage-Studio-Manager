@@ -9,13 +9,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('de-CH', {
+  return new Intl.NumberFormat('en-IE', {
     style: 'currency',
-    currency: 'CHF',
+    currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
 };
+
+export const SESSION_PRICE = 150;
 
 export const useDateFormatter = () => {
   const formatDate = (dateString: string | Date, formatStr: string = 'dd.MM.yyyy') => {

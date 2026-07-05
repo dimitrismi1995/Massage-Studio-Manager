@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import logoSrc from '@assets/IMG_2593_1782977930405.png';
+import heroSrc from '@assets/generated_images/massage_spa_hero_background.png';
 
 export default function DashboardPage() {
   const { t } = useLanguage();
@@ -41,8 +43,22 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <div
+        className="relative overflow-hidden rounded-2xl bg-cover bg-center px-6 py-10 sm:px-10 sm:py-14 shadow-lg"
+        style={{ backgroundImage: `url(${heroSrc})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/40" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
+          <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-16 w-auto object-contain drop-shadow-lg bg-white/90 rounded-xl p-2" />
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white drop-shadow">Moysidis Mobile Massage</h1>
+            <p className="text-white/90 mt-1 text-sm sm:text-base">Professional mobile massage therapy — booked with care, delivered to you.</p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold tracking-tight text-primary">{t('nav.dashboard')}</h1>
+        <h2 className="text-xl font-semibold text-primary">Overview</h2>
         <Link href="/book" target="_blank" className="text-sm font-medium text-accent hover:underline">
           Share client booking page ↗
         </Link>

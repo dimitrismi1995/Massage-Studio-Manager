@@ -55,7 +55,7 @@ export default function ClientDetail() {
             {client.firstName} {client.lastName}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {client.email} • {client.phone} • Registered {formatDate(client.createdAt)}
+            {client.email} • {client.phone}{client.age ? ` • Age ${client.age}` : ''} • Registered {formatDate(client.createdAt)}
           </p>
         </div>
         <Button variant="outline" className="text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={deleteClient.isPending}>

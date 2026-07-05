@@ -3,7 +3,7 @@ import { useLanguage } from '@/lib/i18n';
 import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useCreateAppointment, useDeleteAppointment, useUpdateAppointment, useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { formatCurrency, useDateFormatter, getStatusColor } from '@/lib/utils';
+import { formatCurrency, useDateFormatter, getStatusColor, SESSION_PRICE } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,7 +48,7 @@ export default function AppointmentsPage() {
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
       durationMinutes: 60,
-      price: 120,
+      price: SESSION_PRICE,
     }
   });
 
@@ -164,7 +164,8 @@ export default function AppointmentsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>{t('appointments.price')}</Label>
-                    <Input type="number" {...form.register('price')} />
+                    <Input type="number" {...form.register('price')} readOnly className="bg-muted" />
+                    <p className="text-xs text-muted-foreground">Fixed rate — every session is {formatCurrency(SESSION_PRICE)}</p>
                   </div>
                 </div>
                 <DialogFooter className="pt-4">

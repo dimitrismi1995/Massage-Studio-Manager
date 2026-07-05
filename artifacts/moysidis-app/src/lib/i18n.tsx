@@ -42,7 +42,7 @@ const translations: Translations = {
     'appointments.time': 'Time',
     'appointments.duration': 'Duration (min)',
     'appointments.service': 'Service',
-    'appointments.price': 'Price (CHF)',
+    'appointments.price': 'Price (EUR)',
     'appointments.notes': 'Notes',
     'appointments.status': 'Status',
     'status.scheduled': 'Scheduled',
@@ -56,7 +56,7 @@ const translations: Translations = {
     'clients.name': 'Name',
     'clients.email': 'Email',
     'clients.phone': 'Phone',
-    'clients.dob': 'Date of Birth',
+    'clients.age': 'Age',
     'clients.search': 'Search clients...',
     'clients.medical_history': 'Medical History',
     'clients.no_history': 'No medical history available.',
@@ -98,7 +98,7 @@ const translations: Translations = {
     'expenses.create': 'Add Expense',
     'expenses.category': 'Category',
     'expenses.description': 'Description',
-    'expenses.amount': 'Amount (CHF)',
+    'expenses.amount': 'Amount (EUR)',
 
     // Finance
     'finance.title': 'Financial Overview',

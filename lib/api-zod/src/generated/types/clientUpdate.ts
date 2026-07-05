@@ -12,6 +12,8 @@ export interface ClientUpdate {
   email?: string;
   phone?: string;
   /** @nullable */
+  age?: number | null;
+  /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
   notes?: string | null;

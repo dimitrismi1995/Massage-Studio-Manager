@@ -30,7 +30,7 @@ export default function ClientsPage() {
       lastName: formData.get('lastName') as string,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
-      dateOfBirth: (formData.get('dateOfBirth') as string) || undefined,
+      age: formData.get('age') ? Number(formData.get('age')) : undefined,
     };
     
     createClient.mutate({ data }, {
@@ -87,8 +87,8 @@ export default function ClientsPage() {
                     <Input type="tel" name="phone" required />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('clients.dob')}</Label>
-                    <Input type="date" name="dateOfBirth" />
+                    <Label>{t('clients.age')}</Label>
+                    <Input type="number" name="age" min={0} max={120} />
                   </div>
                 </div>
                 <DialogFooter className="pt-4">

@@ -16,6 +16,8 @@ export interface Client {
   email: string;
   phone: string;
   /** @nullable */
+  age?: number | null;
+  /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
   notes?: string | null;
@@ -29,6 +31,8 @@ export interface ClientInput {
   email: string;
   phone: string;
   /** @nullable */
+  age?: number | null;
+  /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
   notes?: string | null;
@@ -39,6 +43,8 @@ export interface ClientUpdate {
   lastName?: string;
   email?: string;
   phone?: string;
+  /** @nullable */
+  age?: number | null;
   /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */

@@ -23,7 +23,7 @@ export default function IntakeForm() {
       lastName: '',
       email: '',
       phone: '',
-      dateOfBirth: '',
+      age: '',
       conditions: '',
       allergies: '',
       immuneIssues: '',
@@ -48,7 +48,7 @@ export default function IntakeForm() {
           lastName: data.lastName,
           email: data.email,
           phone: data.phone,
-          dateOfBirth: data.dateOfBirth || undefined,
+          age: data.age ? Number(data.age) : undefined,
         }
       });
 
@@ -133,8 +133,8 @@ export default function IntakeForm() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-base">{t('clients.dob')}</Label>
-                  <Input type="date" {...register('dateOfBirth')} className="h-12 text-lg" />
+                  <Label className="text-base">{t('clients.age')}</Label>
+                  <Input type="number" min={0} max={120} {...register('age')} className="h-12 text-lg" />
                 </div>
               </div>
             </div>

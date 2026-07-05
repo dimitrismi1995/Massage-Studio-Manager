@@ -5,14 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { useForm, Controller } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatCurrency, SESSION_PRICE } from '@/lib/utils';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
-const SERVICE_PRICES: Record<string, number> = {
-  'Swedish': 120,
-  'Deep Tissue': 140,
-  'Sports': 140,
-  'Relaxation': 110,
-};
+const SERVICES = ['Swedish', 'Deep Tissue', 'Sports', 'Relaxation'];
 
 type FormValues = {
   firstName: string;
@@ -74,7 +70,7 @@ export default function ClientBooking() {
           startTime: data.startTime,
           durationMinutes: 60,
           serviceType: data.serviceType,
-          price: SERVICE_PRICES[data.serviceType] ?? 120,
+          price: SESSION_PRICE,
           notes: data.notes || undefined,
         },
       });
@@ -112,6 +108,7 @@ export default function ClientBooking() {
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold text-primary tracking-tight mb-3">Book Your Massage Appointment</h1>
         <p className="text-lg text-muted-foreground">Fill in the table below and we will confirm your booking shortly.</p>
+        <p className="text-base text-accent font-semibold mt-2">Every session is {formatCurrency(SESSION_PRICE)}</p>
       </div>
 
       <Card className="border-t-4 border-t-accent shadow-lg">
@@ -174,7 +171,7 @@ export default function ClientBooking() {
                             <SelectValue placeholder="Select a service..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.keys(SERVICE_PRICES).map((s) => (
+                            {SERVICES.map((s) => (
                               <SelectItem key={s} value={s}>{s}</SelectItem>
                             ))}
                           </SelectContent>
