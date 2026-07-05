@@ -235,6 +235,14 @@ export interface Review {
   createdAt: string;
 }
 
+export interface ReviewInput {
+  clientId: number;
+  /** @nullable */
+  rating?: number | null;
+  /** @nullable */
+  comment?: string | null;
+}
+
 export interface ReviewUpdate {
   /**
      * @minimum 1

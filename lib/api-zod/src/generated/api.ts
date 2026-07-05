@@ -561,6 +561,27 @@ export const ListReviewsResponse = zod.array(ListReviewsResponseItem)
 
 
 /**
+ * @summary Manually log client feedback
+ */
+export const CreateReviewBody = zod.object({
+  "clientId": zod.number(),
+  "rating": zod.number().nullish(),
+  "comment": zod.string().nullish()
+})
+
+export const CreateReviewResponse = zod.object({
+  "id": zod.number(),
+  "appointmentId": zod.number(),
+  "clientId": zod.number().nullish(),
+  "clientName": zod.string().nullish(),
+  "rating": zod.number().nullish(),
+  "comment": zod.string().nullish(),
+  "emailSentAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
  * @summary Submit or update a review (star rating)
  */
 export const UpdateReviewParams = zod.object({

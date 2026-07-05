@@ -509,6 +509,23 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Review"
+    post:
+      operationId: createReview
+      tags: [reviews]
+      summary: Manually log client feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Created review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
 
   /reviews/{reviewId}:
     patch:
@@ -889,6 +906,17 @@ components:
           type: ["string", "null"]
         createdAt:
           type: string
+
+    ReviewInput:
+      type: object
+      required: [clientId]
+      properties:
+        clientId:
+          type: integer
+        rating:
+          type: ["integer", "null"]
+        comment:
+          type: ["string", "null"]
 
     ReviewUpdate:
       type: object

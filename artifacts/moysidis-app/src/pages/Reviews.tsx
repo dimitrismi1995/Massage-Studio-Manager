@@ -1,10 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListReviews, useUpdateReview, getListReviewsQueryKey } from '@workspace/api-client-react';
+import { useListReviews, useUpdateReview, useCreateReview, getListReviewsQueryKey, useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { StarRating } from '@/components/ui/star-rating';
+import { StarRating, StarRatingInput } from '@/components/ui/star-rating';
 import { useDateFormatter } from '@/lib/utils';
-import { MessageSquareQuote } from 'lucide-react';
+import { MessageSquareQuote, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useQueryClient } from '@tanstack/react-query';
+
+function AddFeedbackDialog() {
+  const [open, setOpen] = useState(false);
+  const [clientId, setClientId] = useState<string>('');
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const queryClient = useQueryClient();
+
+  const { data: clients } = useListClients(undefined, { query: { queryKey: getListClientsQueryKey() } });
+  const createReview = useCreateReview();
+
+  const reset = () => {
+    setClientId('');
+    setRating(0);
+    setComment('');
+  };
+
+  const handleSubmit = () => {
+    if (!clientId) return;
+    createReview.mutate(
+      { data: { clientId: Number(clientId), rating: rating || null, comment: comment || null } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListReviewsQueryKey() });
+          setOpen(false);
+          reset();
+        },
+      }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Feedback
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Log Client Feedback</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>Client</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a client..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clients?.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.firstName} {c.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Rating</Label>
+            <StarRatingInput value={rating} onChange={setRating} />
+          </div>
+          <div className="space-y-2">
+            <Label>Comment</Label>
+            <Textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="What did the client say?"
+              rows={4}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit} disabled={!clientId || createReview.isPending}>
+            Save Feedback
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function ReviewsPage() {
   const { t } = useLanguage();
@@ -16,8 +117,11 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <h1 className="text-3xl font-bold tracking-tight text-primary">{t('reviews.title')}</h1>
-      
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-primary">{t('reviews.title')}</h1>
+        <AddFeedbackDialog />
+      </div>
+
       {isLoading ? (
         <div className="text-muted-foreground">Loading reviews...</div>
       ) : validReviews.length === 0 ? (

@@ -6,7 +6,7 @@ import { clientsTable } from "./clients";
 
 export const reviewsTable = pgTable("reviews", {
   id: serial("id").primaryKey(),
-  appointmentId: integer("appointment_id").notNull().references(() => appointmentsTable.id, { onDelete: "cascade" }),
+  appointmentId: integer("appointment_id").references(() => appointmentsTable.id, { onDelete: "cascade" }),
   clientId: integer("client_id").references(() => clientsTable.id, { onDelete: "set null" }),
   rating: integer("rating"), // 1-5
   comment: text("comment"),

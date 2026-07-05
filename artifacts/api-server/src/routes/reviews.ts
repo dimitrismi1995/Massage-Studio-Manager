@@ -2,9 +2,25 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { reviewsTable, clientsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { UpdateReviewParams, UpdateReviewBody } from "@workspace/api-zod";
+import { UpdateReviewParams, UpdateReviewBody, CreateReviewBody } from "@workspace/api-zod";
 
 const router = Router();
+
+// POST /reviews
+router.post("/", async (req, res) => {
+  const body = CreateReviewBody.safeParse(req.body);
+  if (!body.success) { res.status(400).json({ error: "Invalid input" }); return; }
+
+  const [review] = await db
+    .insert(reviewsTable)
+    .values({
+      clientId: body.data.clientId,
+      rating: body.data.rating ?? null,
+      comment: body.data.comment ?? null,
+    })
+    .returning();
+  res.status(201).json(review);
+});
 
 // GET /reviews
 router.get("/", async (req, res) => {

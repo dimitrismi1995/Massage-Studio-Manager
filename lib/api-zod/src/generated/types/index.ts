@@ -32,5 +32,6 @@ export * from './medicalHistoryInput';
 export * from './medicalHistoryUpdate';
 export * from './monthlyBreakdownItem';
 export * from './review';
+export * from './reviewInput';
 export * from './reviewUpdate';
 export * from './serviceRevenue';
