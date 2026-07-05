@@ -423,6 +423,33 @@ export const CancelAppointmentResponse = zod.object({
 
 
 /**
+ * @summary Mark an appointment as a no-show
+ */
+export const MarkAppointmentNoShowParams = zod.object({
+  "appointmentId": zod.coerce.number()
+})
+
+export const MarkAppointmentNoShowResponse = zod.object({
+  "id": zod.number(),
+  "clientId": zod.number(),
+  "clientName": zod.string().nullish(),
+  "clientEmail": zod.string().nullish(),
+  "date": zod.string(),
+  "startTime": zod.string(),
+  "endTime": zod.string().nullish(),
+  "durationMinutes": zod.number().optional(),
+  "serviceType": zod.string(),
+  "status": zod.enum(['scheduled', 'completed', 'cancelled', 'no_show']),
+  "price": zod.number(),
+  "notes": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "emailScheduledFor": zod.string().nullish(),
+  "emailSentAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
  * @summary List expenses
  */
 export const ListExpensesQueryParams = zod.object({

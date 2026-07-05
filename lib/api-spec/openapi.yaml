@@ -349,6 +349,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/Appointment"
 
+  /appointments/{appointmentId}/no-show:
+    post:
+      operationId: markAppointmentNoShow
+      tags: [appointments]
+      summary: Mark an appointment as a no-show
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment marked as no-show
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
   # ── Expenses ──────────────────────────────────────────────────────────────
   /expenses:
     get:

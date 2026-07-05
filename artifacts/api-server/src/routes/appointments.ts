@@ -11,6 +11,7 @@ import {
   DeleteAppointmentParams,
   CompleteAppointmentParams,
   CancelAppointmentParams,
+  MarkAppointmentNoShowParams,
 } from "@workspace/api-zod";
 import { sendThankYouEmail } from "../lib/email";
 import { logger } from "../lib/logger";
@@ -219,6 +220,28 @@ router.post("/:appointmentId/cancel", async (req, res) => {
   const [appt] = await db
     .update(appointmentsTable)
     .set({ status: "cancelled" })
+    .where(eq(appointmentsTable.id, parsed.data.appointmentId))
+    .returning();
+  if (!appt) { res.status(404).json({ error: "Not found" }); return; }
+
+  const enriched = await enrichAppointment(appt);
+  res.json({
+    ...enriched,
+    completedAt: enriched.completedAt ? enriched.completedAt.toISOString() : null,
+    emailScheduledFor: enriched.emailScheduledFor ? enriched.emailScheduledFor.toISOString() : null,
+    emailSentAt: enriched.emailSentAt ? enriched.emailSentAt.toISOString() : null,
+    createdAt: enriched.createdAt.toISOString(),
+  });
+});
+
+// POST /appointments/:appointmentId/no-show
+router.post("/:appointmentId/no-show", async (req, res) => {
+  const parsed = MarkAppointmentNoShowParams.safeParse({ appointmentId: Number(req.params.appointmentId) });
+  if (!parsed.success) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  const [appt] = await db
+    .update(appointmentsTable)
+    .set({ status: "no_show" })
     .where(eq(appointmentsTable.id, parsed.data.appointmentId))
     .returning();
   if (!appt) { res.status(404).json({ error: "Not found" }); return; }

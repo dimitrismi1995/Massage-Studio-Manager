@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useCreateAppointment, useDeleteAppointment, useUpdateAppointment, useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
+import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useUpdateAppointment, useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, useDateFormatter, getStatusColor, SESSION_PRICE } from '@/lib/utils';
@@ -40,6 +40,7 @@ export default function AppointmentsPage() {
   const { data: clients } = useListClients(undefined, { query: { queryKey: getListClientsQueryKey() } });
   const completeAppt = useCompleteAppointment();
   const cancelAppt = useCancelAppointment();
+  const noShowAppt = useMarkAppointmentNoShow();
   const createAppt = useCreateAppointment();
   const deleteAppt = useDeleteAppointment();
   const updateAppt = useUpdateAppointment();
@@ -70,6 +71,12 @@ export default function AppointmentsPage() {
 
   const handleCancel = (id: number) => {
     cancelAppt.mutate({ appointmentId: id }, {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() })
+    });
+  };
+
+  const handleNoShow = (id: number) => {
+    noShowAppt.mutate({ appointmentId: id }, {
       onSuccess: () => queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() })
     });
   };
@@ -215,6 +222,7 @@ export default function AppointmentsPage() {
                       {appt.status === 'scheduled' && (
                         <>
                           <Button size="sm" variant="outline" onClick={() => handleComplete(appt.id)}>{t('action.complete')}</Button>
+                          <Button size="sm" variant="ghost" className="text-orange-600 hover:text-orange-700" onClick={() => handleNoShow(appt.id)}>No-Show</Button>
                           <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleCancel(appt.id)}>{t('action.cancel')}</Button>
                         </>
                       )}

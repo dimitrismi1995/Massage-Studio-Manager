@@ -1258,6 +1258,76 @@ export const useCancelAppointment = <TError = ErrorType<unknown>,
       return useMutation(getCancelAppointmentMutationOptions(options));
     }
 
+export const getMarkAppointmentNoShowUrl = (appointmentId: number,) => {
+
+
+
+
+  return `/api/appointments/${appointmentId}/no-show`
+}
+
+/**
+ * @summary Mark an appointment as a no-show
+ */
+export const markAppointmentNoShow = async (appointmentId: number, options?: RequestInit): Promise<Appointment> => {
+
+  return customFetch<Appointment>(getMarkAppointmentNoShowUrl(appointmentId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getMarkAppointmentNoShowMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAppointmentNoShow>>, TError,{appointmentId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markAppointmentNoShow>>, TError,{appointmentId: number}, TContext> => {
+
+const mutationKey = ['markAppointmentNoShow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markAppointmentNoShow>>, {appointmentId: number}> = (props) => {
+          const {appointmentId} = props ?? {};
+
+          return  markAppointmentNoShow(appointmentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkAppointmentNoShowMutationResult = NonNullable<Awaited<ReturnType<typeof markAppointmentNoShow>>>
+
+    export type MarkAppointmentNoShowMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Mark an appointment as a no-show
+ */
+export const useMarkAppointmentNoShow = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAppointmentNoShow>>, TError,{appointmentId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markAppointmentNoShow>>,
+        TError,
+        {appointmentId: number},
+        TContext
+      > => {
+      return useMutation(getMarkAppointmentNoShowMutationOptions(options));
+    }
+
 export const getListExpensesUrl = (params?: ListExpensesParams,) => {
   const normalizedParams = new URLSearchParams();
 
