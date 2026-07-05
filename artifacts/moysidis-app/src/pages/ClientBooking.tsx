@@ -1,16 +1,12 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { useCreateClient, useListClients, useCreateAppointment, useCreateMedicalHistory, getListClientsQueryKey } from '@workspace/api-client-react';
+import { useCreateClient, useUpdateClient, useListClients, useCreateMedicalHistory, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { formatCurrency, SESSION_PRICE } from '@/lib/utils';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
-
-const SERVICES = ['Swedish', 'Deep Tissue', 'Sports', 'Relaxation'];
 
 type FormValues = {
   firstName: string;
@@ -18,10 +14,6 @@ type FormValues = {
   age: string;
   email: string;
   phone: string;
-  serviceType: string;
-  date: string;
-  startTime: string;
-  notes: string;
   allergies: string;
   medicalHistory: string;
   gdprAccepted: boolean;
@@ -32,7 +24,7 @@ export default function ClientBooking() {
   const [error, setError] = React.useState<string | null>(null);
 
   const createClient = useCreateClient();
-  const createAppointment = useCreateAppointment();
+  const updateClient = useUpdateClient();
   const createMedicalHistory = useCreateMedicalHistory();
   const { refetch: findClients } = useListClients(undefined, { query: { enabled: false, queryKey: getListClientsQueryKey() } });
 
@@ -43,10 +35,6 @@ export default function ClientBooking() {
       age: '',
       email: '',
       phone: '',
-      serviceType: '',
-      date: '',
-      startTime: '',
-      notes: '',
       allergies: '',
       medicalHistory: '',
       gdprAccepted: false,
@@ -62,7 +50,18 @@ export default function ClientBooking() {
       );
 
       const clientId = match
-        ? match.id
+        ? (
+            await updateClient.mutateAsync({
+              clientId: match.id,
+              data: {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                phone: data.phone,
+                age: data.age ? Number(data.age) : undefined,
+              },
+            })
+          ).id
         : (
             await createClient.mutateAsync({
               data: {
@@ -75,33 +74,19 @@ export default function ClientBooking() {
             })
           ).id;
 
-      if (data.allergies || data.medicalHistory || data.gdprAccepted) {
-        await createMedicalHistory.mutateAsync({
-          clientId,
-          data: {
-            allergies: data.allergies || undefined,
-            conditions: data.medicalHistory || undefined,
-            gdprAccepted: data.gdprAccepted,
-          },
-        });
-      }
-
-      await createAppointment.mutateAsync({
+      await createMedicalHistory.mutateAsync({
+        clientId,
         data: {
-          clientId,
-          date: data.date,
-          startTime: data.startTime,
-          durationMinutes: 60,
-          serviceType: data.serviceType,
-          price: SESSION_PRICE,
-          notes: data.notes || undefined,
+          allergies: data.allergies || undefined,
+          conditions: data.medicalHistory || undefined,
+          gdprAccepted: data.gdprAccepted,
         },
       });
 
       setSubmitted(true);
     } catch (e) {
       console.error(e);
-      setError('Something went wrong submitting your booking. Please try again.');
+      setError('Something went wrong submitting your details. Please try again.');
     }
   };
 
@@ -112,10 +97,10 @@ export default function ClientBooking() {
           <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
           </div>
-          <h2 className="text-3xl font-bold text-primary mb-2">Booking Received!</h2>
-          <p className="text-muted-foreground mb-8">Thank you for booking with Moysidis Massage. We will contact you to confirm your appointment.</p>
+          <h2 className="text-3xl font-bold text-primary mb-2">Details Received!</h2>
+          <p className="text-muted-foreground mb-8">Thank you for your details. Moysidis Mobile Massage will contact you directly to arrange your appointment.</p>
           <Button onClick={() => window.location.reload()} variant="outline">
-            Book Another Appointment
+            Submit Another Form
           </Button>
         </Card>
       </div>
@@ -131,9 +116,8 @@ export default function ClientBooking() {
       </div>
 
       <div className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-primary tracking-tight mb-3">Book Your Massage Appointment</h1>
-        <p className="text-lg text-muted-foreground">Fill in the table below and we will confirm your booking shortly.</p>
-        <p className="text-base text-accent font-semibold mt-2">Every session is {formatCurrency(SESSION_PRICE)}</p>
+        <h1 className="text-4xl font-bold text-primary tracking-tight mb-3">Client Details Form</h1>
+        <p className="text-lg text-muted-foreground">Please fill in your details below. Moysidis Mobile Massage will contact you to arrange your appointment.</p>
       </div>
 
       <Card className="border-t-4 border-t-accent shadow-lg">
@@ -142,7 +126,7 @@ export default function ClientBooking() {
             <Table>
               <TableBody>
                 <TableRow>
-                  <TableCell className="font-semibold w-1/3 align-top pt-4">First Name *</TableCell>
+                  <TableCell className="font-semibold w-1/3 align-top pt-4">Name *</TableCell>
                   <TableCell>
                     <input
                       {...register('firstName', { required: true })}
@@ -152,7 +136,7 @@ export default function ClientBooking() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Last Name *</TableCell>
+                  <TableCell className="font-semibold align-top pt-4">Surname *</TableCell>
                   <TableCell>
                     <input
                       {...register('lastName', { required: true })}
@@ -173,7 +157,7 @@ export default function ClientBooking() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Phone *</TableCell>
+                  <TableCell className="font-semibold align-top pt-4">Telephone Number *</TableCell>
                   <TableCell>
                     <input
                       type="tel"
@@ -195,74 +179,7 @@ export default function ClientBooking() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Service *</TableCell>
-                  <TableCell>
-                    <Controller
-                      name="serviceType"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Select a service..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {SERVICES.map((s) => (
-                              <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                    {errors.serviceType && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Preferred Date *</TableCell>
-                  <TableCell>
-                    <input
-                      type="date"
-                      {...register('date', { required: true })}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                    {errors.date && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Preferred Time *</TableCell>
-                  <TableCell>
-                    <input
-                      type="time"
-                      {...register('startTime', { required: true })}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                    {errors.startTime && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Notes / Requests</TableCell>
-                  <TableCell>
-                    <textarea
-                      {...register('notes')}
-                      placeholder="Anything we should know?"
-                      className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-base"
-                    />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-
-            <div className="mt-10 mb-2">
-              <h2 className="text-xl font-bold text-primary">Medical Intake</h2>
-              <p className="text-sm text-muted-foreground">
-                This information helps us provide a safe and appropriate massage. It is kept confidential.
-              </p>
-            </div>
-
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-semibold w-1/3 align-top pt-4">Allergies</TableCell>
+                  <TableCell className="font-semibold align-top pt-4">Any Allergies</TableCell>
                   <TableCell>
                     <textarea
                       {...register('allergies')}
@@ -272,7 +189,7 @@ export default function ClientBooking() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Medical History</TableCell>
+                  <TableCell className="font-semibold align-top pt-4">Medical History / Health Issues</TableCell>
                   <TableCell>
                     <textarea
                       {...register('medicalHistory')}
@@ -298,7 +215,7 @@ export default function ClientBooking() {
                         )}
                       />
                       <p className="text-sm text-muted-foreground">
-                        I consent to Moysidis Mobile Massage storing my medical intake information for the purpose of providing safe treatment, in accordance with GDPR.
+                        I consent to Moysidis Mobile Massage storing my details in accordance with GDPR.
                       </p>
                     </div>
                     {errors.gdprAccepted && <p className="text-destructive text-xs mt-1">Please confirm consent to continue</p>}
@@ -313,9 +230,9 @@ export default function ClientBooking() {
               type="submit"
               size="lg"
               className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90 mt-8"
-              disabled={createClient.isPending || createAppointment.isPending || createMedicalHistory.isPending}
+              disabled={createClient.isPending || updateClient.isPending || createMedicalHistory.isPending}
             >
-              Book Appointment
+              Submit
             </Button>
           </form>
         </CardContent>
