@@ -47,13 +47,22 @@ export default function ClientDetail() {
   if (clientLoading) return <div className="p-8 text-center">Loading client...</div>;
   if (!client) return <div className="p-8 text-center text-destructive">Client not found</div>;
 
+  const noShowCount = appointments?.filter((a) => a.status === 'no_show').length ?? 0;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">
-            {client.firstName} {client.lastName}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight text-primary">
+              {client.firstName} {client.lastName}
+            </h1>
+            {noShowCount > 0 && (
+              <Badge variant="outline" className={getStatusColor('no_show')}>
+                {noShowCount} No-Show{noShowCount > 1 ? 's' : ''}
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground mt-1">
             {client.email} • {client.phone}{client.age ? ` • Age ${client.age}` : ''} • Registered {formatDate(client.createdAt)}
           </p>
