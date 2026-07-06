@@ -59,13 +59,13 @@ export function MobileNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t bg-card px-2 py-2 md:hidden">
-      {navItems.slice(0, 5).map((item) => {
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center border-t bg-card px-1 py-1.5 md:hidden overflow-x-auto">
+      {navItems.map((item) => {
         const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
         return (
-          <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 p-2 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
-            <item.icon className="h-5 w-5" />
-            <span className="text-[10px] font-medium">{t(item.labelKey).slice(0, 8)}</span>
+          <Link key={item.href} href={item.href} className={`flex flex-1 min-w-[56px] flex-col items-center gap-1 p-2 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span className="text-[9px] font-medium whitespace-nowrap">{t(item.labelKey)}</span>
           </Link>
         );
       })}
