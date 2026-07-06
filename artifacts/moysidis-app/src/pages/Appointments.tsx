@@ -109,7 +109,7 @@ export default function AppointmentsPage() {
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto">{t('appointments.create')}</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>{t('appointments.create')}</DialogTitle>
               </DialogHeader>

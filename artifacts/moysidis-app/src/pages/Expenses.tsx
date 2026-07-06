@@ -60,7 +60,7 @@ export default function ExpensesPage() {
           <DialogTrigger asChild>
             <Button className="w-full sm:w-auto">{t('expenses.create')}</Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>{t('expenses.create')}</DialogTitle>
             </DialogHeader>
