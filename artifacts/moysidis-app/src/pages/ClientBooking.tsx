@@ -50,6 +50,98 @@ function FieldRow({
   );
 }
 
+const MONTH_OPTIONS = [
+  { value: '01', label: 'January' },
+  { value: '02', label: 'February' },
+  { value: '03', label: 'March' },
+  { value: '04', label: 'April' },
+  { value: '05', label: 'May' },
+  { value: '06', label: 'June' },
+  { value: '07', label: 'July' },
+  { value: '08', label: 'August' },
+  { value: '09', label: 'September' },
+  { value: '10', label: 'October' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'December' },
+];
+
+function daysInMonth(month: string, year: string): number {
+  if (!month) return 31;
+  const m = parseInt(month, 10);
+  const y = year ? parseInt(year, 10) : 2000;
+  return new Date(y, m, 0).getDate();
+}
+
+function DateOfBirthPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [year, month, day] = value ? value.split('-') : ['', '', ''];
+
+  const maxDay = daysInMonth(month, year);
+  const dayOptions = Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0'));
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 110 }, (_, i) => String(currentYear - i));
+
+  const update = (next: { year?: string; month?: string; day?: string }) => {
+    const y = next.year ?? year;
+    const m = next.month ?? month;
+    let d = next.day ?? day;
+    if (m && d && parseInt(d, 10) > daysInMonth(m, y)) {
+      d = String(daysInMonth(m, y)).padStart(2, '0');
+    }
+    if (y && m && d) {
+      onChange(`${y}-${m}-${d}`);
+    } else {
+      onChange('');
+    }
+  };
+
+  const selectClass =
+    'h-11 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm sm:text-base appearance-none';
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <select
+        aria-label="Month"
+        value={month}
+        onChange={(e) => update({ month: e.target.value })}
+        className={selectClass}
+      >
+        <option value="">Month</option>
+        {MONTH_OPTIONS.map((m) => (
+          <option key={m.value} value={m.value}>
+            {m.label}
+          </option>
+        ))}
+      </select>
+      <select
+        aria-label="Day"
+        value={day}
+        onChange={(e) => update({ day: e.target.value })}
+        className={selectClass}
+      >
+        <option value="">Day</option>
+        {dayOptions.map((d) => (
+          <option key={d} value={d}>
+            {parseInt(d, 10)}
+          </option>
+        ))}
+      </select>
+      <select
+        aria-label="Year"
+        value={year}
+        onChange={(e) => update({ year: e.target.value })}
+        className={selectClass}
+      >
+        <option value="">Year</option>
+        {yearOptions.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function YesNoToggle({ value, onChange }: { value: YesNo; onChange: (v: YesNo) => void }) {
   return (
     <div className="inline-flex rounded-md border border-input overflow-hidden shrink-0">
@@ -239,10 +331,12 @@ export default function ClientBooking() {
             </FieldRow>
 
             <FieldRow icon={Calendar} label="Date of Birth">
-              <input
-                type="date"
-                {...register('dateOfBirth')}
-                className="block w-full max-w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:shrink-0"
+              <Controller
+                name="dateOfBirth"
+                control={control}
+                render={({ field }) => (
+                  <DateOfBirthPicker value={field.value} onChange={field.onChange} />
+                )}
               />
             </FieldRow>
 
