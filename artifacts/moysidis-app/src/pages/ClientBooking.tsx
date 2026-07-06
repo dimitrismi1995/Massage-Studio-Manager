@@ -242,7 +242,7 @@ export default function ClientBooking() {
               <input
                 type="date"
                 {...register('dateOfBirth')}
-                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                className="block w-full max-w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:shrink-0"
               />
             </FieldRow>
 
