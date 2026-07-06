@@ -94,25 +94,27 @@ export default function AppointmentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-primary">{t('appointments.title')}</h1>
         
-        <div className="flex items-center gap-4">
-          <Input 
-            type="date" 
-            className="w-auto bg-card" 
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-          />
-          <Button onClick={() => setDateFilter('')} variant="outline" className="hidden sm:inline-flex">Clear</Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
+            <Input 
+              type="date" 
+              className="w-full sm:w-auto bg-card" 
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+            />
+            <Button onClick={() => setDateFilter('')} variant="outline" className="hidden sm:inline-flex">Clear</Button>
+          </div>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>{t('appointments.create')}</Button>
+              <Button className="w-full sm:w-auto">{t('appointments.create')}</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t('appointments.create')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Client</Label>
                     <Controller
@@ -154,7 +156,7 @@ export default function AppointmentsPage() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('appointments.date')}</Label>
                     <Input type="date" {...form.register('date')} />
@@ -164,7 +166,7 @@ export default function AppointmentsPage() {
                     <Input type="time" {...form.register('startTime')} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('appointments.duration')}</Label>
                     <Input type="number" {...form.register('durationMinutes')} />
@@ -175,9 +177,9 @@ export default function AppointmentsPage() {
                     <p className="text-xs text-muted-foreground">Fixed rate — every session is {formatCurrency(SESSION_PRICE)}</p>
                   </div>
                 </div>
-                <DialogFooter className="pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('action.cancel')}</Button>
-                  <Button type="submit" disabled={createAppt.isPending}>{t('action.save')}</Button>
+                <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
+                  <Button type="submit" disabled={createAppt.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -186,56 +188,58 @@ export default function AppointmentsPage() {
       </div>
 
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('appointments.date')}</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>{t('appointments.service')}</TableHead>
-              <TableHead>{t('appointments.status')}</TableHead>
-              <TableHead className="text-right">{t('appointments.price')}</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow><TableCell colSpan={6} className="text-center p-8">Loading...</TableCell></TableRow>
-            ) : appointments?.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center p-8">No appointments found.</TableCell></TableRow>
-            ) : (
-              appointments?.map((appt) => (
-                <TableRow key={appt.id}>
-                  <TableCell className="font-medium">
-                    {formatDate(appt.date)}
-                    <div className="text-xs text-muted-foreground">{appt.startTime} ({appt.durationMinutes}m)</div>
-                  </TableCell>
-                  <TableCell>{appt.clientName}</TableCell>
-                  <TableCell>{appt.serviceType}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={getStatusColor(appt.status)}>
-                      {t(`status.${appt.status}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">{formatCurrency(appt.price)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {appt.status === 'scheduled' && (
-                        <>
-                          <Button size="sm" variant="outline" onClick={() => handleComplete(appt.id)}>{t('action.complete')}</Button>
-                          <Button size="sm" variant="ghost" className="text-orange-600 hover:text-orange-700" onClick={() => handleNoShow(appt.id)}>No-Show</Button>
-                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleCancel(appt.id)}>{t('action.cancel')}</Button>
-                        </>
-                      )}
-                      <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive px-2" onClick={() => handleDelete(appt.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className="w-full overflow-x-auto">
+          <Table className="min-w-[720px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('appointments.date')}</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>{t('appointments.service')}</TableHead>
+                <TableHead>{t('appointments.status')}</TableHead>
+                <TableHead className="text-right">{t('appointments.price')}</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={6} className="text-center p-8">Loading...</TableCell></TableRow>
+              ) : appointments?.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center p-8">No appointments found.</TableCell></TableRow>
+              ) : (
+                appointments?.map((appt) => (
+                  <TableRow key={appt.id}>
+                    <TableCell className="font-medium">
+                      {formatDate(appt.date)}
+                      <div className="text-xs text-muted-foreground">{appt.startTime} ({appt.durationMinutes}m)</div>
+                    </TableCell>
+                    <TableCell>{appt.clientName}</TableCell>
+                    <TableCell>{appt.serviceType}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={getStatusColor(appt.status)}>
+                        {t(`status.${appt.status}`)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{formatCurrency(appt.price)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2 flex-wrap">
+                        {appt.status === 'scheduled' && (
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => handleComplete(appt.id)}>{t('action.complete')}</Button>
+                            <Button size="sm" variant="ghost" className="text-orange-600 hover:text-orange-700" onClick={() => handleNoShow(appt.id)}>No-Show</Button>
+                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleCancel(appt.id)}>{t('action.cancel')}</Button>
+                          </>
+                        )}
+                        <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive px-2" onClick={() => handleDelete(appt.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
     </div>
   );

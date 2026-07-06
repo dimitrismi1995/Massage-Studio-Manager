@@ -235,9 +235,9 @@ export default function ClientBooking() {
             </h2>
 
             <div className="py-3 border-b border-border/60">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span className="text-sm font-medium flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-accent" />
+                  <ShieldAlert className="h-4 w-4 text-accent shrink-0" />
                   Do you have any allergies?
                 </span>
                 <Controller
@@ -256,9 +256,9 @@ export default function ClientBooking() {
             </div>
 
             <div className="py-3 border-b border-border/60">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span className="text-sm font-medium flex items-center gap-2">
-                  <Pill className="h-4 w-4 text-accent" />
+                  <Pill className="h-4 w-4 text-accent shrink-0" />
                   Any medical conditions I should know about?
                 </span>
                 <Controller

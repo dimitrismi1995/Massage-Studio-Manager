@@ -53,14 +53,14 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-primary">{t('expenses.title')}</h1>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>{t('expenses.create')}</Button>
+            <Button className="w-full sm:w-auto">{t('expenses.create')}</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t('expenses.create')}</DialogTitle>
             </DialogHeader>
@@ -88,9 +88,9 @@ export default function ExpensesPage() {
                 <Label>{t('expenses.amount')}</Label>
                 <Input type="number" step="0.01" name="amount" required />
               </div>
-              <DialogFooter className="pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('action.cancel')}</Button>
-                <Button type="submit" disabled={createExpense.isPending}>{t('action.save')}</Button>
+              <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
+                <Button type="submit" disabled={createExpense.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -98,38 +98,40 @@ export default function ExpensesPage() {
       </div>
 
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>{t('expenses.category')}</TableHead>
-              <TableHead>{t('expenses.description')}</TableHead>
-              <TableHead className="text-right">{t('expenses.amount')}</TableHead>
-              <TableHead className="text-right"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow><TableCell colSpan={5} className="text-center p-8">Loading...</TableCell></TableRow>
-            ) : expenses?.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center p-8">No expenses logged.</TableCell></TableRow>
-            ) : (
-              expenses?.map((exp) => (
-                <TableRow key={exp.id}>
-                  <TableCell>{formatDate(exp.date)}</TableCell>
-                  <TableCell><span className="bg-muted px-2 py-1 rounded-md text-xs font-medium">{exp.category}</span></TableCell>
-                  <TableCell>{exp.description}</TableCell>
-                  <TableCell className="text-right font-medium">{formatCurrency(exp.amount)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(exp.id)} className="text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className="w-full overflow-x-auto">
+          <Table className="min-w-[600px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>{t('expenses.category')}</TableHead>
+                <TableHead>{t('expenses.description')}</TableHead>
+                <TableHead className="text-right">{t('expenses.amount')}</TableHead>
+                <TableHead className="text-right"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={5} className="text-center p-8">Loading...</TableCell></TableRow>
+              ) : expenses?.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center p-8">No expenses logged.</TableCell></TableRow>
+              ) : (
+                expenses?.map((exp) => (
+                  <TableRow key={exp.id}>
+                    <TableCell>{formatDate(exp.date)}</TableCell>
+                    <TableCell><span className="bg-muted px-2 py-1 rounded-md text-xs font-medium">{exp.category}</span></TableCell>
+                    <TableCell>{exp.description}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(exp.amount)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(exp.id)} className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
     </div>
   );

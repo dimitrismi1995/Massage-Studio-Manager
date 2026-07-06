@@ -34,7 +34,7 @@ export default function FinancePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-primary">{t('finance.title')}</h1>
         <select 
-          className="bg-card border rounded px-3 py-1.5"
+          className="bg-card border rounded px-3 py-1.5 w-full sm:w-auto"
           value={year}
           onChange={(e) => setYear(parseInt(e.target.value))}
         >
@@ -45,12 +45,12 @@ export default function FinancePage() {
         </select>
       </div>
 
-      <div className="flex bg-muted rounded-lg p-1 gap-1 w-fit">
+      <div className="flex bg-muted rounded-lg p-1 gap-1 w-full sm:w-fit">
         {(['day', 'month', 'year'] as const).map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${period === p ? 'bg-card shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`flex-1 sm:flex-none px-4 py-1.5 rounded text-sm font-medium transition-all ${period === p ? 'bg-card shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
           >
             {PERIOD_LABELS[p]}
           </button>

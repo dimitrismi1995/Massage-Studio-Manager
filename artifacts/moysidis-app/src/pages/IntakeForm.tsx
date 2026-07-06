@@ -100,12 +100,12 @@ export default function IntakeForm() {
       </div>
 
       <div className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-primary tracking-tight mb-3">{t('intake.title')}</h1>
-        <p className="text-lg text-muted-foreground">{t('intake.subtitle')}</p>
+        <h1 className="text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-3">{t('intake.title')}</h1>
+        <p className="text-base sm:text-lg text-muted-foreground">{t('intake.subtitle')}</p>
       </div>
 
       <Card className="border-t-4 border-t-accent shadow-lg">
-        <CardContent className="p-8 sm:p-10">
+        <CardContent className="p-4 sm:p-8 md:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
             
             {/* Personal Info */}

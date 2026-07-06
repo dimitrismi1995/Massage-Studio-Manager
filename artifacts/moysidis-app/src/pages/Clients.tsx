@@ -67,7 +67,7 @@ export default function ClientsPage() {
                 <DialogTitle>{t('clients.create')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('intake.first_name')}</Label>
                     <Input name="firstName" required />
@@ -81,7 +81,7 @@ export default function ClientsPage() {
                   <Label>{t('clients.email')}</Label>
                   <Input type="email" name="email" required />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('clients.phone')}</Label>
                     <Input type="tel" name="phone" required />
@@ -91,9 +91,9 @@ export default function ClientsPage() {
                     <Input type="number" name="age" min={0} max={120} />
                   </div>
                 </div>
-                <DialogFooter className="pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('action.cancel')}</Button>
-                  <Button type="submit" disabled={createClient.isPending}>{t('action.save')}</Button>
+                <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
+                  <Button type="submit" disabled={createClient.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -102,41 +102,43 @@ export default function ClientsPage() {
       </div>
 
       <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('clients.name')}</TableHead>
-              <TableHead>{t('clients.email')}</TableHead>
-              <TableHead>{t('clients.phone')}</TableHead>
-              <TableHead>Registered</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow><TableCell colSpan={5} className="text-center p-8">Loading...</TableCell></TableRow>
-            ) : clients?.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center p-8">No clients found.</TableCell></TableRow>
-            ) : (
-              clients?.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell className="font-medium">
-                    {client.firstName} {client.lastName}
-                    {client.hasMedicalHistory && <span className="ml-2 text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full border border-accent/20">History</span>}
-                  </TableCell>
-                  <TableCell>{client.email}</TableCell>
-                  <TableCell>{client.phone}</TableCell>
-                  <TableCell>{formatDate(client.createdAt)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="text-accent hover:text-accent hover:bg-accent/10" asChild>
-                      <Link href={`/clients/${client.id}`}>View Profile</Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className="w-full overflow-x-auto">
+          <Table className="min-w-[640px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('clients.name')}</TableHead>
+                <TableHead>{t('clients.email')}</TableHead>
+                <TableHead>{t('clients.phone')}</TableHead>
+                <TableHead>Registered</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={5} className="text-center p-8">Loading...</TableCell></TableRow>
+              ) : clients?.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center p-8">No clients found.</TableCell></TableRow>
+              ) : (
+                clients?.map((client) => (
+                  <TableRow key={client.id}>
+                    <TableCell className="font-medium">
+                      {client.firstName} {client.lastName}
+                      {client.hasMedicalHistory && <span className="ml-2 text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full border border-accent/20">History</span>}
+                    </TableCell>
+                    <TableCell>{client.email}</TableCell>
+                    <TableCell>{client.phone}</TableCell>
+                    <TableCell>{formatDate(client.createdAt)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" className="text-accent hover:text-accent hover:bg-accent/10" asChild>
+                        <Link href={`/clients/${client.id}`}>View Profile</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
     </div>
   );

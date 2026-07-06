@@ -51,10 +51,10 @@ export default function ClientDetail() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-primary">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">
               {client.firstName} {client.lastName}
             </h1>
             {noShowCount > 0 && (
@@ -63,11 +63,11 @@ export default function ClientDetail() {
               </Badge>
             )}
           </div>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             {client.email} • {client.phone}{client.age ? ` • Age ${client.age}` : ''} • Registered {formatDate(client.createdAt)}
           </p>
         </div>
-        <Button variant="outline" className="text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={deleteClient.isPending}>
+        <Button variant="outline" className="text-destructive hover:bg-destructive/10 w-full sm:w-auto" onClick={handleDelete} disabled={deleteClient.isPending}>
           <Trash2 className="h-4 w-4 mr-2" />
           Delete Client
         </Button>
@@ -99,7 +99,7 @@ export default function ClientDetail() {
                   <dt className="font-semibold text-primary">{t('clients.history.pain')}</dt>
                   <dd className="mt-1">{history.painAreas || '-'}</dd>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-4">
                   <div>
                     <dt className="font-semibold text-primary">{t('clients.history.pressure')}</dt>
                     <dd className="mt-1 capitalize">{history.preferredPressure || '-'}</dd>
@@ -123,36 +123,38 @@ export default function ClientDetail() {
             <CardTitle className="text-lg">Appointment History</CardTitle>
           </CardHeader>
           <CardContent className="px-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Date</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {apptsLoading ? (
-                  <TableRow><TableCell colSpan={3} className="text-center p-4">Loading...</TableCell></TableRow>
-                ) : appointments?.length === 0 ? (
-                  <TableRow><TableCell colSpan={3} className="text-center p-4 text-muted-foreground">No appointments</TableCell></TableRow>
-                ) : (
-                  appointments?.map((appt) => (
-                    <TableRow key={appt.id}>
-                      <TableCell className="pl-6 font-medium">
-                        {formatDate(appt.date)} <span className="text-muted-foreground font-normal text-xs ml-1">{appt.startTime}</span>
-                      </TableCell>
-                      <TableCell>{appt.serviceType}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor(appt.status)}>
-                          {t(`status.${appt.status}`)}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <div className="w-full overflow-x-auto">
+              <Table className="min-w-[420px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="pl-6">Date</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {apptsLoading ? (
+                    <TableRow><TableCell colSpan={3} className="text-center p-4">Loading...</TableCell></TableRow>
+                  ) : appointments?.length === 0 ? (
+                    <TableRow><TableCell colSpan={3} className="text-center p-4 text-muted-foreground">No appointments</TableCell></TableRow>
+                  ) : (
+                    appointments?.map((appt) => (
+                      <TableRow key={appt.id}>
+                        <TableCell className="pl-6 font-medium">
+                          {formatDate(appt.date)} <span className="text-muted-foreground font-normal text-xs ml-1">{appt.startTime}</span>
+                        </TableCell>
+                        <TableCell>{appt.serviceType}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(appt.status)}>
+                            {t(`status.${appt.status}`)}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
