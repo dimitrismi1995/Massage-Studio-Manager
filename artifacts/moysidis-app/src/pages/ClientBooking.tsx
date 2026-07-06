@@ -3,10 +3,12 @@ import { Link } from 'wouter';
 import { useCreateClient, useUpdateClient, useListClients, useCreateMedicalHistory, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
+import { User, Calendar, Phone, Mail, MapPin, HeartPulse, Save, ShieldAlert, Pill, MessageCircle } from 'lucide-react';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
+
+type YesNo = 'yes' | 'no';
 
 type FormValues = {
   firstName: string;
@@ -14,10 +16,55 @@ type FormValues = {
   age: string;
   email: string;
   phone: string;
+  hasAllergies: YesNo;
   allergies: string;
+  hasMedicalConditions: YesNo;
   medicalHistory: string;
   gdprAccepted: boolean;
 };
+
+function FieldRow({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: React.ElementType;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-border/60 last:border-b-0">
+      <div className="mt-1.5 text-accent shrink-0">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <label className="block text-sm font-medium text-muted-foreground mb-1">{label}</label>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function YesNoToggle({ value, onChange }: { value: YesNo; onChange: (v: YesNo) => void }) {
+  return (
+    <div className="inline-flex rounded-md border border-input overflow-hidden">
+      <button
+        type="button"
+        onClick={() => onChange('no')}
+        className={`px-4 py-1.5 text-sm font-medium transition-colors ${value === 'no' ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+      >
+        No
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('yes')}
+        className={`px-4 py-1.5 text-sm font-medium transition-colors ${value === 'yes' ? 'bg-accent text-accent-foreground' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+      >
+        Yes
+      </button>
+    </div>
+  );
+}
 
 export default function ClientBooking() {
   const [submitted, setSubmitted] = React.useState(false);
@@ -28,18 +75,23 @@ export default function ClientBooking() {
   const createMedicalHistory = useCreateMedicalHistory();
   const { refetch: findClients } = useListClients(undefined, { query: { enabled: false, queryKey: getListClientsQueryKey() } });
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       firstName: '',
       lastName: '',
       age: '',
       email: '',
       phone: '',
+      hasAllergies: 'no',
       allergies: '',
+      hasMedicalConditions: 'no',
       medicalHistory: '',
       gdprAccepted: false,
     },
   });
+
+  const hasAllergies = watch('hasAllergies');
+  const hasMedicalConditions = watch('hasMedicalConditions');
 
   const onSubmit = async (data: FormValues) => {
     setError(null);
@@ -77,8 +129,8 @@ export default function ClientBooking() {
       await createMedicalHistory.mutateAsync({
         clientId,
         data: {
-          allergies: data.allergies || undefined,
-          conditions: data.medicalHistory || undefined,
+          allergies: data.hasAllergies === 'yes' ? (data.allergies || undefined) : undefined,
+          conditions: data.hasMedicalConditions === 'yes' ? (data.medicalHistory || undefined) : undefined,
           gdprAccepted: data.gdprAccepted,
         },
       });
@@ -108,134 +160,158 @@ export default function ClientBooking() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
-      <div className="flex justify-center items-center mb-8">
+    <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6">
+      <div className="flex justify-center items-center mb-6">
         <Link href="/">
-          <img src={logoSrc} alt="Moysidis Massage" className="h-12 w-auto object-contain cursor-pointer" />
+          <img src={logoSrc} alt="Moysidis Massage" className="h-14 w-auto object-contain cursor-pointer" />
         </Link>
       </div>
 
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-primary tracking-tight mb-3">Client Details Form</h1>
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-primary tracking-tight">Client Details Form</h1>
       </div>
 
-      <Card className="border-t-4 border-t-accent shadow-lg">
-        <CardContent className="p-4 sm:p-8">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-semibold w-1/3 align-top pt-4">Name *</TableCell>
-                  <TableCell>
-                    <input
-                      {...register('firstName', { required: true })}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                    {errors.firstName && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Surname *</TableCell>
-                  <TableCell>
-                    <input
-                      {...register('lastName', { required: true })}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                    {errors.lastName && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Email *</TableCell>
-                  <TableCell>
-                    <input
-                      type="email"
-                      {...register('email', { required: true })}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                    {errors.email && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Telephone Number *</TableCell>
-                  <TableCell>
-                    <input
-                      type="tel"
-                      {...register('phone', { required: true })}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                    {errors.phone && <p className="text-destructive text-xs mt-1">Required</p>}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Age</TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      min={0}
-                      {...register('age')}
-                      className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Any Allergies</TableCell>
-                  <TableCell>
-                    <textarea
-                      {...register('allergies')}
-                      placeholder="e.g. nut oils, latex, fragrances..."
-                      className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Medical History / Health Issues</TableCell>
-                  <TableCell>
-                    <textarea
-                      {...register('medicalHistory')}
-                      placeholder="Any conditions, injuries, surgeries, or medications we should know about..."
-                      className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-base"
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-semibold align-top pt-4">Consent *</TableCell>
-                  <TableCell>
-                    <div className="flex items-start gap-3">
-                      <Controller
-                        name="gdprAccepted"
-                        control={control}
-                        rules={{ required: true }}
-                        render={({ field }) => (
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="mt-1"
-                          />
-                        )}
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        I consent to Moysidis Mobile Massage storing my details in accordance with GDPR.
-                      </p>
-                    </div>
-                    {errors.gdprAccepted && <p className="text-destructive text-xs mt-1">Please confirm consent to continue</p>}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card className="border-t-4 border-t-primary shadow-lg">
+          <CardContent className="p-4 sm:p-6">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-primary mb-2">
+              <User className="h-5 w-5" />
+              Personal Information
+            </h2>
 
-            {error && <p className="text-destructive text-sm mt-4">{error}</p>}
+            <FieldRow icon={User} label="Full Name *">
+              <div className="flex gap-2">
+                <input
+                  {...register('firstName', { required: true })}
+                  placeholder="First name"
+                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                />
+                <input
+                  {...register('lastName', { required: true })}
+                  placeholder="Last name"
+                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                />
+              </div>
+              {(errors.firstName || errors.lastName) && <p className="text-destructive text-xs mt-1">Full name is required</p>}
+            </FieldRow>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90 mt-8"
-              disabled={createClient.isPending || updateClient.isPending || createMedicalHistory.isPending}
-            >
-              Submit
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <FieldRow icon={Calendar} label="Age">
+              <input
+                type="number"
+                min={0}
+                {...register('age')}
+                placeholder="Enter your age"
+                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+              />
+            </FieldRow>
+
+            <FieldRow icon={Phone} label="Phone *">
+              <input
+                type="tel"
+                {...register('phone', { required: true })}
+                placeholder="Enter your phone number"
+                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+              />
+              {errors.phone && <p className="text-destructive text-xs mt-1">Required</p>}
+            </FieldRow>
+
+            <FieldRow icon={Mail} label="Email *">
+              <input
+                type="email"
+                {...register('email', { required: true })}
+                placeholder="Enter your email address"
+                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+              />
+              {errors.email && <p className="text-destructive text-xs mt-1">Required</p>}
+            </FieldRow>
+          </CardContent>
+        </Card>
+
+        <Card className="border-t-4 border-t-accent shadow-lg">
+          <CardContent className="p-4 sm:p-6">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-primary mb-2">
+              <HeartPulse className="h-5 w-5" />
+              Medical Information
+            </h2>
+
+            <div className="py-3 border-b border-border/60">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-accent" />
+                  Do you have any allergies?
+                </span>
+                <Controller
+                  name="hasAllergies"
+                  control={control}
+                  render={({ field }) => <YesNoToggle value={field.value} onChange={field.onChange} />}
+                />
+              </div>
+              {hasAllergies === 'yes' && (
+                <textarea
+                  {...register('allergies')}
+                  placeholder="e.g. nut oils, latex, fragrances..."
+                  className="w-full min-h-[70px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-base"
+                />
+              )}
+            </div>
+
+            <div className="py-3 border-b border-border/60">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium flex items-center gap-2">
+                  <Pill className="h-4 w-4 text-accent" />
+                  Any medical conditions I should know about?
+                </span>
+                <Controller
+                  name="hasMedicalConditions"
+                  control={control}
+                  render={({ field }) => <YesNoToggle value={field.value} onChange={field.onChange} />}
+                />
+              </div>
+              {hasMedicalConditions === 'yes' && (
+                <textarea
+                  {...register('medicalHistory')}
+                  placeholder="Any conditions, injuries, surgeries, or medications we should know about..."
+                  className="w-full min-h-[90px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-base"
+                />
+              )}
+            </div>
+
+            <div className="py-3">
+              <div className="flex items-start gap-3">
+                <Controller
+                  name="gdprAccepted"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="mt-1"
+                    />
+                  )}
+                />
+                <p className="text-sm text-muted-foreground flex items-start gap-1">
+                  <MessageCircle className="h-4 w-4 mt-0.5 shrink-0 text-accent" />
+                  I consent to Moysidis Mobile Massage storing my details in accordance with GDPR.
+                </p>
+              </div>
+              {errors.gdprAccepted && <p className="text-destructive text-xs mt-1">Please confirm consent to continue</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {error && <p className="text-destructive text-sm">{error}</p>}
+
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full h-14 text-lg font-semibold gap-2"
+          disabled={createClient.isPending || updateClient.isPending || createMedicalHistory.isPending}
+        >
+          <Save className="h-5 w-5" />
+          Save Health History
+        </Button>
+      </form>
     </div>
   );
 }
