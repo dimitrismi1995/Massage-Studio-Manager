@@ -315,16 +315,16 @@ export default function ClientBooking() {
             </h2>
 
             <FieldRow icon={User} label="Full Name *">
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <input
                   {...register('firstName', { required: true })}
                   placeholder="First name"
-                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                  className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border"
                 />
                 <input
                   {...register('lastName', { required: true })}
                   placeholder="Last name"
-                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                  className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border"
                 />
               </div>
               {(errors.firstName || errors.lastName) && <p className="text-destructive text-xs mt-1">Full name is required</p>}
@@ -345,7 +345,7 @@ export default function ClientBooking() {
                 type="tel"
                 {...register('phone', { required: true })}
                 placeholder="Enter your phone number"
-                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-3 text-sm sm:text-base box-border"
               />
               {errors.phone && <p className="text-destructive text-xs mt-1">Required</p>}
             </FieldRow>
@@ -355,7 +355,7 @@ export default function ClientBooking() {
                 type="email"
                 {...register('email', { required: true })}
                 placeholder="Enter your email address"
-                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+                className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-3 text-sm sm:text-base box-border"
               />
               {errors.email && <p className="text-destructive text-xs mt-1">Required</p>}
             </FieldRow>
@@ -383,7 +383,7 @@ export default function ClientBooking() {
                   <textarea
                     {...register('allergies')}
                     placeholder="e.g. nut oils, latex, fragrances..."
-                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                    className="w-full min-w-0 min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base box-border"
                   />
                 </MedicalQuestionRow>
               )}
@@ -403,7 +403,7 @@ export default function ClientBooking() {
                   <textarea
                     {...register('medicalHistory')}
                     placeholder="Any conditions we should know about..."
-                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                    className="w-full min-w-0 min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base box-border"
                   />
                 </MedicalQuestionRow>
               )}
@@ -423,7 +423,7 @@ export default function ClientBooking() {
                   <textarea
                     {...register('injuries')}
                     placeholder="Any injuries, surgeries, or chronic pain..."
-                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                    className="w-full min-w-0 min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base box-border"
                   />
                 </MedicalQuestionRow>
               )}
@@ -443,7 +443,7 @@ export default function ClientBooking() {
                   <textarea
                     {...register('medication')}
                     placeholder="List any medications you are taking..."
-                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                    className="w-full min-w-0 min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base box-border"
                   />
                 </MedicalQuestionRow>
               )}
@@ -465,7 +465,7 @@ export default function ClientBooking() {
                 <textarea
                   {...register('otherNotes')}
                   placeholder="Anything else you'd like us to know..."
-                  className="w-full min-h-[70px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-base"
+                  className="w-full min-w-0 min-h-[70px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base box-border"
                 />
               )}
             </div>
