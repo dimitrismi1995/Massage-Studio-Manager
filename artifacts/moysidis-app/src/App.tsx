@@ -12,8 +12,7 @@ import IntakeForm from '@/pages/IntakeForm';
 import ClientBooking from '@/pages/ClientBooking';
 import Expenses from '@/pages/Expenses';
 import Finance from '@/pages/Finance';
-import Reviews from '@/pages/Reviews';
-import About from '@/pages/About';
+import MedicalHistory from '@/pages/MedicalHistory';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,8 +43,7 @@ function Router() {
         <Route path="/book" component={ClientBooking} />
         <Route path="/expenses" component={Expenses} />
         <Route path="/finance" component={Finance} />
-        <Route path="/reviews" component={Reviews} />
-        <Route path="/about" component={About} />
+        <Route path="/medical-history" component={MedicalHistory} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>

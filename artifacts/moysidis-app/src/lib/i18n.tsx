@@ -16,8 +16,7 @@ const translations: Translations = {
     'nav.clients': 'Clients',
     'nav.expenses': 'Expenses',
     'nav.finance': 'Finance',
-    'nav.reviews': 'Reviews',
-    'nav.about': 'About Me',
+    'nav.medical_history': 'Medical History',
 
     // Dashboard
     'dashboard.today_income': 'Today\'s Income',
@@ -106,10 +105,13 @@ const translations: Translations = {
     'finance.income_vs_expenses': 'Income vs Expenses',
     'finance.revenue_by_service': 'Revenue by Service',
 
-    // Reviews
-    'reviews.title': 'Reviews',
-    'reviews.rating': 'Rating',
-    'reviews.comment': 'Comment',
+    // Medical History
+    'medical_history.title': 'Medical History',
+    'medical_history.subtitle': 'All client medical records submitted through the intake and booking forms.',
+    'medical_history.none': 'No medical history submitted yet.',
+    'medical_history.immune': 'Immune/Autoimmune Issues',
+    'medical_history.other_health': 'Other Health Issues',
+    'medical_history.goals': 'Massage Goals',
 
     // Booking (client self-service)
     'booking.title': 'Book Your Massage Appointment',
