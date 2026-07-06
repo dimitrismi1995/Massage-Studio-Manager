@@ -8,6 +8,7 @@ import {
   CreditCard,
   PieChart,
   Star,
+  UserCircle,
   Menu
 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/expenses', icon: CreditCard, labelKey: 'nav.expenses' },
   { href: '/finance', icon: PieChart, labelKey: 'nav.finance' },
   { href: '/reviews', icon: Star, labelKey: 'nav.reviews' },
+  { href: '/about', icon: UserCircle, labelKey: 'nav.about' },
 ];
 
 export function Sidebar() {

@@ -17,6 +17,7 @@ const translations: Translations = {
     'nav.expenses': 'Expenses',
     'nav.finance': 'Finance',
     'nav.reviews': 'Reviews',
+    'nav.about': 'About Me',
 
     // Dashboard
     'dashboard.today_income': 'Today\'s Income',
