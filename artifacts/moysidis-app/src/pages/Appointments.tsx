@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useUpdateAppointment, useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
+import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useCreateClient, useUpdateClient, useGetClient, getGetClientQueryKey, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, useDateFormatter, getStatusColor, SESSION_PRICE } from '@/lib/utils';
@@ -8,23 +8,18 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Pencil } from 'lucide-react';
 import { format, addDays, parseISO, isToday as isTodayFn } from 'date-fns';
 import * as z from 'zod';
 
-const appointmentSchema = z.object({
-  clientId: z.coerce.number().min(1, 'Client is required'),
+const quickBookSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   date: z.string().min(1, 'Date is required'),
   startTime: z.string().min(1, 'Start time is required'),
-  durationMinutes: z.coerce.number().min(15).max(180),
-  serviceType: z.string().min(1, 'Service is required'),
-  price: z.coerce.number().min(0),
-  notes: z.string().optional(),
 });
 
 type Appt = {
@@ -77,6 +72,7 @@ export default function AppointmentsPage() {
   const [selectedDate, setSelectedDate] = React.useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedAppt, setSelectedAppt] = React.useState<Appt | null>(null);
+  const [editClientId, setEditClientId] = React.useState<number | null>(null);
   const [now, setNow] = React.useState(() => new Date());
 
   React.useEffect(() => {
@@ -88,24 +84,19 @@ export default function AppointmentsPage() {
     { date: selectedDate },
     { query: { queryKey: getListAppointmentsQueryKey({ date: selectedDate }) } }
   );
-  const { data: allAppointments, isLoading: allLoading } = useListAppointments(
-    undefined,
-    { query: { queryKey: getListAppointmentsQueryKey() } }
-  );
-  const { data: clients } = useListClients(undefined, { query: { queryKey: getListClientsQueryKey() } });
+  const { data: editingClient } = useGetClient(editClientId ?? 0, {
+    query: { enabled: !!editClientId, queryKey: getGetClientQueryKey(editClientId ?? 0) }
+  });
   const completeAppt = useCompleteAppointment();
   const cancelAppt = useCancelAppointment();
   const noShowAppt = useMarkAppointmentNoShow();
   const createAppt = useCreateAppointment();
   const deleteAppt = useDeleteAppointment();
-  const updateAppt = useUpdateAppointment();
+  const createClient = useCreateClient();
+  const updateClient = useUpdateClient();
 
-  const form = useForm<z.infer<typeof appointmentSchema>>({
-    resolver: zodResolver(appointmentSchema),
-    defaultValues: {
-      durationMinutes: 60,
-      price: SESSION_PRICE,
-    }
+  const form = useForm<z.infer<typeof quickBookSchema>>({
+    resolver: zodResolver(quickBookSchema),
   });
 
   const invalidateAppointments = () => {
@@ -113,12 +104,47 @@ export default function AppointmentsPage() {
     queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey({ date: selectedDate }) });
   };
 
-  const onSubmit = (values: z.infer<typeof appointmentSchema>) => {
-    createAppt.mutate({ data: values }, {
+  const onSubmit = (values: z.infer<typeof quickBookSchema>) => {
+    createClient.mutate({ data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: '' } }, {
+      onSuccess: (client) => {
+        queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
+        createAppt.mutate({
+          data: {
+            clientId: client.id,
+            date: values.date,
+            startTime: values.startTime,
+            durationMinutes: 60,
+            serviceType: 'Massage',
+            price: SESSION_PRICE,
+          }
+        }, {
+          onSuccess: () => {
+            invalidateAppointments();
+            setIsDialogOpen(false);
+            form.reset();
+          }
+        });
+      }
+    });
+  };
+
+  const handleEditClient = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editClientId) return;
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      firstName: formData.get('firstName') as string,
+      lastName: formData.get('lastName') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      age: formData.get('age') ? Number(formData.get('age')) : undefined,
+    };
+    updateClient.mutate({ clientId: editClientId, data }, {
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
         invalidateAppointments();
-        setIsDialogOpen(false);
-        form.reset({ durationMinutes: 60, price: SESSION_PRICE });
+        setEditClientId(null);
+        setSelectedAppt(null);
       }
     });
   };
@@ -147,8 +173,8 @@ export default function AppointmentsPage() {
 
   const openSlot = (slotStartMin: number) => {
     form.reset({
-      durationMinutes: 60,
-      price: SESSION_PRICE,
+      firstName: '',
+      lastName: '',
       date: selectedDate,
       startTime: minutesToTime(slotStartMin),
     });
@@ -280,51 +306,21 @@ export default function AppointmentsPage() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle>{t('appointments.create')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Client</Label>
-                <Controller
-                  name="clientId"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value ? String(field.value) : undefined}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select client..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients?.map((c) => (
-                          <SelectItem key={c.id} value={String(c.id)}>{c.firstName} {c.lastName}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {form.formState.errors.clientId && <p className="text-destructive text-xs">Required</p>}
+                <Label>{t('intake.first_name')}</Label>
+                <Input autoFocus {...form.register('firstName')} />
+                {form.formState.errors.firstName && <p className="text-destructive text-xs">{form.formState.errors.firstName.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label>{t('appointments.service')}</Label>
-                <Controller
-                  name="serviceType"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Swedish">Swedish</SelectItem>
-                        <SelectItem value="Deep Tissue">Deep Tissue</SelectItem>
-                        <SelectItem value="Sports">Sports</SelectItem>
-                        <SelectItem value="Relaxation">Relaxation</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+                <Label>{t('intake.last_name')}</Label>
+                <Input {...form.register('lastName')} />
+                {form.formState.errors.lastName && <p className="text-destructive text-xs">{form.formState.errors.lastName.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -337,20 +333,12 @@ export default function AppointmentsPage() {
                 <Input type="time" {...form.register('startTime')} />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t('appointments.duration')}</Label>
-                <Input type="number" {...form.register('durationMinutes')} />
-              </div>
-              <div className="space-y-2">
-                <Label>{t('appointments.price')}</Label>
-                <Input type="number" {...form.register('price')} readOnly className="bg-muted" />
-                <p className="text-xs text-muted-foreground">Fixed rate — every session is {formatCurrency(SESSION_PRICE)}</p>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Fixed 60-minute session at {formatCurrency(SESSION_PRICE)}. You can add their email, phone and other details afterwards with the edit button.
+            </p>
             <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
-              <Button type="submit" disabled={createAppt.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
+              <Button type="submit" disabled={createClient.isPending || createAppt.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -363,7 +351,7 @@ export default function AppointmentsPage() {
           </DialogHeader>
           {selectedAppt && (
             <div className="space-y-4 pt-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="font-semibold text-lg">{selectedAppt.clientName}</span>
                 <Badge variant="outline" className={getStatusColor(selectedAppt.status)}>
                   {t(`status.${selectedAppt.status}`)}
@@ -375,6 +363,11 @@ export default function AppointmentsPage() {
                 <div className="font-medium text-foreground">{formatCurrency(selectedAppt.price)}</div>
               </div>
               <div className="flex flex-wrap gap-2 pt-2">
+                {selectedAppt.clientId && (
+                  <Button size="sm" variant="outline" onClick={() => setEditClientId(selectedAppt.clientId!)}>
+                    <Pencil className="h-3.5 w-3.5 mr-1" /> Edit Client Info
+                  </Button>
+                )}
                 {selectedAppt.status === 'scheduled' && (
                   <>
                     <Button size="sm" variant="outline" onClick={() => handleComplete(selectedAppt.id)}>{t('action.complete')}</Button>
@@ -391,63 +384,45 @@ export default function AppointmentsPage() {
         </DialogContent>
       </Dialog>
 
-      <Card>
-        <div className="p-4 sm:p-5 pb-0">
-          <h2 className="text-lg font-semibold text-primary">All Appointments</h2>
-        </div>
-        <div className="w-full overflow-x-auto">
-          <Table className="min-w-[720px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('appointments.date')}</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>{t('appointments.service')}</TableHead>
-                <TableHead>{t('appointments.status')}</TableHead>
-                <TableHead className="text-right">{t('appointments.price')}</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allLoading ? (
-                <TableRow><TableCell colSpan={6} className="text-center p-8">Loading...</TableCell></TableRow>
-              ) : allAppointments?.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center p-8">No appointments found.</TableCell></TableRow>
-              ) : (
-                allAppointments?.map((appt: Appt) => (
-                  <TableRow key={appt.id}>
-                    <TableCell className="font-medium">
-                      {formatDate(appt.date)}
-                      <div className="text-xs text-muted-foreground">{appt.startTime} ({appt.durationMinutes}m)</div>
-                    </TableCell>
-                    <TableCell>{appt.clientName}</TableCell>
-                    <TableCell>{appt.serviceType}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(appt.status)}>
-                        {t(`status.${appt.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{formatCurrency(appt.price)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2 flex-wrap">
-                        {appt.status === 'scheduled' && (
-                          <>
-                            <Button size="sm" variant="outline" onClick={() => handleComplete(appt.id)}>{t('action.complete')}</Button>
-                            <Button size="sm" variant="ghost" className="text-orange-600 hover:text-orange-700" onClick={() => handleNoShow(appt.id)}>No-Show</Button>
-                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleCancel(appt.id)}>{t('action.cancel')}</Button>
-                          </>
-                        )}
-                        <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive px-2" onClick={() => handleDelete(appt.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+      <Dialog open={!!editClientId} onOpenChange={(open) => !open && setEditClientId(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Client Info</DialogTitle>
+          </DialogHeader>
+          {editingClient && (
+            <form onSubmit={handleEditClient} className="space-y-4 pt-4" key={editingClient.id}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('intake.first_name')}</Label>
+                  <Input name="firstName" defaultValue={editingClient.firstName} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('intake.last_name')}</Label>
+                  <Input name="lastName" defaultValue={editingClient.lastName} required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('clients.email')}</Label>
+                <Input type="email" name="email" defaultValue={editingClient.email} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('clients.phone')}</Label>
+                  <Input type="tel" name="phone" defaultValue={editingClient.phone} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('clients.age')}</Label>
+                  <Input type="number" name="age" min={0} max={120} defaultValue={editingClient.age ?? ''} />
+                </div>
+              </div>
+              <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
+                <Button type="button" variant="outline" onClick={() => setEditClientId(null)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
+                <Button type="submit" disabled={updateClient.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
