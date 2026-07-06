@@ -16,5 +16,7 @@ export interface ClientInput {
   /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
+  address?: string | null;
+  /** @nullable */
   notes?: string | null;
 }

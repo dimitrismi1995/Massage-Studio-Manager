@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
-import { User, Calendar, Phone, Mail, MapPin, HeartPulse, Save, ShieldAlert, Pill, MessageCircle } from 'lucide-react';
+import { User, Calendar, Phone, Mail, MapPin, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 type YesNo = 'yes' | 'no';
@@ -13,13 +13,19 @@ type YesNo = 'yes' | 'no';
 type FormValues = {
   firstName: string;
   lastName: string;
-  age: string;
-  email: string;
+  dateOfBirth: string;
   phone: string;
+  email: string;
+  address: string;
   hasAllergies: YesNo;
   allergies: string;
   hasMedicalConditions: YesNo;
   medicalHistory: string;
+  hasInjuries: YesNo;
+  injuries: string;
+  hasMedication: YesNo;
+  medication: string;
+  otherNotes: string;
   gdprAccepted: boolean;
 };
 
@@ -47,7 +53,7 @@ function FieldRow({
 
 function YesNoToggle({ value, onChange }: { value: YesNo; onChange: (v: YesNo) => void }) {
   return (
-    <div className="inline-flex rounded-md border border-input overflow-hidden">
+    <div className="inline-flex rounded-md border border-input overflow-hidden shrink-0">
       <button
         type="button"
         onClick={() => onChange('no')}
@@ -66,9 +72,48 @@ function YesNoToggle({ value, onChange }: { value: YesNo; onChange: (v: YesNo) =
   );
 }
 
+function MedicalQuestionRow({
+  question,
+  value,
+  onChange,
+  expanded,
+  onToggleExpand,
+  children,
+}: {
+  question: string;
+  value: YesNo;
+  onChange: (v: YesNo) => void;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="py-3 border-b border-border/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <span className="text-sm font-medium">{question}</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <YesNoToggle value={value} onChange={onChange} />
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            aria-label="Toggle details"
+            className="text-muted-foreground hover:text-foreground transition-transform shrink-0"
+            style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      {expanded && children && <div className="mt-3">{children}</div>}
+    </div>
+  );
+}
+
 export default function ClientBooking() {
   const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
+  const [otherExpanded, setOtherExpanded] = React.useState(false);
 
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
@@ -79,19 +124,29 @@ export default function ClientBooking() {
     defaultValues: {
       firstName: '',
       lastName: '',
-      age: '',
-      email: '',
+      dateOfBirth: '',
       phone: '',
+      email: '',
+      address: '',
       hasAllergies: 'no',
       allergies: '',
       hasMedicalConditions: 'no',
       medicalHistory: '',
+      hasInjuries: 'no',
+      injuries: '',
+      hasMedication: 'no',
+      medication: '',
+      otherNotes: '',
       gdprAccepted: false,
     },
   });
 
   const hasAllergies = watch('hasAllergies');
   const hasMedicalConditions = watch('hasMedicalConditions');
+  const hasInjuries = watch('hasInjuries');
+  const hasMedication = watch('hasMedication');
+
+  const toggleRow = (row: string) => setExpandedRow((prev) => (prev === row ? null : row));
 
   const onSubmit = async (data: FormValues) => {
     setError(null);
@@ -101,36 +156,27 @@ export default function ClientBooking() {
         (c) => c.email.toLowerCase() === data.email.toLowerCase()
       );
 
+      const clientPayload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        dateOfBirth: data.dateOfBirth || undefined,
+        address: data.address || undefined,
+      };
+
       const clientId = match
-        ? (
-            await updateClient.mutateAsync({
-              clientId: match.id,
-              data: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email,
-                phone: data.phone,
-                age: data.age ? Number(data.age) : undefined,
-              },
-            })
-          ).id
-        : (
-            await createClient.mutateAsync({
-              data: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email,
-                phone: data.phone,
-                age: data.age ? Number(data.age) : undefined,
-              },
-            })
-          ).id;
+        ? (await updateClient.mutateAsync({ clientId: match.id, data: clientPayload })).id
+        : (await createClient.mutateAsync({ data: clientPayload })).id;
 
       await createMedicalHistory.mutateAsync({
         clientId,
         data: {
           allergies: data.hasAllergies === 'yes' ? (data.allergies || undefined) : undefined,
           conditions: data.hasMedicalConditions === 'yes' ? (data.medicalHistory || undefined) : undefined,
+          painAreas: data.hasInjuries === 'yes' ? (data.injuries || undefined) : undefined,
+          medications: data.hasMedication === 'yes' ? (data.medication || undefined) : undefined,
+          otherHealthIssues: data.otherNotes || undefined,
           gdprAccepted: data.gdprAccepted,
         },
       });
@@ -195,12 +241,10 @@ export default function ClientBooking() {
               {(errors.firstName || errors.lastName) && <p className="text-destructive text-xs mt-1">Full name is required</p>}
             </FieldRow>
 
-            <FieldRow icon={Calendar} label="Age">
+            <FieldRow icon={Calendar} label="Date of Birth">
               <input
-                type="number"
-                min={0}
-                {...register('age')}
-                placeholder="Enter your age"
+                type="date"
+                {...register('dateOfBirth')}
                 className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
               />
             </FieldRow>
@@ -224,6 +268,14 @@ export default function ClientBooking() {
               />
               {errors.email && <p className="text-destructive text-xs mt-1">Required</p>}
             </FieldRow>
+
+            <FieldRow icon={MapPin} label="Address">
+              <input
+                {...register('address')}
+                placeholder="Enter your address"
+                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
+              />
+            </FieldRow>
           </CardContent>
         </Card>
 
@@ -234,44 +286,103 @@ export default function ClientBooking() {
               Medical Information
             </h2>
 
-            <div className="py-3 border-b border-border/60">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <span className="text-sm font-medium flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-accent shrink-0" />
-                  Do you have any allergies?
-                </span>
-                <Controller
-                  name="hasAllergies"
-                  control={control}
-                  render={({ field }) => <YesNoToggle value={field.value} onChange={field.onChange} />}
-                />
-              </div>
-              {hasAllergies === 'yes' && (
-                <textarea
-                  {...register('allergies')}
-                  placeholder="e.g. nut oils, latex, fragrances..."
-                  className="w-full min-h-[70px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-base"
-                />
+            <Controller
+              name="hasAllergies"
+              control={control}
+              render={({ field }) => (
+                <MedicalQuestionRow
+                  question="Do you have any allergies?"
+                  value={field.value}
+                  onChange={(v) => { field.onChange(v); if (v === 'yes') setExpandedRow('allergies'); }}
+                  expanded={expandedRow === 'allergies'}
+                  onToggleExpand={() => toggleRow('allergies')}
+                >
+                  <textarea
+                    {...register('allergies')}
+                    placeholder="e.g. nut oils, latex, fragrances..."
+                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                  />
+                </MedicalQuestionRow>
               )}
-            </div>
+            />
+
+            <Controller
+              name="hasMedicalConditions"
+              control={control}
+              render={({ field }) => (
+                <MedicalQuestionRow
+                  question="Do you have any medical conditions I should know about?"
+                  value={field.value}
+                  onChange={(v) => { field.onChange(v); if (v === 'yes') setExpandedRow('conditions'); }}
+                  expanded={expandedRow === 'conditions'}
+                  onToggleExpand={() => toggleRow('conditions')}
+                >
+                  <textarea
+                    {...register('medicalHistory')}
+                    placeholder="Any conditions we should know about..."
+                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                  />
+                </MedicalQuestionRow>
+              )}
+            />
+
+            <Controller
+              name="hasInjuries"
+              control={control}
+              render={({ field }) => (
+                <MedicalQuestionRow
+                  question="Have you had any musculoskeletal injuries, surgeries or chronic pain?"
+                  value={field.value}
+                  onChange={(v) => { field.onChange(v); if (v === 'yes') setExpandedRow('injuries'); }}
+                  expanded={expandedRow === 'injuries'}
+                  onToggleExpand={() => toggleRow('injuries')}
+                >
+                  <textarea
+                    {...register('injuries')}
+                    placeholder="Any injuries, surgeries, or chronic pain..."
+                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                  />
+                </MedicalQuestionRow>
+              )}
+            />
+
+            <Controller
+              name="hasMedication"
+              control={control}
+              render={({ field }) => (
+                <MedicalQuestionRow
+                  question="Are you currently taking any medication?"
+                  value={field.value}
+                  onChange={(v) => { field.onChange(v); if (v === 'yes') setExpandedRow('medication'); }}
+                  expanded={expandedRow === 'medication'}
+                  onToggleExpand={() => toggleRow('medication')}
+                >
+                  <textarea
+                    {...register('medication')}
+                    placeholder="List any medications you are taking..."
+                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-base"
+                  />
+                </MedicalQuestionRow>
+              )}
+            />
 
             <div className="py-3 border-b border-border/60">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <span className="text-sm font-medium flex items-center gap-2">
-                  <Pill className="h-4 w-4 text-accent shrink-0" />
-                  Any medical conditions I should know about?
-                </span>
-                <Controller
-                  name="hasMedicalConditions"
-                  control={control}
-                  render={({ field }) => <YesNoToggle value={field.value} onChange={field.onChange} />}
+              <button
+                type="button"
+                onClick={() => setOtherExpanded((prev) => !prev)}
+                className="flex w-full items-center justify-between gap-3 text-left"
+              >
+                <span className="text-sm font-medium">Is there anything else you would like me to know before your massage?</span>
+                <ChevronRight
+                  className="h-4 w-4 text-muted-foreground shrink-0 transition-transform"
+                  style={{ transform: otherExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
                 />
-              </div>
-              {hasMedicalConditions === 'yes' && (
+              </button>
+              {otherExpanded && (
                 <textarea
-                  {...register('medicalHistory')}
-                  placeholder="Any conditions, injuries, surgeries, or medications we should know about..."
-                  className="w-full min-h-[90px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-base"
+                  {...register('otherNotes')}
+                  placeholder="Anything else you'd like us to know..."
+                  className="w-full min-h-[70px] mt-3 rounded-md border border-input bg-background px-3 py-2 text-base"
                 />
               )}
             </div>

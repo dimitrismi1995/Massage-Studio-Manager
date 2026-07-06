@@ -20,6 +20,8 @@ export interface Client {
   /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
+  address?: string | null;
+  /** @nullable */
   notes?: string | null;
   createdAt: string;
   hasMedicalHistory?: boolean;
@@ -35,6 +37,8 @@ export interface ClientInput {
   /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
+  address?: string | null;
+  /** @nullable */
   notes?: string | null;
 }
 
@@ -47,6 +51,8 @@ export interface ClientUpdate {
   age?: number | null;
   /** @nullable */
   dateOfBirth?: string | null;
+  /** @nullable */
+  address?: string | null;
   /** @nullable */
   notes?: string | null;
 }

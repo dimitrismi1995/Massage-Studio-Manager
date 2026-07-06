@@ -17,6 +17,8 @@ export interface Client {
   /** @nullable */
   dateOfBirth?: string | null;
   /** @nullable */
+  address?: string | null;
+  /** @nullable */
   notes?: string | null;
   createdAt: string;
   hasMedicalHistory?: boolean;

@@ -613,6 +613,8 @@ components:
           type: ["integer", "null"]
         dateOfBirth:
           type: ["string", "null"]
+        address:
+          type: ["string", "null"]
         notes:
           type: ["string", "null"]
         createdAt:
@@ -636,6 +638,8 @@ components:
           type: ["integer", "null"]
         dateOfBirth:
           type: ["string", "null"]
+        address:
+          type: ["string", "null"]
         notes:
           type: ["string", "null"]
 
@@ -653,6 +657,8 @@ components:
         age:
           type: ["integer", "null"]
         dateOfBirth:
+          type: ["string", "null"]
+        address:
           type: ["string", "null"]
         notes:
           type: ["string", "null"]
