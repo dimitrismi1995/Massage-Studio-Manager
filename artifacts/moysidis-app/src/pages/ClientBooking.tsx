@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
-import { User, Calendar, Phone, Mail, MapPin, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
+import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 type YesNo = 'yes' | 'no';
@@ -16,7 +16,6 @@ type FormValues = {
   dateOfBirth: string;
   phone: string;
   email: string;
-  address: string;
   hasAllergies: YesNo;
   allergies: string;
   hasMedicalConditions: YesNo;
@@ -127,7 +126,6 @@ export default function ClientBooking() {
       dateOfBirth: '',
       phone: '',
       email: '',
-      address: '',
       hasAllergies: 'no',
       allergies: '',
       hasMedicalConditions: 'no',
@@ -162,7 +160,6 @@ export default function ClientBooking() {
         email: data.email,
         phone: data.phone,
         dateOfBirth: data.dateOfBirth || undefined,
-        address: data.address || undefined,
       };
 
       const clientId = match
@@ -267,14 +264,6 @@ export default function ClientBooking() {
                 className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
               />
               {errors.email && <p className="text-destructive text-xs mt-1">Required</p>}
-            </FieldRow>
-
-            <FieldRow icon={MapPin} label="Address">
-              <input
-                {...register('address')}
-                placeholder="Enter your address"
-                className="w-full h-11 rounded-md border border-input bg-background px-3 text-base"
-              />
             </FieldRow>
           </CardContent>
         </Card>
