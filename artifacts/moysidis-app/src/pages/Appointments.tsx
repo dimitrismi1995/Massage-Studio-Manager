@@ -18,16 +18,17 @@ import * as z from 'zod';
 
 /* ── Services catalogue ── */
 const SERVICES = [
-  { name: 'Relaxation Massage',  durations: [60, 90] as const, prices: { 60: 150, 90: 220 } },
-  { name: 'Deep Tissue Massage', durations: [60, 90] as const, prices: { 60: 150, 90: 220 } },
-  { name: 'Sports Massage',      durations: [60, 90] as const, prices: { 60: 150, 90: 220 } },
-  { name: 'Pregnancy Massage',   durations: [60]     as const, prices: { 60: 150 } },
-  { name: 'Cupping Massage',     durations: [60]     as const, prices: { 60: 150 } },
+  { name: 'Relaxation Massage',  durations: [60, 90] as const },
+  { name: 'Deep Tissue Massage', durations: [60, 90] as const },
+  { name: 'Sports Massage',      durations: [60, 90] as const },
+  { name: 'Pregnancy Massage',   durations: [60]     as const },
+  { name: 'Cupping Massage',     durations: [60]     as const },
 ];
 
-function servicePrice(serviceName: string, duration: number): number {
-  const svc = SERVICES.find(s => s.name === serviceName);
-  return (svc?.prices as Record<number, number>)?.[duration] ?? 150;
+const SESSION_PRICE = 150;
+
+function servicePrice(_serviceName: string, _duration: number): number {
+  return SESSION_PRICE;
 }
 
 /* ── Form schema ── */
