@@ -4,6 +4,7 @@ import { useCreateClient, useUpdateClient, useListClients, useCreateMedicalHisto
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, Controller } from 'react-hook-form';
 import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
@@ -93,44 +94,49 @@ function DateOfBirthPicker({ value, onChange }: { value: string; onChange: (v: s
   const maxDay = daysInMonth(month, year);
   const dayOptions = Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0'));
 
-  const selectClass =
-    'h-11 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm sm:text-base';
-
   return (
     <div className="grid grid-cols-3 gap-2">
-      <select
-        aria-label="Month"
+      <Select
         value={month}
-        onChange={(e) => { setMonth(e.target.value); commit(year, e.target.value, day); }}
-        className={selectClass}
+        onValueChange={(v) => { setMonth(v); commit(year, v, day); }}
       >
-        <option value="">Month</option>
-        {MONTH_OPTIONS.map((m) => (
-          <option key={m.value} value={m.value}>{m.label}</option>
-        ))}
-      </select>
-      <select
-        aria-label="Day"
+        <SelectTrigger className="h-11">
+          <SelectValue placeholder="Month" />
+        </SelectTrigger>
+        <SelectContent>
+          {MONTH_OPTIONS.map((m) => (
+            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
         value={day}
-        onChange={(e) => { setDay(e.target.value); commit(year, month, e.target.value); }}
-        className={selectClass}
+        onValueChange={(v) => { setDay(v); commit(year, month, v); }}
       >
-        <option value="">Day</option>
-        {dayOptions.map((d) => (
-          <option key={d} value={d}>{parseInt(d, 10)}</option>
-        ))}
-      </select>
-      <select
-        aria-label="Year"
+        <SelectTrigger className="h-11">
+          <SelectValue placeholder="Day" />
+        </SelectTrigger>
+        <SelectContent>
+          {dayOptions.map((d) => (
+            <SelectItem key={d} value={d}>{parseInt(d, 10)}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
         value={year}
-        onChange={(e) => { setYear(e.target.value); const d = commit(e.target.value, month, day); setDay(d); }}
-        className={selectClass}
+        onValueChange={(v) => { setYear(v); const d = commit(v, month, day); setDay(d); }}
       >
-        <option value="">Year</option>
-        {yearOptions.map((y) => (
-          <option key={y} value={y}>{y}</option>
-        ))}
-      </select>
+        <SelectTrigger className="h-11">
+          <SelectValue placeholder="Year" />
+        </SelectTrigger>
+        <SelectContent>
+          {yearOptions.map((y) => (
+            <SelectItem key={y} value={y}>{y}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
