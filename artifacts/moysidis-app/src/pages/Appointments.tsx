@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, ChevronRight, Trash2, Pencil } from 'lucide-react';
-import { format, addDays, parseISO, isToday as isTodayFn } from 'date-fns';
+import { format, addDays, parseISO, isToday as isTodayFn, startOfWeek, isSameDay } from 'date-fns';
 import * as z from 'zod';
 
 const quickBookSchema = z.object({
@@ -38,6 +38,7 @@ const DAY_START_MIN = 7 * 60;
 const DAY_END_MIN = 21 * 60;
 const SLOT_MIN = 30;
 const ROW_HEIGHT = 56;
+const SESSION_DURATION = 60;
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -60,15 +61,39 @@ function formatTimeLabel(mins: number): string {
 
 function statusBlockColor(status: string) {
   switch (status) {
-    case 'completed': return 'bg-green-100 border-green-300 text-green-900 hover:bg-green-200';
-    default: return 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/20';
+    case 'completed': return 'bg-green-100 border-green-400 text-green-900 hover:bg-green-200';
+    default: return 'bg-primary/10 border-primary/40 text-primary hover:bg-primary/20';
   }
+}
+
+function isSlotOccupiedIn(appts: Appt[], slotStart: number): boolean {
+  const slotEnd = slotStart + SLOT_MIN;
+  return appts.some((a) => {
+    const s = timeToMinutes(a.startTime);
+    const e = s + Math.max(a.durationMinutes || SESSION_DURATION, SESSION_DURATION);
+    return s < slotEnd && e > slotStart;
+  });
+}
+
+const slotTimes: number[] = [];
+for (let t = DAY_START_MIN; t < DAY_END_MIN; t += SLOT_MIN) slotTimes.push(t);
+
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = React.useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  React.useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isDesktop;
 }
 
 export default function AppointmentsPage() {
   const { t } = useLanguage();
   const { formatDate } = useDateFormatter();
   const queryClient = useQueryClient();
+  const isDesktop = useIsDesktop();
+
   const [selectedDate, setSelectedDate] = React.useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedAppt, setSelectedAppt] = React.useState<Appt | null>(null);
@@ -80,13 +105,18 @@ export default function AppointmentsPage() {
     return () => clearInterval(id);
   }, []);
 
-  const { data: dayAppointments, isLoading: dayLoading } = useListAppointments(
-    { date: selectedDate },
-    { query: { queryKey: getListAppointmentsQueryKey({ date: selectedDate }) } }
+  const weekStart = startOfWeek(parseISO(selectedDate), { weekStartsOn: 1 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  const { data: allAppointments, isLoading } = useListAppointments(
+    {},
+    { query: { queryKey: getListAppointmentsQueryKey() } }
   );
+
   const { data: editingClient } = useGetClient(editClientId ?? 0, {
     query: { enabled: !!editClientId, queryKey: getGetClientQueryKey(editClientId ?? 0) }
   });
+
   const completeAppt = useCompleteAppointment();
   const cancelAppt = useCancelAppointment();
   const noShowAppt = useMarkAppointmentNoShow();
@@ -101,8 +131,14 @@ export default function AppointmentsPage() {
 
   const invalidateAppointments = () => {
     queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() });
-    queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey({ date: selectedDate }) });
   };
+
+  const activeAppts: Appt[] = (allAppointments || []).filter(
+    (a: Appt) => a.status === 'scheduled' || a.status === 'completed'
+  );
+
+  const apptsByDate = (dateStr: string) =>
+    activeAppts.filter((a) => a.date === dateStr);
 
   const onSubmit = (values: z.infer<typeof quickBookSchema>) => {
     createClient.mutate({ data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: '' } }, {
@@ -113,7 +149,7 @@ export default function AppointmentsPage() {
             clientId: client.id,
             date: values.date,
             startTime: values.startTime,
-            durationMinutes: 60,
+            durationMinutes: SESSION_DURATION,
             serviceType: 'Massage',
             price: SESSION_PRICE,
           }
@@ -167,63 +203,61 @@ export default function AppointmentsPage() {
     }
   };
 
-  const shiftDate = (delta: number) => {
-    setSelectedDate((prev) => format(addDays(parseISO(prev), delta), 'yyyy-MM-dd'));
-  };
-
-  const openSlot = (slotStartMin: number) => {
+  const openSlot = (slotStartMin: number, dateStr?: string) => {
     form.reset({
       firstName: '',
       lastName: '',
-      date: selectedDate,
+      date: dateStr ?? selectedDate,
       startTime: minutesToTime(slotStartMin),
     });
     setIsDialogOpen(true);
   };
 
-  const activeAppointments: Appt[] = (dayAppointments || []).filter(
-    (a: Appt) => a.status === 'scheduled' || a.status === 'completed'
-  );
-
-  const isSlotOccupied = (slotStart: number) => {
-    const slotEnd = slotStart + SLOT_MIN;
-    return activeAppointments.some((a) => {
-      const s = timeToMinutes(a.startTime);
-      const e = s + (a.durationMinutes || 60);
-      return s < slotEnd && e > slotStart;
-    });
-  };
-
-  const slotTimes: number[] = [];
-  for (let t = DAY_START_MIN; t < DAY_END_MIN; t += SLOT_MIN) slotTimes.push(t);
-
-  const selectedDateObj = parseISO(selectedDate);
-  const isToday = isTodayFn(selectedDateObj);
   const nowMin = now.getHours() * 60 + now.getMinutes();
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight text-primary">{t('appointments.title')}</h1>
-      </div>
+      <h1 className="text-3xl font-bold tracking-tight text-primary">{t('appointments.title')}</h1>
 
       <Card>
         <CardContent className="p-3 sm:p-5 space-y-4">
+          {/* Navigation */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => shiftDate(-1)} aria-label="Previous day">
+              <Button variant="outline" size="icon" onClick={() => {
+                const delta = isDesktop ? -7 : -1;
+                setSelectedDate((prev) => format(addDays(parseISO(prev), delta), 'yyyy-MM-dd'));
+              }} aria-label="Previous">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="min-w-[150px] sm:min-w-[200px] text-center">
-                <div className="font-semibold text-base sm:text-lg text-primary">
-                  {format(selectedDateObj, 'EEEE, MMM d')}
-                </div>
-                {isToday && <div className="text-xs text-accent font-medium">Today</div>}
+
+              <div className="min-w-[160px] sm:min-w-[220px] text-center">
+                {isDesktop ? (
+                  <>
+                    <div className="font-semibold text-base sm:text-lg text-primary">
+                      {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Week view</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="font-semibold text-base sm:text-lg text-primary">
+                      {format(parseISO(selectedDate), 'EEEE, MMM d')}
+                    </div>
+                    {selectedDate === todayStr && <div className="text-xs text-accent font-medium">Today</div>}
+                  </>
+                )}
               </div>
-              <Button variant="outline" size="icon" onClick={() => shiftDate(1)} aria-label="Next day">
+
+              <Button variant="outline" size="icon" onClick={() => {
+                const delta = isDesktop ? 7 : 1;
+                setSelectedDate((prev) => format(addDays(parseISO(prev), delta), 'yyyy-MM-dd'));
+              }} aria-label="Next">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
+
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Input
                 type="date"
@@ -231,26 +265,123 @@ export default function AppointmentsPage() {
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
-              <Button
-                variant="outline"
-                onClick={() => setSelectedDate(format(new Date(), 'yyyy-MM-dd'))}
-              >
+              <Button variant="outline" onClick={() => setSelectedDate(todayStr)}>
                 Today
               </Button>
             </div>
           </div>
 
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Tap any open time slot to book a client who called or messaged you — the slot fills in the date and time automatically.
+            Tap any open time slot to book a client — date and time fill in automatically.
           </p>
 
-          <div className="relative border rounded-lg overflow-y-auto overflow-x-hidden" style={{ maxHeight: '65vh' }}>
-            {dayLoading ? (
-              <div className="p-8 text-center text-muted-foreground">Loading schedule...</div>
-            ) : (
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Loading schedule...</div>
+          ) : isDesktop ? (
+            /* ── WEEKLY VIEW (desktop / tablet) ── */
+            <div className="border rounded-lg overflow-auto" style={{ maxHeight: '70vh' }}>
+              {/* Day header row */}
+              <div className="flex sticky top-0 z-10 bg-card border-b">
+                <div className="w-14 shrink-0" />
+                {weekDays.map((day) => {
+                  const isToday = isTodayFn(day);
+                  const isSelected = format(day, 'yyyy-MM-dd') === selectedDate;
+                  return (
+                    <div
+                      key={day.toISOString()}
+                      className={`flex-1 min-w-0 text-center py-2 px-1 border-l text-xs font-medium cursor-pointer hover:bg-accent/10 transition-colors ${
+                        isToday ? 'text-accent' : 'text-muted-foreground'
+                      } ${isSelected ? 'bg-primary/5' : ''}`}
+                      onClick={() => setSelectedDate(format(day, 'yyyy-MM-dd'))}
+                    >
+                      <div className="font-semibold uppercase tracking-wide">{format(day, 'EEE')}</div>
+                      <div className={`text-base font-bold mt-0.5 w-7 h-7 mx-auto flex items-center justify-center rounded-full ${
+                        isToday ? 'bg-accent text-white' : ''
+                      }`}>
+                        {format(day, 'd')}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Grid body */}
+              <div className="flex" style={{ height: slotTimes.length * ROW_HEIGHT }}>
+                {/* Time labels */}
+                <div className="w-14 shrink-0 relative">
+                  {slotTimes.map((t, i) => (
+                    <div
+                      key={t}
+                      className="absolute left-0 right-0 flex items-start justify-end pr-1 pt-1"
+                      style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
+                    >
+                      <span className="text-[10px] text-muted-foreground">{formatTimeLabel(t)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Day columns */}
+                {weekDays.map((day) => {
+                  const dateStr = format(day, 'yyyy-MM-dd');
+                  const dayAppts = apptsByDate(dateStr);
+                  const isToday = isTodayFn(day);
+
+                  return (
+                    <div key={dateStr} className="flex-1 min-w-0 relative border-l">
+                      {/* Slot rows */}
+                      {slotTimes.map((t, i) => {
+                        const occupied = isSlotOccupiedIn(dayAppts, t);
+                        return (
+                          <div
+                            key={t}
+                            className={`absolute left-0 right-0 border-b border-border/30 transition-colors ${
+                              !occupied ? 'hover:bg-accent/10 cursor-pointer group' : ''
+                            }`}
+                            style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
+                            onClick={!occupied ? () => openSlot(t, dateStr) : undefined}
+                          />
+                        );
+                      })}
+
+                      {/* Today now-line */}
+                      {isToday && nowMin >= DAY_START_MIN && nowMin <= DAY_END_MIN && (
+                        <div
+                          className="absolute left-0 right-0 border-t-2 border-red-500 z-[2] pointer-events-none"
+                          style={{ top: ((nowMin - DAY_START_MIN) / SLOT_MIN) * ROW_HEIGHT }}
+                        >
+                          <span className="absolute -left-1 -top-1.5 w-3 h-3 bg-red-500 rounded-full" />
+                        </div>
+                      )}
+
+                      {/* Appointment blocks */}
+                      {dayAppts.map((appt) => {
+                        const s = timeToMinutes(appt.startTime);
+                        const dur = Math.max(appt.durationMinutes || SESSION_DURATION, SESSION_DURATION);
+                        const top = ((s - DAY_START_MIN) / SLOT_MIN) * ROW_HEIGHT;
+                        const height = (dur / SLOT_MIN) * ROW_HEIGHT;
+                        return (
+                          <button
+                            key={appt.id}
+                            onClick={() => setSelectedAppt(appt)}
+                            className={`absolute left-0.5 right-0.5 rounded-md border text-left overflow-hidden shadow-sm z-[1] px-1 py-0.5 ${statusBlockColor(appt.status)}`}
+                            style={{ top, height }}
+                          >
+                            <div className="text-[10px] sm:text-xs font-semibold truncate">{appt.clientName}</div>
+                            <div className="text-[9px] sm:text-[10px] opacity-70 truncate">{appt.startTime} · {dur}m</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* ── DAILY VIEW (mobile) ── */
+            <div className="relative border rounded-lg overflow-y-auto overflow-x-hidden" style={{ maxHeight: '65vh' }}>
               <div className="relative" style={{ height: slotTimes.length * ROW_HEIGHT }}>
                 {slotTimes.map((t, i) => {
-                  const occupied = isSlotOccupied(t);
+                  const occupied = isSlotOccupiedIn(apptsByDate(selectedDate), t);
                   return (
                     <div
                       key={t}
@@ -260,11 +391,11 @@ export default function AppointmentsPage() {
                       style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
                       onClick={occupied ? undefined : () => openSlot(t)}
                     >
-                      <span className="w-14 sm:w-16 shrink-0 text-[10px] sm:text-xs text-muted-foreground pl-1 sm:pl-2">
+                      <span className="w-14 shrink-0 text-[10px] text-muted-foreground pl-2">
                         {formatTimeLabel(t)}
                       </span>
                       {!occupied && (
-                        <span className="text-[10px] sm:text-xs text-muted-foreground/0 group-hover:text-accent transition-colors ml-1">
+                        <span className="text-[10px] text-muted-foreground/0 group-hover:text-accent transition-colors ml-1">
                           + Book
                         </span>
                       )}
@@ -272,26 +403,27 @@ export default function AppointmentsPage() {
                   );
                 })}
 
-                {activeAppointments.map((appt) => {
+                {apptsByDate(selectedDate).map((appt) => {
                   const s = timeToMinutes(appt.startTime);
+                  const dur = Math.max(appt.durationMinutes || SESSION_DURATION, SESSION_DURATION);
                   const top = ((s - DAY_START_MIN) / SLOT_MIN) * ROW_HEIGHT;
-                  const height = Math.max(((appt.durationMinutes || 60) / SLOT_MIN) * ROW_HEIGHT, 32);
+                  const height = (dur / SLOT_MIN) * ROW_HEIGHT;
                   return (
                     <button
                       key={appt.id}
                       onClick={() => setSelectedAppt(appt)}
-                      className={`absolute left-14 sm:left-16 right-1 sm:right-2 rounded-md border px-2 py-1 text-left overflow-hidden shadow-sm z-[1] ${statusBlockColor(appt.status)}`}
+                      className={`absolute left-14 right-2 rounded-md border px-2 py-1 text-left overflow-hidden shadow-sm z-[1] ${statusBlockColor(appt.status)}`}
                       style={{ top, height }}
                     >
                       <div className="text-xs sm:text-sm font-semibold truncate">{appt.clientName}</div>
                       <div className="text-[10px] sm:text-xs opacity-80 truncate">
-                        {appt.startTime} · {appt.serviceType} ({appt.durationMinutes}m)
+                        {appt.startTime} · {appt.serviceType} ({dur}m)
                       </div>
                     </button>
                   );
                 })}
 
-                {isToday && nowMin >= DAY_START_MIN && nowMin <= DAY_END_MIN && (
+                {selectedDate === todayStr && nowMin >= DAY_START_MIN && nowMin <= DAY_END_MIN && (
                   <div
                     className="absolute left-0 right-0 border-t-2 border-red-500 z-[2] pointer-events-none"
                     style={{ top: ((nowMin - DAY_START_MIN) / SLOT_MIN) * ROW_HEIGHT }}
@@ -300,11 +432,12 @@ export default function AppointmentsPage() {
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
+      {/* Quick-book dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -334,7 +467,7 @@ export default function AppointmentsPage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Fixed 60-minute session at {formatCurrency(SESSION_PRICE)}. You can add their email, phone and other details afterwards with the edit button.
+              Fixed 60-minute session at {formatCurrency(SESSION_PRICE)}. Add email, phone and other details with the edit button after booking.
             </p>
             <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
@@ -344,6 +477,7 @@ export default function AppointmentsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Appointment details dialog */}
       <Dialog open={!!selectedAppt} onOpenChange={(open) => !open && setSelectedAppt(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -358,7 +492,7 @@ export default function AppointmentsPage() {
                 </Badge>
               </div>
               <div className="text-sm text-muted-foreground space-y-1">
-                <div>{formatDate(selectedAppt.date)} at {selectedAppt.startTime} ({selectedAppt.durationMinutes} min)</div>
+                <div>{formatDate(selectedAppt.date)} at {selectedAppt.startTime} ({Math.max(selectedAppt.durationMinutes || SESSION_DURATION, SESSION_DURATION)} min)</div>
                 <div>{selectedAppt.serviceType}</div>
                 <div className="font-medium text-foreground">{formatCurrency(selectedAppt.price)}</div>
               </div>
@@ -384,6 +518,7 @@ export default function AppointmentsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit client info dialog */}
       <Dialog open={!!editClientId} onOpenChange={(open) => !open && setEditClientId(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
