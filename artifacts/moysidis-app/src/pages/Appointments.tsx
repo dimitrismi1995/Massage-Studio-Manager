@@ -18,11 +18,11 @@ import * as z from 'zod';
 
 /* ── Services catalogue ── */
 const SERVICES = [
-  { name: 'Relaxation Massage',  durations: [60, 90] as const },
-  { name: 'Deep Tissue Massage', durations: [60, 90] as const },
-  { name: 'Sports Massage',      durations: [60, 90] as const },
-  { name: 'Pregnancy Massage',   durations: [60]     as const },
-  { name: 'Cupping Massage',     durations: [60]     as const },
+  { name: 'Relaxation Massage',  durations: [60] as const },
+  { name: 'Deep Tissue Massage', durations: [60] as const },
+  { name: 'Sports Massage',      durations: [60] as const },
+  { name: 'Pregnancy Massage',   durations: [60] as const },
+  { name: 'Cupping Massage',     durations: [60] as const },
 ];
 
 const SESSION_PRICE = 150;
