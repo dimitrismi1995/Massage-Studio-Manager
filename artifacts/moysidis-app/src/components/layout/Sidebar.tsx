@@ -9,7 +9,6 @@ import {
   TrendingUp,
   HeartPulse,
   Menu,
-  X,
   Sparkles,
 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -85,15 +84,8 @@ export function MobileHeader() {
 
         <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
           {/* Drawer header */}
-          <div className="flex h-20 items-center justify-between border-b border-sidebar-border px-5">
+          <div className="flex h-20 items-center border-b border-sidebar-border px-5">
             <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-9 w-auto object-contain" />
-            <button
-              onClick={() => setOpen(false)}
-              className="rounded-md p-1.5 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
 
           {/* Wellness tagline */}

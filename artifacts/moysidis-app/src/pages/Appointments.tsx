@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, ChevronRight, Trash2, Pencil } from 'lucide-react';
-import { format, addDays, parseISO, isToday as isTodayFn, startOfWeek, isSameDay } from 'date-fns';
+import { format, addDays, parseISO, isToday as isTodayFn, startOfWeek } from 'date-fns';
 import * as z from 'zod';
 
 const quickBookSchema = z.object({
@@ -78,21 +78,10 @@ function isSlotOccupiedIn(appts: Appt[], slotStart: number): boolean {
 const slotTimes: number[] = [];
 for (let t = DAY_START_MIN; t < DAY_END_MIN; t += SLOT_MIN) slotTimes.push(t);
 
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = React.useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
-  React.useEffect(() => {
-    const handler = () => setIsDesktop(window.innerWidth >= 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-  return isDesktop;
-}
-
 export default function AppointmentsPage() {
   const { t } = useLanguage();
   const { formatDate } = useDateFormatter();
   const queryClient = useQueryClient();
-  const isDesktop = useIsDesktop();
 
   const [selectedDate, setSelectedDate] = React.useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -226,34 +215,21 @@ export default function AppointmentsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={() => {
-                const delta = isDesktop ? -7 : -1;
-                setSelectedDate((prev) => format(addDays(parseISO(prev), delta), 'yyyy-MM-dd'));
-              }} aria-label="Previous">
+                setSelectedDate((prev) => format(addDays(parseISO(prev), -7), 'yyyy-MM-dd'));
+              }} aria-label="Previous week">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
 
               <div className="min-w-[160px] sm:min-w-[220px] text-center">
-                {isDesktop ? (
-                  <>
-                    <div className="font-semibold text-base sm:text-lg text-primary">
-                      {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Week view</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="font-semibold text-base sm:text-lg text-primary">
-                      {format(parseISO(selectedDate), 'EEEE, MMM d')}
-                    </div>
-                    {selectedDate === todayStr && <div className="text-xs text-accent font-medium">Today</div>}
-                  </>
-                )}
+                <div className="font-semibold text-base sm:text-lg text-primary">
+                  {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
+                </div>
+                <div className="text-xs text-muted-foreground">Week view</div>
               </div>
 
               <Button variant="outline" size="icon" onClick={() => {
-                const delta = isDesktop ? 7 : 1;
-                setSelectedDate((prev) => format(addDays(parseISO(prev), delta), 'yyyy-MM-dd'));
-              }} aria-label="Next">
+                setSelectedDate((prev) => format(addDays(parseISO(prev), 7), 'yyyy-MM-dd'));
+              }} aria-label="Next week">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -277,19 +253,20 @@ export default function AppointmentsPage() {
 
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground">Loading schedule...</div>
-          ) : isDesktop ? (
-            /* ── WEEKLY VIEW (desktop / tablet) ── */
+          ) : (
+            /* ── WEEKLY VIEW (all devices — scrolls horizontally on phones) ── */
             <div className="border rounded-lg overflow-auto" style={{ maxHeight: '70vh' }}>
-              {/* Day header row */}
-              <div className="flex sticky top-0 z-10 bg-card border-b">
-                <div className="w-14 shrink-0" />
+              {/* Day header row — sticky, min-width so columns never collapse below 72px */}
+              <div className="flex sticky top-0 z-10 bg-card border-b" style={{ minWidth: 52 + 7 * 72 }}>
+                <div className="w-13 shrink-0" style={{ width: 52 }} />
                 {weekDays.map((day) => {
                   const isToday = isTodayFn(day);
                   const isSelected = format(day, 'yyyy-MM-dd') === selectedDate;
                   return (
                     <div
                       key={day.toISOString()}
-                      className={`flex-1 min-w-0 text-center py-2 px-1 border-l text-xs font-medium cursor-pointer hover:bg-accent/10 transition-colors ${
+                      style={{ minWidth: 72 }}
+                      className={`flex-1 text-center py-2 px-1 border-l text-xs font-medium cursor-pointer hover:bg-accent/10 transition-colors ${
                         isToday ? 'text-accent' : 'text-muted-foreground'
                       } ${isSelected ? 'bg-primary/5' : ''}`}
                       onClick={() => setSelectedDate(format(day, 'yyyy-MM-dd'))}
@@ -306,16 +283,16 @@ export default function AppointmentsPage() {
               </div>
 
               {/* Grid body */}
-              <div className="flex" style={{ height: slotTimes.length * ROW_HEIGHT }}>
+              <div className="flex" style={{ height: slotTimes.length * ROW_HEIGHT, minWidth: 52 + 7 * 72 }}>
                 {/* Time labels */}
-                <div className="w-14 shrink-0 relative">
+                <div className="shrink-0 relative" style={{ width: 52 }}>
                   {slotTimes.map((t, i) => (
                     <div
                       key={t}
                       className="absolute left-0 right-0 flex items-start justify-end pr-1 pt-1"
                       style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
                     >
-                      <span className="text-[10px] text-muted-foreground">{formatTimeLabel(t)}</span>
+                      <span className="text-[9px] text-muted-foreground">{formatTimeLabel(t)}</span>
                     </div>
                   ))}
                 </div>
@@ -327,7 +304,7 @@ export default function AppointmentsPage() {
                   const isToday = isTodayFn(day);
 
                   return (
-                    <div key={dateStr} className="flex-1 min-w-0 relative border-l">
+                    <div key={dateStr} className="flex-1 relative border-l" style={{ minWidth: 72 }}>
                       {/* Slot rows */}
                       {slotTimes.map((t, i) => {
                         const occupied = isSlotOccupiedIn(dayAppts, t);
@@ -335,7 +312,7 @@ export default function AppointmentsPage() {
                           <div
                             key={t}
                             className={`absolute left-0 right-0 border-b border-border/30 transition-colors ${
-                              !occupied ? 'hover:bg-accent/10 cursor-pointer group' : ''
+                              !occupied ? 'hover:bg-accent/10 cursor-pointer' : ''
                             }`}
                             style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
                             onClick={!occupied ? () => openSlot(t, dateStr) : undefined}
@@ -366,71 +343,14 @@ export default function AppointmentsPage() {
                             className={`absolute left-0.5 right-0.5 rounded-md border text-left overflow-hidden shadow-sm z-[1] px-1 py-0.5 ${statusBlockColor(appt.status)}`}
                             style={{ top, height }}
                           >
-                            <div className="text-[10px] sm:text-xs font-semibold truncate">{appt.clientName}</div>
-                            <div className="text-[9px] sm:text-[10px] opacity-70 truncate">{appt.startTime} · {dur}m</div>
+                            <div className="text-[9px] font-semibold truncate leading-tight">{appt.clientName}</div>
+                            <div className="text-[8px] opacity-70 truncate">{appt.startTime}</div>
                           </button>
                         );
                       })}
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          ) : (
-            /* ── DAILY VIEW (mobile) ── */
-            <div className="relative border rounded-lg overflow-y-auto overflow-x-hidden" style={{ maxHeight: '65vh' }}>
-              <div className="relative" style={{ height: slotTimes.length * ROW_HEIGHT }}>
-                {slotTimes.map((t, i) => {
-                  const occupied = isSlotOccupiedIn(apptsByDate(selectedDate), t);
-                  return (
-                    <div
-                      key={t}
-                      className={`absolute left-0 right-0 border-b border-border/50 flex items-center transition-colors ${
-                        occupied ? '' : 'hover:bg-accent/10 cursor-pointer group'
-                      }`}
-                      style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
-                      onClick={occupied ? undefined : () => openSlot(t)}
-                    >
-                      <span className="w-14 shrink-0 text-[10px] text-muted-foreground pl-2">
-                        {formatTimeLabel(t)}
-                      </span>
-                      {!occupied && (
-                        <span className="text-[10px] text-muted-foreground/0 group-hover:text-accent transition-colors ml-1">
-                          + Book
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {apptsByDate(selectedDate).map((appt) => {
-                  const s = timeToMinutes(appt.startTime);
-                  const dur = Math.max(appt.durationMinutes || SESSION_DURATION, SESSION_DURATION);
-                  const top = ((s - DAY_START_MIN) / SLOT_MIN) * ROW_HEIGHT;
-                  const height = (dur / SLOT_MIN) * ROW_HEIGHT;
-                  return (
-                    <button
-                      key={appt.id}
-                      onClick={() => setSelectedAppt(appt)}
-                      className={`absolute left-14 right-2 rounded-md border px-2 py-1 text-left overflow-hidden shadow-sm z-[1] ${statusBlockColor(appt.status)}`}
-                      style={{ top, height }}
-                    >
-                      <div className="text-xs sm:text-sm font-semibold truncate">{appt.clientName}</div>
-                      <div className="text-[10px] sm:text-xs opacity-80 truncate">
-                        {appt.startTime} · {appt.serviceType} ({dur}m)
-                      </div>
-                    </button>
-                  );
-                })}
-
-                {selectedDate === todayStr && nowMin >= DAY_START_MIN && nowMin <= DAY_END_MIN && (
-                  <div
-                    className="absolute left-0 right-0 border-t-2 border-red-500 z-[2] pointer-events-none"
-                    style={{ top: ((nowMin - DAY_START_MIN) / SLOT_MIN) * ROW_HEIGHT }}
-                  >
-                    <span className="absolute -left-1 -top-1.5 w-3 h-3 bg-red-500 rounded-full" />
-                  </div>
-                )}
               </div>
             </div>
           )}
