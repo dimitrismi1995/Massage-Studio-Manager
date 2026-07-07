@@ -81,14 +81,6 @@ export function MobileHeader() {
             <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-9 w-auto object-contain" />
           </div>
 
-          {/* Wellness tagline */}
-          <div className="flex items-center gap-2 px-5 pt-5 pb-2">
-            <Sparkles className="h-4 w-4 text-sidebar-foreground/40 shrink-0" />
-            <span className="text-xs text-sidebar-foreground/40 font-medium tracking-wide uppercase">
-              Mobile Massage
-            </span>
-          </div>
-
           {/* Nav items */}
           <nav className="flex flex-col gap-1 px-3 pt-2">
             {navItems.map((item) => {
