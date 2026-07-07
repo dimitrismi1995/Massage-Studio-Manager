@@ -73,69 +73,62 @@ function daysInMonth(month: string, year: string): number {
 }
 
 function DateOfBirthPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [year, month, day] = value ? value.split('-') : ['', '', ''];
+  const parts = value ? value.split('-') : ['', '', ''];
+  const [year,  setYear]  = React.useState(parts[0]);
+  const [month, setMonth] = React.useState(parts[1]);
+  const [day,   setDay]   = React.useState(parts[2]);
 
-  const maxDay = daysInMonth(month, year);
-  const dayOptions = Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0'));
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 110 }, (_, i) => String(currentYear - i));
 
-  const update = (next: { year?: string; month?: string; day?: string }) => {
-    const y = next.year ?? year;
-    const m = next.month ?? month;
-    let d = next.day ?? day;
+  const commit = (y: string, m: string, d: string) => {
+    let safeDay = d;
     if (m && d && parseInt(d, 10) > daysInMonth(m, y)) {
-      d = String(daysInMonth(m, y)).padStart(2, '0');
+      safeDay = String(daysInMonth(m, y)).padStart(2, '0');
     }
-    if (y && m && d) {
-      onChange(`${y}-${m}-${d}`);
-    } else {
-      onChange('');
-    }
+    onChange(y && m && safeDay ? `${y}-${m}-${safeDay}` : '');
+    return safeDay;
   };
 
+  const maxDay = daysInMonth(month, year);
+  const dayOptions = Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0'));
+
   const selectClass =
-    'h-11 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm sm:text-base appearance-none';
+    'h-11 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm sm:text-base';
 
   return (
     <div className="grid grid-cols-3 gap-2">
       <select
         aria-label="Month"
         value={month}
-        onChange={(e) => update({ month: e.target.value })}
+        onChange={(e) => { setMonth(e.target.value); commit(year, e.target.value, day); }}
         className={selectClass}
       >
         <option value="">Month</option>
         {MONTH_OPTIONS.map((m) => (
-          <option key={m.value} value={m.value}>
-            {m.label}
-          </option>
+          <option key={m.value} value={m.value}>{m.label}</option>
         ))}
       </select>
       <select
         aria-label="Day"
         value={day}
-        onChange={(e) => update({ day: e.target.value })}
+        onChange={(e) => { setDay(e.target.value); commit(year, month, e.target.value); }}
         className={selectClass}
       >
         <option value="">Day</option>
         {dayOptions.map((d) => (
-          <option key={d} value={d}>
-            {parseInt(d, 10)}
-          </option>
+          <option key={d} value={d}>{parseInt(d, 10)}</option>
         ))}
       </select>
       <select
         aria-label="Year"
         value={year}
-        onChange={(e) => update({ year: e.target.value })}
+        onChange={(e) => { setYear(e.target.value); const d = commit(e.target.value, month, day); setDay(d); }}
         className={selectClass}
       >
         <option value="">Year</option>
         {yearOptions.map((y) => (
-          <option key={y} value={y}>
-            {y}
-          </option>
+          <option key={y} value={y}>{y}</option>
         ))}
       </select>
     </div>
