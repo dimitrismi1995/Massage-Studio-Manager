@@ -55,8 +55,8 @@ type Appt = {
 /* ── Calendar constants ── */
 const DAY_START_MIN = 7 * 60;
 const DAY_END_MIN   = 21 * 60;
-const SLOT_MIN      = 30;
-const ROW_HEIGHT    = 56;
+const SLOT_MIN      = 60;
+const ROW_HEIGHT    = 64;
 
 /* ── Helpers ── */
 function timeToMinutes(time: string): number {
