@@ -4,7 +4,6 @@ import { useCreateClient, useUpdateClient, useListClients, useCreateMedicalHisto
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, Controller } from 'react-hook-form';
 import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
@@ -51,93 +50,20 @@ function FieldRow({
   );
 }
 
-const MONTH_OPTIONS = [
-  { value: '01', label: 'January' },
-  { value: '02', label: 'February' },
-  { value: '03', label: 'March' },
-  { value: '04', label: 'April' },
-  { value: '05', label: 'May' },
-  { value: '06', label: 'June' },
-  { value: '07', label: 'July' },
-  { value: '08', label: 'August' },
-  { value: '09', label: 'September' },
-  { value: '10', label: 'October' },
-  { value: '11', label: 'November' },
-  { value: '12', label: 'December' },
-];
-
-function daysInMonth(month: string, year: string): number {
-  if (!month) return 31;
-  const m = parseInt(month, 10);
-  const y = year ? parseInt(year, 10) : 2000;
-  return new Date(y, m, 0).getDate();
-}
-
 function DateOfBirthPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const parts = value ? value.split('-') : ['', '', ''];
-  const [year,  setYear]  = React.useState(parts[0]);
-  const [month, setMonth] = React.useState(parts[1]);
-  const [day,   setDay]   = React.useState(parts[2]);
-
   const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 110 }, (_, i) => String(currentYear - i));
-
-  const commit = (y: string, m: string, d: string) => {
-    let safeDay = d;
-    if (m && d && parseInt(d, 10) > daysInMonth(m, y)) {
-      safeDay = String(daysInMonth(m, y)).padStart(2, '0');
-    }
-    onChange(y && m && safeDay ? `${y}-${m}-${safeDay}` : '');
-    return safeDay;
-  };
-
-  const maxDay = daysInMonth(month, year);
-  const dayOptions = Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0'));
+  const maxDate = `${currentYear}-12-31`;
+  const minDate = `${currentYear - 110}-01-01`;
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <Select
-        value={month}
-        onValueChange={(v) => { setMonth(v); commit(year, v, day); }}
-      >
-        <SelectTrigger className="h-11">
-          <SelectValue placeholder="Month" />
-        </SelectTrigger>
-        <SelectContent>
-          {MONTH_OPTIONS.map((m) => (
-            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={day}
-        onValueChange={(v) => { setDay(v); commit(year, month, v); }}
-      >
-        <SelectTrigger className="h-11">
-          <SelectValue placeholder="Day" />
-        </SelectTrigger>
-        <SelectContent>
-          {dayOptions.map((d) => (
-            <SelectItem key={d} value={d}>{parseInt(d, 10)}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={year}
-        onValueChange={(v) => { setYear(v); const d = commit(v, month, day); setDay(d); }}
-      >
-        <SelectTrigger className="h-11">
-          <SelectValue placeholder="Year" />
-        </SelectTrigger>
-        <SelectContent>
-          {yearOptions.map((y) => (
-            <SelectItem key={y} value={y}>{y}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <input
+      type="date"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      max={maxDate}
+      min={minDate}
+      className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+    />
   );
 }
 
