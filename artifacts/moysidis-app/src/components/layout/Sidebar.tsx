@@ -9,7 +9,6 @@ import {
   TrendingUp,
   HeartPulse,
   Menu,
-  Sparkles,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -56,12 +55,6 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="border-t border-sidebar-border px-4 py-4">
-        <div className="flex items-center gap-2 text-sidebar-foreground/40 text-xs">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>Mobile Massage Pro</span>
-        </div>
-      </div>
     </aside>
   );
 }
