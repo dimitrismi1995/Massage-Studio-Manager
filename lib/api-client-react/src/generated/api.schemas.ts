@@ -22,6 +22,10 @@ export interface Client {
   /** @nullable */
   address?: string | null;
   /** @nullable */
+  floor?: string | null;
+  /** @nullable */
+  plz?: string | null;
+  /** @nullable */
   notes?: string | null;
   createdAt: string;
   hasMedicalHistory?: boolean;
@@ -39,6 +43,10 @@ export interface ClientInput {
   /** @nullable */
   address?: string | null;
   /** @nullable */
+  floor?: string | null;
+  /** @nullable */
+  plz?: string | null;
+  /** @nullable */
   notes?: string | null;
 }
 
@@ -53,6 +61,10 @@ export interface ClientUpdate {
   dateOfBirth?: string | null;
   /** @nullable */
   address?: string | null;
+  /** @nullable */
+  floor?: string | null;
+  /** @nullable */
+  plz?: string | null;
   /** @nullable */
   notes?: string | null;
 }

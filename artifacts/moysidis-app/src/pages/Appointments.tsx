@@ -201,7 +201,9 @@ export default function AppointmentsPage() {
         lastName:  fd.get('lastName')  as string,
         email:     fd.get('email')     as string,
         phone:     fd.get('phone')     as string,
-        age:       fd.get('age') ? Number(fd.get('age')) : undefined,
+        address:   fd.get('address') as string || undefined,
+        floor:     fd.get('floor')   as string || undefined,
+        plz:       fd.get('plz')     as string || undefined,
       }},
       { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() }); invalidateAppointments(); setEditClientId(null); setSelectedAppt(null); } }
     );
@@ -489,17 +491,25 @@ export default function AppointmentsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>{t('clients.email')}</Label>
+                <Label>Telephone Number</Label>
+                <Input type="tel" name="phone" defaultValue={editingClient.phone} />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
                 <Input type="email" name="email" defaultValue={editingClient.email} />
+              </div>
+              <div className="space-y-2">
+                <Label>Address</Label>
+                <Input name="address" defaultValue={editingClient.address ?? ''} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('clients.phone')}</Label>
-                  <Input type="tel" name="phone" defaultValue={editingClient.phone} />
+                  <Label>Floor</Label>
+                  <Input name="floor" defaultValue={editingClient.floor ?? ''} />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('clients.age')}</Label>
-                  <Input type="number" name="age" min={0} max={120} defaultValue={editingClient.age ?? ''} />
+                  <Label>PLZ</Label>
+                  <Input name="plz" defaultValue={editingClient.plz ?? ''} />
                 </div>
               </div>
               <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">

@@ -1,47 +1,23 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListClients, getListClientsQueryKey, useCreateClient } from '@workspace/api-client-react';
+import { useListClients, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { useDateFormatter } from '@/lib/utils';
 import { Link } from 'wouter';
-import { useQueryClient } from '@tanstack/react-query';
-import { Label } from '@/components/ui/label';
 import { Search, ChevronRight, UserCircle2 } from 'lucide-react';
 
 export default function ClientsPage() {
   const { t } = useLanguage();
   const { formatDate } = useDateFormatter();
-  const queryClient = useQueryClient();
   const [search, setSearch] = React.useState('');
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   const { data: clients, isLoading } = useListClients(
     search ? { search } : undefined,
     { query: { queryKey: getListClientsQueryKey(search ? { search } : undefined) } }
   );
-  const createClient = useCreateClient();
-
-  const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      firstName: formData.get('firstName') as string,
-      lastName: formData.get('lastName') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      age: formData.get('age') ? Number(formData.get('age')) : undefined,
-    };
-    createClient.mutate({ data }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
-        setIsDialogOpen(false);
-      }
-    });
-  };
 
   const empty = !isLoading && (!clients || clients.length === 0);
 
@@ -51,58 +27,15 @@ export default function ClientsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-primary">{t('clients.title')}</h1>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64 sm:flex-none">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={t('clients.search')}
-              className="pl-9 bg-card w-full"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="shrink-0">{t('clients.create')}</Button>
-            </DialogTrigger>
-            <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto">
-              <DialogHeader>
-                <DialogTitle>{t('clients.create')}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleCreate} className="space-y-4 pt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('intake.first_name')}</Label>
-                    <Input name="firstName" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('intake.last_name')}</Label>
-                    <Input name="lastName" required />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('clients.email')}</Label>
-                  <Input type="email" name="email" required />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('clients.phone')}</Label>
-                    <Input type="tel" name="phone" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('clients.age')}</Label>
-                    <Input type="number" name="age" min={0} max={120} />
-                  </div>
-                </div>
-                <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
-                  <Button type="submit" disabled={createClient.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+        <div className="relative flex-1 sm:w-64 sm:flex-none">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder={t('clients.search')}
+            className="pl-9 bg-card w-full"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
 

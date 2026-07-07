@@ -11,6 +11,8 @@ export const clientsTable = pgTable("clients", {
   age: integer("age"),
   dateOfBirth: text("date_of_birth"),
   address: text("address"),
+  floor: text("floor"),
+  plz: text("plz"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

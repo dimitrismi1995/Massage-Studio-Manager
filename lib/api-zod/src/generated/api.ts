@@ -33,6 +33,8 @@ export const ListClientsResponseItem = zod.object({
   "age": zod.number().nullish(),
   "dateOfBirth": zod.string().nullish(),
   "address": zod.string().nullish(),
+  "floor": zod.string().nullish(),
+  "plz": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "hasMedicalHistory": zod.boolean().optional()
@@ -51,6 +53,8 @@ export const CreateClientBody = zod.object({
   "age": zod.number().nullish(),
   "dateOfBirth": zod.string().nullish(),
   "address": zod.string().nullish(),
+  "floor": zod.string().nullish(),
+  "plz": zod.string().nullish(),
   "notes": zod.string().nullish()
 })
 
@@ -63,6 +67,8 @@ export const CreateClientResponse = zod.object({
   "age": zod.number().nullish(),
   "dateOfBirth": zod.string().nullish(),
   "address": zod.string().nullish(),
+  "floor": zod.string().nullish(),
+  "plz": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "hasMedicalHistory": zod.boolean().optional()
@@ -85,6 +91,8 @@ export const GetClientResponse = zod.object({
   "age": zod.number().nullish(),
   "dateOfBirth": zod.string().nullish(),
   "address": zod.string().nullish(),
+  "floor": zod.string().nullish(),
+  "plz": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "hasMedicalHistory": zod.boolean().optional()
@@ -106,6 +114,8 @@ export const UpdateClientBody = zod.object({
   "age": zod.number().nullish(),
   "dateOfBirth": zod.string().nullish(),
   "address": zod.string().nullish(),
+  "floor": zod.string().nullish(),
+  "plz": zod.string().nullish(),
   "notes": zod.string().nullish()
 })
 
@@ -118,6 +128,8 @@ export const UpdateClientResponse = zod.object({
   "age": zod.number().nullish(),
   "dateOfBirth": zod.string().nullish(),
   "address": zod.string().nullish(),
+  "floor": zod.string().nullish(),
+  "plz": zod.string().nullish(),
   "notes": zod.string().nullish(),
   "createdAt": zod.string(),
   "hasMedicalHistory": zod.boolean().optional()
