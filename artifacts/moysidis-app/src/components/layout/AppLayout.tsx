@@ -16,8 +16,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col md:pl-64">
         <MobileHeader />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-8">
-          <div className="mx-auto max-w-6xl">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8 pb-8">
+          <div className="mx-auto max-w-6xl w-full min-w-0">
             {children}
           </div>
         </main>
