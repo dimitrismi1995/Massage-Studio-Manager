@@ -285,25 +285,26 @@ export default function AppointmentsPage() {
       <Card>
         <CardContent className="p-3 sm:p-5 space-y-4">
           {/* ── Week navigation ── */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => setSelectedDate(prev => format(addDays(parseISO(prev), -7), 'yyyy-MM-dd'))} aria-label="Previous week">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="min-w-[160px] sm:min-w-[220px] text-center">
-                <div className="font-semibold text-base sm:text-lg text-primary">
-                  {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
-                </div>
-                <div className="text-xs text-muted-foreground">Week view</div>
+          {/* Row 1: prev / date-label / next + today button */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setSelectedDate(prev => format(addDays(parseISO(prev), -7), 'yyyy-MM-dd'))} aria-label="Previous week">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex-1 min-w-0 text-center">
+              <div className="font-semibold text-sm sm:text-base text-primary leading-tight">
+                {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
               </div>
-              <Button variant="outline" size="icon" onClick={() => setSelectedDate(prev => format(addDays(parseISO(prev), 7), 'yyyy-MM-dd'))} aria-label="Next week">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="text-xs text-muted-foreground">Week view</div>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Input type="date" className="flex-1 sm:flex-none sm:w-auto bg-card" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
-              <Button variant="outline" onClick={() => setSelectedDate(todayStr)}>Today</Button>
-            </div>
+            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setSelectedDate(prev => format(addDays(parseISO(prev), 7), 'yyyy-MM-dd'))} aria-label="Next week">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" className="shrink-0 hidden sm:inline-flex" onClick={() => setSelectedDate(todayStr)}>Today</Button>
+          </div>
+          {/* Row 2: date picker + Today (stacked on mobile, hidden today on sm+) */}
+          <div className="flex items-center gap-2">
+            <Input type="date" className="flex-1 sm:flex-none sm:w-[150px] bg-card text-sm" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
+            <Button variant="outline" size="sm" className="shrink-0 sm:hidden" onClick={() => setSelectedDate(todayStr)}>Today</Button>
           </div>
 
           <p className="text-xs sm:text-sm text-muted-foreground">
@@ -314,17 +315,17 @@ export default function AppointmentsPage() {
             <div className="p-8 text-center text-muted-foreground">Loading schedule...</div>
           ) : (
             /* ── Weekly grid — scrolls horizontally on phones ── */
-            <div className="border rounded-lg overflow-auto" style={{ maxHeight: '70vh' }}>
+            <div className="border rounded-lg overflow-auto -mx-0" style={{ maxHeight: '72vh' }}>
               {/* Sticky day header */}
-              <div className="flex sticky top-0 z-10 bg-card border-b" style={{ minWidth: 52 + 7 * 72 }}>
-                <div style={{ width: 52 }} className="shrink-0" />
+              <div className="flex sticky top-0 z-10 bg-card border-b" style={{ minWidth: 48 + 7 * 86 }}>
+                <div style={{ width: 48 }} className="shrink-0" />
                 {weekDays.map(day => {
                   const isToday    = isTodayFn(day);
                   const isSelected = format(day, 'yyyy-MM-dd') === selectedDate;
                   return (
                     <div
                       key={day.toISOString()}
-                      style={{ minWidth: 72 }}
+                      style={{ minWidth: 86 }}
                       className={`flex-1 text-center py-2 px-1 border-l text-xs font-medium cursor-pointer hover:bg-accent/10 transition-colors ${isToday ? 'text-accent' : 'text-muted-foreground'} ${isSelected ? 'bg-primary/5' : ''}`}
                       onClick={() => setSelectedDate(format(day, 'yyyy-MM-dd'))}
                     >
@@ -338,9 +339,9 @@ export default function AppointmentsPage() {
               </div>
 
               {/* Grid body */}
-              <div className="flex" style={{ height: slotTimes.length * ROW_HEIGHT, minWidth: 52 + 7 * 72 }}>
+              <div className="flex" style={{ height: slotTimes.length * ROW_HEIGHT, minWidth: 48 + 7 * 86 }}>
                 {/* Time labels */}
-                <div className="shrink-0 relative" style={{ width: 52 }}>
+                <div className="shrink-0 relative" style={{ width: 48 }}>
                   {slotTimes.map((t, i) => (
                     <div key={t} className="absolute left-0 right-0 flex items-start justify-end pr-1 pt-1" style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}>
                       <span className="text-[9px] text-muted-foreground">{formatTimeLabel(t)}</span>
@@ -355,7 +356,7 @@ export default function AppointmentsPage() {
                   const isToday  = isTodayFn(day);
 
                   return (
-                    <div key={dateStr} className="flex-1 relative border-l" style={{ minWidth: 72 }}>
+                    <div key={dateStr} className="flex-1 relative border-l" style={{ minWidth: 86 }}>
                       {/* Clickable slot rows */}
                       {slotTimes.map((t, i) => {
                         const occupied = isSlotOccupiedIn(dayAppts, t);
@@ -405,11 +406,11 @@ export default function AppointmentsPage() {
 
       {/* ── Quick-book dialog ── */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setIsDialogOpen(true); }}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto">
-          <DialogHeader>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto max-h-[90dvh] flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{t('appointments.create')}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
 
             {/* ── Client search / autocomplete ── */}
             <div className="space-y-1.5">
@@ -510,7 +511,7 @@ export default function AppointmentsPage() {
               {bookService} · {bookDuration} min · <span className="font-semibold text-foreground">{formatCurrency(servicePrice(bookService, bookDuration))}</span>
             </div>
 
-            <DialogFooter className="pt-2 flex-col sm:flex-row gap-2">
+            <DialogFooter className="pt-2 flex-col sm:flex-row gap-2 sticky bottom-0 bg-background pb-1">
               <Button type="button" variant="outline" onClick={resetDialog} className="w-full sm:w-auto">{t('action.cancel')}</Button>
               <Button type="submit" disabled={createClient.isPending || createAppt.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
             </DialogFooter>

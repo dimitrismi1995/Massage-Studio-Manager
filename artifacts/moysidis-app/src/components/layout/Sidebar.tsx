@@ -66,7 +66,7 @@ export function MobileHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
-      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-11 w-auto object-contain" />
+      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-13 w-auto object-contain" />
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
