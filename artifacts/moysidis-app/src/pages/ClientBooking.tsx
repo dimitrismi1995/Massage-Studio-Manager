@@ -242,20 +242,19 @@ export default function ClientBooking() {
               Personal Information
             </h2>
 
-            <FieldRow icon={User} label="Full Name *">
+            <FieldRow icon={User} label="Full Name">
               <div className="grid grid-cols-2 gap-2">
                 <input
-                  {...register('firstName', { required: true })}
+                  {...register('firstName')}
                   placeholder="First name"
                   className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border"
                 />
                 <input
-                  {...register('lastName', { required: true })}
+                  {...register('lastName')}
                   placeholder="Last name"
                   className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border"
                 />
               </div>
-              {(errors.firstName || errors.lastName) && <p className="text-destructive text-xs mt-1">Full name is required</p>}
             </FieldRow>
 
             <FieldRow icon={Calendar} label="Date of Birth">
