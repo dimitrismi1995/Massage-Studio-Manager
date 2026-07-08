@@ -167,8 +167,11 @@ export default function ClientBooking() {
     setError(null);
     try {
       const existing = await findClients();
+      const norm = (s: string) => s.trim().toLowerCase();
       const match = existing.data?.find(
-        (c) => c.email.toLowerCase() === data.email.toLowerCase()
+        (c) =>
+          c.email.toLowerCase() === data.email.toLowerCase() ||
+          (norm(c.firstName) === norm(data.firstName) && norm(c.lastName) === norm(data.lastName))
       );
 
       const clientPayload = {

@@ -1,6 +1,44 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
+export async function sendFormConfirmationEmail(opts: {
+  toEmail: string;
+  toName: string;
+}): Promise<boolean> {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || "587");
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const from = process.env.SMTP_FROM || "Moysidis Mobile Massage <noreply@moysidis.ch>";
+
+  if (!host || !user || !pass) {
+    logger.warn("SMTP not configured — skipping form confirmation email");
+    return false;
+  }
+
+  const transporter = nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass } });
+
+  const subject = "Thank you for choosing Moysidis Mobile Massage";
+  const html = `
+    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.6;">
+      <h2 style="color:#1a2444;">Thank you, ${opts.toName}!</h2>
+      <p>We have received your client details and health information.</p>
+      <p>We will be in touch shortly to confirm your appointment.</p>
+      <p>If you have any questions in the meantime, feel free to reach out to us via phone or Instagram.</p>
+      <p style="margin-top: 32px;">Warm regards,<br/><strong>Moysidis Mobile Massage</strong></p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({ from, to: opts.toEmail, subject, html });
+    logger.info({ to: opts.toEmail }, "Form confirmation email sent");
+    return true;
+  } catch (err) {
+    logger.error({ err, to: opts.toEmail }, "Failed to send form confirmation email");
+    return false;
+  }
+}
+
 function createTransporter() {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || "587");

@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { medicalHistoryTable } from "@workspace/db";
+import { medicalHistoryTable, clientsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import {
   CreateMedicalHistoryBody,
   UpdateMedicalHistoryBody,
 } from "@workspace/api-zod";
+import { sendFormConfirmationEmail } from "../lib/email";
 
 // mergeParams: true merges parent route params at runtime, but TS types on
 // sub-routers don't reflect that automatically — access via record cast.
@@ -54,6 +55,17 @@ router.post("/", async (req, res) => {
     .insert(medicalHistoryTable)
     .values({ ...body.data, clientId, gdprAcceptedAt })
     .returning();
+
+  // Fire confirmation email — non-blocking, errors are logged not thrown
+  db.select().from(clientsTable).where(eq(clientsTable.id, clientId)).then(([client]) => {
+    if (client?.email) {
+      sendFormConfirmationEmail({
+        toEmail: client.email,
+        toName: `${client.firstName} ${client.lastName}`,
+      }).catch(() => {});
+    }
+  }).catch(() => {});
+
   res.status(201).json({
     ...record,
     gdprAcceptedAt: record!.gdprAcceptedAt ? record!.gdprAcceptedAt.toISOString() : null,
