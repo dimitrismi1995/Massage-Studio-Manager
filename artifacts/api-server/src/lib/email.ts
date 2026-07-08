@@ -1,30 +1,40 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
-export async function sendFormConfirmationEmail(opts: {
-  toEmail: string;
-  toName: string;
-}): Promise<boolean> {
+function buildTransport() {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || "587");
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || "Moysidis Mobile Massage <noreply@moysidis.ch>";
+  const from = process.env.SMTP_FROM || "Moysidis Mobile Massage <info@moysidismassage.ch>";
 
-  if (!host || !user || !pass) {
-    logger.warn("SMTP not configured — skipping form confirmation email");
+  if (!host) return null;
+
+  const auth = user && pass ? { user, pass } : user ? { user, pass: "" } : undefined;
+
+  return {
+    transporter: nodemailer.createTransport({ host, port, secure: port === 465, auth }),
+    from,
+  };
+}
+
+export async function sendFormConfirmationEmail(opts: {
+  toEmail: string;
+  toName: string;
+}): Promise<boolean> {
+  const config = buildTransport();
+  if (!config) {
+    logger.warn("SMTP_HOST not configured — skipping form confirmation email");
     return false;
   }
 
-  const transporter = nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass } });
-
+  const { transporter, from } = config;
   const subject = "Thank you for choosing Moysidis Mobile Massage";
   const html = `
     <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.6;">
       <h2 style="color:#1a2444;">Thank you, ${opts.toName}!</h2>
       <p>We have received your client details and health information.</p>
-      <p>We will be in touch shortly to confirm your appointment.</p>
-      <p>If you have any questions in the meantime, feel free to reach out to us via phone or Instagram.</p>
+      <p>If you have any questions, feel free to reach out via phone or Instagram.</p>
       <p style="margin-top: 32px;">Warm regards,<br/><strong>Moysidis Mobile Massage</strong></p>
     </div>
   `;
@@ -39,20 +49,6 @@ export async function sendFormConfirmationEmail(opts: {
   }
 }
 
-function createTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT || "587");
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || "Moysidis Mobile Massage <noreply@moysidis.ch>";
-
-  if (!host || !user || !pass) {
-    return null;
-  }
-
-  return { transporter: nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass } }), from };
-}
-
 export async function sendThankYouEmail(opts: {
   toEmail: string;
   toName: string;
@@ -61,9 +57,9 @@ export async function sendThankYouEmail(opts: {
   reviewBaseUrl: string;
   language?: string;
 }): Promise<boolean> {
-  const config = createTransporter();
+  const config = buildTransport();
   if (!config) {
-    logger.warn("SMTP not configured — skipping thank-you email");
+    logger.warn("SMTP_HOST not configured — skipping thank-you email");
     return false;
   }
 
@@ -75,30 +71,29 @@ export async function sendThankYouEmail(opts: {
     : "Thank you for your massage session — Moysidis Mobile Massage";
 
   const reviewLink = `${opts.reviewBaseUrl}?appointmentId=${opts.appointmentId}`;
+  const baseUrl = opts.reviewBaseUrl.replace(/\/[^/]*$/, "");
 
-  const html = isDE
-    ? `
-      <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444;">
-        <img src="${opts.reviewBaseUrl.replace(/\/[^/]*$/, "")}/logo.png" alt="Moysidis Mobile Massage" style="width:180px; margin-bottom:24px;" />
-        <h2 style="color:#1a2444;">Herzlichen Dank, ${opts.toName}!</h2>
-        <p>Es war uns eine Freude, Ihnen heute eine <strong>${opts.serviceType}</strong> Massage anbieten zu dürfen.</p>
-        <p>Wir hoffen, Sie fühlen sich entspannt und erholt. Ihre Gesundheit und Ihr Wohlbefinden liegen uns sehr am Herzen.</p>
-        <p>Wir würden uns sehr über Ihre Bewertung freuen — es dauert nur eine Minute:</p>
-        <a href="${reviewLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;">Bewertung abgeben ★★★★★</a>
-        <p style="color:#666;font-size:13px;margin-top:32px;">Bis zum nächsten Mal — Ihr Moysidis Mobile Massage Team</p>
-      </div>
-    `
-    : `
-      <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444;">
-        <img src="${opts.reviewBaseUrl.replace(/\/[^/]*$/, "")}/logo.png" alt="Moysidis Mobile Massage" style="width:180px; margin-bottom:24px;" />
-        <h2 style="color:#1a2444;">Thank you, ${opts.toName}!</h2>
-        <p>It was a pleasure to provide your <strong>${opts.serviceType}</strong> massage session today.</p>
-        <p>We hope you feel relaxed, restored, and at ease. Your wellbeing is at the heart of everything we do.</p>
-        <p>We'd love to hear your feedback — it only takes a moment:</p>
-        <a href="${reviewLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;">Leave a Review ★★★★★</a>
-        <p style="color:#666;font-size:13px;margin-top:32px;">Until next time — The Moysidis Mobile Massage team</p>
-      </div>
-    `;
+  const html = isDE ? `
+    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444;">
+      <img src="${baseUrl}/logo.png" alt="Moysidis Mobile Massage" style="width:180px; margin-bottom:24px;" />
+      <h2 style="color:#1a2444;">Herzlichen Dank, ${opts.toName}!</h2>
+      <p>Es war uns eine Freude, Ihnen heute eine <strong>${opts.serviceType}</strong> Massage anbieten zu dürfen.</p>
+      <p>Wir hoffen, Sie fühlen sich entspannt und erholt.</p>
+      <p>Wir würden uns sehr über Ihre Bewertung freuen — es dauert nur eine Minute:</p>
+      <a href="${reviewLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;">Bewertung abgeben ★★★★★</a>
+      <p style="color:#666;font-size:13px;margin-top:32px;">Bis zum nächsten Mal — Ihr Moysidis Mobile Massage Team</p>
+    </div>
+  ` : `
+    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444;">
+      <img src="${baseUrl}/logo.png" alt="Moysidis Mobile Massage" style="width:180px; margin-bottom:24px;" />
+      <h2 style="color:#1a2444;">Thank you, ${opts.toName}!</h2>
+      <p>It was a pleasure to provide your <strong>${opts.serviceType}</strong> massage session today.</p>
+      <p>We hope you feel relaxed, restored, and at ease. Your wellbeing is at the heart of everything we do.</p>
+      <p>We'd love to hear your feedback — it only takes a moment:</p>
+      <a href="${reviewLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;">Leave a Review ★★★★★</a>
+      <p style="color:#666;font-size:13px;margin-top:32px;">Until next time — The Moysidis Mobile Massage team</p>
+    </div>
+  `;
 
   try {
     await transporter.sendMail({ from, to: opts.toEmail, subject, html });
