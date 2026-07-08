@@ -13,7 +13,6 @@ import {
   CancelAppointmentParams,
   MarkAppointmentNoShowParams,
 } from "@workspace/api-zod";
-import { sendThankYouEmail } from "../lib/email";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -159,12 +158,10 @@ router.post("/:appointmentId/complete", async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: "Invalid id" }); return; }
 
   const now = new Date();
-  // Schedule email 20 minutes after completion
-  const emailScheduledFor = new Date(now.getTime() + 20 * 60 * 1000);
 
   const [appt] = await db
     .update(appointmentsTable)
-    .set({ status: "completed", completedAt: now, emailScheduledFor })
+    .set({ status: "completed", completedAt: now })
     .where(eq(appointmentsTable.id, parsed.data.appointmentId))
     .returning();
   if (!appt) { res.status(404).json({ error: "Not found" }); return; }
@@ -173,33 +170,6 @@ router.post("/:appointmentId/complete", async (req, res) => {
   const existingReview = await db.select().from(reviewsTable).where(eq(reviewsTable.appointmentId, appt.id));
   if (existingReview.length === 0) {
     await db.insert(reviewsTable).values({ appointmentId: appt.id, clientId: appt.clientId });
-  }
-
-  // Get client info and attempt to send email asynchronously
-  const [client] = await db.select().from(clientsTable).where(eq(clientsTable.id, appt.clientId));
-  if (client?.email) {
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-    // Fire and forget — email is scheduled
-    setTimeout(async () => {
-      try {
-        const sent = await sendThankYouEmail({
-          toEmail: client.email,
-          toName: `${client.firstName}`,
-          appointmentId: appt.id,
-          serviceType: appt.serviceType,
-          reviewBaseUrl: `${baseUrl}/reviews`,
-          language: "en",
-        });
-        if (sent) {
-          await db
-            .update(appointmentsTable)
-            .set({ emailSentAt: new Date() })
-            .where(eq(appointmentsTable.id, appt.id));
-        }
-      } catch (err) {
-        logger.error({ err }, "Error in scheduled email send");
-      }
-    }, 20 * 60 * 1000);
   }
 
   const enriched = await enrichAppointment(appt);

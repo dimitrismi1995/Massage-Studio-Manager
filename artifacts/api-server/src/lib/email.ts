@@ -18,89 +18,75 @@ function buildTransport() {
   };
 }
 
-export async function sendFormConfirmationEmail(opts: {
+export async function sendNewClientThankYouEmail(opts: {
   toEmail: string;
   toName: string;
+  reviewUrl?: string;
 }): Promise<boolean> {
   const config = buildTransport();
   if (!config) {
-    logger.warn("SMTP_HOST not configured — skipping form confirmation email");
+    logger.warn("SMTP_HOST not configured — skipping new client thank-you email");
     return false;
   }
 
   const { transporter, from } = config;
   const subject = "Thank you for choosing Moysidis Mobile Massage";
+
+  const reviewSection = opts.reviewUrl
+    ? `
+      <p style="margin-top:24px;">We'd love to hear about your experience — it only takes a moment:</p>
+      <a href="${opts.reviewUrl}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;font-size:15px;">Leave a Feedback ★★★★★</a>
+    `
+    : `<p style="margin-top:24px;">We hope you had a wonderful experience and we look forward to seeing you again.</p>`;
+
   const html = `
-    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.6;">
-      <h2 style="color:#1a2444;">Thank you, ${opts.toName}!</h2>
-      <p>We have received your client details and health information.</p>
-      <p>If you have any questions, feel free to reach out via phone or Instagram.</p>
-      <p style="margin-top: 32px;">Warm regards,<br/><strong>Moysidis Mobile Massage</strong></p>
+    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.7;">
+      <h2 style="color:#1a2444; margin-bottom:8px;">Thank you for choosing Moysidis Mobile Massage, ${opts.toName}!</h2>
+      <p>It was a pleasure to have you with us today.</p>
+      <p>We hope you feel relaxed, restored, and at ease. Your wellbeing is at the heart of everything we do.</p>
+      ${reviewSection}
+      <p style="color:#666; font-size:13px; margin-top:32px;">Until next time,<br/><strong>Moysidis Mobile Massage</strong></p>
     </div>
   `;
 
   try {
     await transporter.sendMail({ from, to: opts.toEmail, subject, html });
-    logger.info({ to: opts.toEmail }, "Form confirmation email sent");
+    logger.info({ to: opts.toEmail }, "New client thank-you email sent");
     return true;
   } catch (err) {
-    logger.error({ err, to: opts.toEmail }, "Failed to send form confirmation email");
+    logger.error({ err, to: opts.toEmail }, "Failed to send new client thank-you email");
     return false;
   }
 }
 
-export async function sendThankYouEmail(opts: {
+export async function sendReturningClientThankYouEmail(opts: {
   toEmail: string;
   toName: string;
-  appointmentId: number;
-  serviceType: string;
-  reviewBaseUrl: string;
-  language?: string;
 }): Promise<boolean> {
   const config = buildTransport();
   if (!config) {
-    logger.warn("SMTP_HOST not configured — skipping thank-you email");
+    logger.warn("SMTP_HOST not configured — skipping returning client thank-you email");
     return false;
   }
 
   const { transporter, from } = config;
-  const isDE = opts.language === "de";
+  const subject = "Thank you once again for choosing Moysidis Mobile Massage";
 
-  const subject = isDE
-    ? "Vielen Dank für Ihre Massage bei Moysidis Mobile Massage"
-    : "Thank you for your massage session — Moysidis Mobile Massage";
-
-  const reviewLink = `${opts.reviewBaseUrl}?appointmentId=${opts.appointmentId}`;
-  const baseUrl = opts.reviewBaseUrl.replace(/\/[^/]*$/, "");
-
-  const html = isDE ? `
-    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444;">
-      <img src="${baseUrl}/logo.png" alt="Moysidis Mobile Massage" style="width:180px; margin-bottom:24px;" />
-      <h2 style="color:#1a2444;">Herzlichen Dank, ${opts.toName}!</h2>
-      <p>Es war uns eine Freude, Ihnen heute eine <strong>${opts.serviceType}</strong> Massage anbieten zu dürfen.</p>
-      <p>Wir hoffen, Sie fühlen sich entspannt und erholt.</p>
-      <p>Wir würden uns sehr über Ihre Bewertung freuen — es dauert nur eine Minute:</p>
-      <a href="${reviewLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;">Bewertung abgeben ★★★★★</a>
-      <p style="color:#666;font-size:13px;margin-top:32px;">Bis zum nächsten Mal — Ihr Moysidis Mobile Massage Team</p>
-    </div>
-  ` : `
-    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444;">
-      <img src="${baseUrl}/logo.png" alt="Moysidis Mobile Massage" style="width:180px; margin-bottom:24px;" />
-      <h2 style="color:#1a2444;">Thank you, ${opts.toName}!</h2>
-      <p>It was a pleasure to provide your <strong>${opts.serviceType}</strong> massage session today.</p>
-      <p>We hope you feel relaxed, restored, and at ease. Your wellbeing is at the heart of everything we do.</p>
-      <p>We'd love to hear your feedback — it only takes a moment:</p>
-      <a href="${reviewLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;">Leave a Review ★★★★★</a>
-      <p style="color:#666;font-size:13px;margin-top:32px;">Until next time — The Moysidis Mobile Massage team</p>
+  const html = `
+    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.7;">
+      <h2 style="color:#1a2444; margin-bottom:8px;">Thank you once again for choosing Moysidis Mobile Massage, ${opts.toName}!</h2>
+      <p>It is always a pleasure to welcome you back.</p>
+      <p>We hope today's session left you feeling relaxed and refreshed. Your wellbeing means the world to us.</p>
+      <p style="color:#666; font-size:13px; margin-top:32px;">Until next time,<br/><strong>Moysidis Mobile Massage</strong></p>
     </div>
   `;
 
   try {
     await transporter.sendMail({ from, to: opts.toEmail, subject, html });
-    logger.info({ to: opts.toEmail, appointmentId: opts.appointmentId }, "Thank-you email sent");
+    logger.info({ to: opts.toEmail }, "Returning client thank-you email sent");
     return true;
   } catch (err) {
-    logger.error({ err, to: opts.toEmail }, "Failed to send thank-you email");
+    logger.error({ err, to: opts.toEmail }, "Failed to send returning client thank-you email");
     return false;
   }
 }
