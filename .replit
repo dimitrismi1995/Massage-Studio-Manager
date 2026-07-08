@@ -25,3 +25,6 @@ channel = "stable-25_05"
 
 [userenv.shared]
 SMTP_FROM = "Moysidis Mobile Massage <info@moysidismassage.ch>"
+SMTP_HOST = "mail.moysidismassage.ch"
+SMTP_PORT = "587"
+SMTP_USER = "info@moysidismassage.ch"
