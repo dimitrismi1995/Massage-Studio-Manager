@@ -71,22 +71,20 @@ function minutesToTime(mins: number): string {
 }
 
 function formatTimeLabel(mins: number): string {
-  const h24 = Math.floor(mins / 60);
-  const m   = mins % 60;
-  const period = h24 >= 12 ? 'PM' : 'AM';
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  return `${h12}:${m.toString().padStart(2, '0')} ${period}`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (m === 0) return String(h);
+  return `${h}:${m.toString().padStart(2, '0')}`;
 }
 
 function formatBlockTime(start: string, durationMin: number): string {
   const startMins = timeToMinutes(start);
   const endMins   = startMins + durationMin;
   const fmt = (m: number) => {
-    const h24 = Math.floor(m / 60);
-    const mm  = m % 60;
-    const p = h24 >= 12 ? 'PM' : 'AM';
-    const h = h24 % 12 === 0 ? 12 : h24 % 12;
-    return `${h}:${mm.toString().padStart(2, '0')} ${p}`;
+    const h  = Math.floor(m / 60);
+    const mm = m % 60;
+    if (mm === 0) return String(h);
+    return `${h}:${mm.toString().padStart(2, '0')}`;
   };
   return `${fmt(startMins)} – ${fmt(endMins)}`;
 }
@@ -206,7 +204,14 @@ export default function AppointmentsPage() {
     const bookAppt = (clientId: number) => {
       createAppt.mutate(
         { data: { clientId, date: values.date, startTime: values.startTime, durationMinutes: bookDuration, serviceType: bookService, price } },
-        { onSuccess: () => { invalidateAppointments(); resetDialog(); } }
+        {
+          onSuccess: (appt) => {
+            completeAppt.mutate(
+              { appointmentId: appt.id },
+              { onSuccess: () => { invalidateAppointments(); resetDialog(); } }
+            );
+          },
+        }
       );
     };
 
