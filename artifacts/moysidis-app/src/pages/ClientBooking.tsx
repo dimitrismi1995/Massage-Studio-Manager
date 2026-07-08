@@ -212,8 +212,8 @@ export default function ClientBooking() {
           <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
           </div>
-          <h2 className="text-3xl font-bold text-primary mb-2">Details Received!</h2>
-          <p className="text-muted-foreground mb-8">Thank you for your details. Moysidis Mobile Massage will contact you directly to arrange your appointment.</p>
+          <h2 className="text-3xl font-bold text-primary mb-2">Information Saved!</h2>
+          <p className="text-muted-foreground mb-8">Thank you. Your health information has been recorded and saved to your client file.</p>
           <Button onClick={() => window.location.reload()} variant="outline">
             Submit Another Form
           </Button>
