@@ -29,8 +29,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
-      <div className="flex h-24 items-center justify-center border-b border-sidebar-border px-4">
-        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-16 w-auto object-contain" />
+      <div className="flex h-36 items-center justify-center border-b border-sidebar-border px-3">
+        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-32 w-auto object-contain" />
       </div>
 
       <div className="flex-1 overflow-y-auto py-6">
