@@ -73,7 +73,6 @@ function minutesToTime(mins: number): string {
 function formatTimeLabel(mins: number): string {
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  if (m === 0) return String(h);
   return `${h}:${m.toString().padStart(2, '0')}`;
 }
 
