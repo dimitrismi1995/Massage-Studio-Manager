@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import logoSrc from '@assets/image_1783540823690.png';
+import logoSrc from '@assets/logo_transparent.png';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
@@ -30,7 +30,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
       <div className="flex h-36 items-center justify-center border-b border-sidebar-border px-3">
-        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-32 w-auto object-contain" style={{ filter: 'saturate(0) brightness(2.5)' }} />
+        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-32 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
       </div>
 
       <div className="flex-1 overflow-y-auto py-6">
@@ -66,7 +66,7 @@ export function MobileHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
-      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-13 w-auto object-contain" style={{ filter: 'saturate(0) brightness(2.5)' }} />
+      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-13 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
@@ -78,7 +78,7 @@ export function MobileHeader() {
         <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
           {/* Drawer header */}
           <div className="flex h-20 items-center border-b border-sidebar-border px-5">
-            <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-9 w-auto object-contain" style={{ filter: 'saturate(0) brightness(2.5)' }} />
+            <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-9 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
           </div>
 
           {/* Nav items */}
