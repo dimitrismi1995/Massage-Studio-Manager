@@ -267,24 +267,22 @@ export default function ClientBooking() {
               />
             </FieldRow>
 
-            <FieldRow icon={Phone} label="Phone *">
+            <FieldRow icon={Phone} label="Phone">
               <input
                 type="tel"
-                {...register('phone', { required: true })}
+                {...register('phone')}
                 placeholder="Enter your phone number"
                 className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-3 text-sm sm:text-base box-border"
               />
-              {errors.phone && <p className="text-destructive text-xs mt-1">Required</p>}
             </FieldRow>
 
-            <FieldRow icon={Mail} label="Email *">
+            <FieldRow icon={Mail} label="Email">
               <input
                 type="email"
-                {...register('email', { required: true })}
+                {...register('email')}
                 placeholder="Enter your email address"
                 className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-3 text-sm sm:text-base box-border"
               />
-              {errors.email && <p className="text-destructive text-xs mt-1">Required</p>}
             </FieldRow>
           </CardContent>
         </Card>

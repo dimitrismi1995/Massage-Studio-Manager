@@ -5,10 +5,86 @@ import { useGetClient, useListAppointments, useGetMedicalHistory, useDeleteClien
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useDateFormatter, getStatusColor, formatCurrency } from '@/lib/utils';
+import { useDateFormatter, getStatusColor } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQueryClient } from '@tanstack/react-query';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil, Check, X } from 'lucide-react';
+
+function EditableField({
+  label,
+  value,
+  onSave,
+  multiline = true,
+}: {
+  label: string;
+  value: string | null | undefined;
+  onSave: (val: string) => Promise<void>;
+  multiline?: boolean;
+}) {
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(value ?? '');
+  const [saving, setSaving] = React.useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(draft);
+    setSaving(false);
+    setEditing(false);
+  };
+
+  const handleCancel = () => {
+    setDraft(value ?? '');
+    setEditing(false);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-1">
+        <dt className="font-semibold text-primary text-sm">{label}</dt>
+        {!editing && (
+          <button
+            onClick={() => { setDraft(value ?? ''); setEditing(true); }}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={`Edit ${label}`}
+          >
+            <Pencil className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+      {editing ? (
+        <div className="space-y-2">
+          {multiline ? (
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring min-h-[80px]"
+              autoFocus
+            />
+          ) : (
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              autoFocus
+            />
+          )}
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSave} disabled={saving} className="h-7 px-3 text-xs">
+              <Check className="h-3 w-3 mr-1" />
+              {saving ? 'Saving…' : 'Save'}
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleCancel} disabled={saving} className="h-7 px-3 text-xs">
+              <X className="h-3 w-3 mr-1" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <dd className="text-sm text-foreground">{value || <span className="text-muted-foreground italic">—</span>}</dd>
+      )}
+    </div>
+  );
+}
 
 export default function ClientDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,20 +102,20 @@ export default function ClientDetail() {
   const updateClient = useUpdateClient();
   const updateMedicalHistory = useUpdateMedicalHistory();
 
+  const saveField = async (field: string, val: string) => {
+    if (!history) return;
+    await updateMedicalHistory.mutateAsync({
+      clientId,
+      historyId: history.id,
+      data: { [field]: val || undefined },
+    });
+    await queryClient.invalidateQueries({ queryKey: getGetMedicalHistoryQueryKey(clientId) });
+  };
+
   const handleDelete = () => {
     if (confirm('Are you sure you want to delete this client?')) {
       deleteClient.mutate({ clientId }, {
-        onSuccess: () => {
-          setLocation('/clients');
-        }
-      });
-    }
-  };
-
-  const handleToggleGDPR = () => {
-    if (history) {
-      updateMedicalHistory.mutate({ clientId, historyId: history.id, data: { conditions: history.conditions ?? undefined } }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetMedicalHistoryQueryKey(clientId) })
+        onSuccess: () => setLocation('/clients'),
       });
     }
   };
@@ -80,40 +156,47 @@ export default function ClientDetail() {
           </CardHeader>
           <CardContent>
             {historyLoading ? (
-              <p>Loading...</p>
+              <p className="text-sm text-muted-foreground">Loading…</p>
             ) : history ? (
-              <dl className="space-y-4 text-sm">
-                <div>
-                  <dt className="font-semibold text-primary">{t('clients.history.conditions')}</dt>
-                  <dd className="mt-1">{history.conditions || '-'}</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-primary">{t('clients.history.allergies')}</dt>
-                  <dd className="mt-1">{history.allergies || '-'}</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-primary">{t('clients.history.medications')}</dt>
-                  <dd className="mt-1">{history.medications || '-'}</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-primary">{t('clients.history.pain')}</dt>
-                  <dd className="mt-1">{history.painAreas || '-'}</dd>
-                </div>
-                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-4">
+              <dl className="space-y-5">
+                <EditableField
+                  label={t('clients.history.conditions')}
+                  value={history.conditions}
+                  onSave={(v) => saveField('conditions', v)}
+                />
+                <EditableField
+                  label={t('clients.history.allergies')}
+                  value={history.allergies}
+                  onSave={(v) => saveField('allergies', v)}
+                />
+                <EditableField
+                  label={t('clients.history.medications')}
+                  value={history.medications}
+                  onSave={(v) => saveField('medications', v)}
+                />
+                <EditableField
+                  label={t('clients.history.pain')}
+                  value={history.painAreas}
+                  onSave={(v) => saveField('painAreas', v)}
+                />
+                <EditableField
+                  label="Other notes"
+                  value={history.otherHealthIssues}
+                  onSave={(v) => saveField('otherHealthIssues', v)}
+                />
+                <div className="flex items-center gap-6 pt-1 text-sm">
                   <div>
-                    <dt className="font-semibold text-primary">{t('clients.history.pressure')}</dt>
-                    <dd className="mt-1 capitalize">{history.preferredPressure || '-'}</dd>
+                    <span className="font-semibold text-primary">{t('clients.history.pressure')}: </span>
+                    <span className="capitalize">{history.preferredPressure || '—'}</span>
                   </div>
                   <div>
-                    <dt className="font-semibold text-primary">GDPR Accepted</dt>
-                    <dd className="mt-1 flex items-center gap-2">
-                      {history.gdprAccepted ? 'Yes' : 'No'}
-                    </dd>
+                    <span className="font-semibold text-primary">GDPR: </span>
+                    <span>{history.gdprAccepted ? 'Accepted' : 'Not accepted'}</span>
                   </div>
                 </div>
               </dl>
             ) : (
-              <p className="text-muted-foreground italic">{t('clients.no_history')}</p>
+              <p className="text-muted-foreground italic text-sm">{t('clients.no_history')}</p>
             )}
           </CardContent>
         </Card>
@@ -134,7 +217,7 @@ export default function ClientDetail() {
                 </TableHeader>
                 <TableBody>
                   {apptsLoading ? (
-                    <TableRow><TableCell colSpan={3} className="text-center p-4">Loading...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={3} className="text-center p-4">Loading…</TableCell></TableRow>
                   ) : appointments?.length === 0 ? (
                     <TableRow><TableCell colSpan={3} className="text-center p-4 text-muted-foreground">No appointments</TableCell></TableRow>
                   ) : (
