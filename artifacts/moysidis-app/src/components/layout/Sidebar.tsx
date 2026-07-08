@@ -29,8 +29,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
-      <div className="flex h-20 items-center justify-center border-b border-sidebar-border px-6">
-        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-10 w-auto object-contain" />
+      <div className="flex h-24 items-center justify-center border-b border-sidebar-border px-4">
+        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-16 w-auto object-contain" />
       </div>
 
       <div className="flex-1 overflow-y-auto py-6">
@@ -66,7 +66,7 @@ export function MobileHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
-      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-8 w-auto object-contain" />
+      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-11 w-auto object-contain" />
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>

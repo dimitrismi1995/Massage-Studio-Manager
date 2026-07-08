@@ -126,6 +126,11 @@ export default function AppointmentsPage() {
   const [bookService,   setBookService]   = React.useState(SERVICES[0].name);
   const [bookDuration,  setBookDuration]  = React.useState<number>(60);
 
+  /* Client autocomplete state */
+  const [clientSearch,     setClientSearch]     = React.useState('');
+  const [selectedClientId, setSelectedClientId] = React.useState<number | null>(null);
+  const [showSuggestions,  setShowSuggestions]  = React.useState(false);
+
   React.useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);
@@ -150,7 +155,17 @@ export default function AppointmentsPage() {
   const deleteAppt   = useDeleteAppointment();
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
-  const { refetch: fetchAllClients } = useListClients(undefined, { query: { enabled: false, queryKey: getListClientsQueryKey() } });
+  const { data: allClients, refetch: fetchAllClients } = useListClients(undefined, { query: { enabled: true, queryKey: getListClientsQueryKey() } });
+
+  const clientSuggestions = React.useMemo(() => {
+    if (!clientSearch.trim() || !allClients) return [];
+    const q = clientSearch.toLowerCase();
+    return allClients.filter(c =>
+      c.phone?.includes(q) ||
+      `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q)
+    ).slice(0, 6);
+  }, [clientSearch, allClients]);
 
   const form = useForm<z.infer<typeof quickBookSchema>>({
     resolver: zodResolver(quickBookSchema),
@@ -176,6 +191,14 @@ export default function AppointmentsPage() {
     setBookDuration(svc.durations[0]);
   };
 
+  const resetDialog = () => {
+    setIsDialogOpen(false);
+    form.reset();
+    setClientSearch('');
+    setSelectedClientId(null);
+    setShowSuggestions(false);
+  };
+
   const onSubmit = async (values: z.infer<typeof quickBookSchema>) => {
     const price = servicePrice(bookService, bookDuration);
     const norm = (s: string) => s.trim().toLowerCase();
@@ -183,18 +206,23 @@ export default function AppointmentsPage() {
     const bookAppt = (clientId: number) => {
       createAppt.mutate(
         { data: { clientId, date: values.date, startTime: values.startTime, durationMinutes: bookDuration, serviceType: bookService, price } },
-        { onSuccess: () => { invalidateAppointments(); setIsDialogOpen(false); form.reset(); } }
+        { onSuccess: () => { invalidateAppointments(); resetDialog(); } }
       );
     };
 
-    // Look up existing clients by name to avoid duplicates
+    // If client was picked via autocomplete, use that ID directly
+    if (selectedClientId) {
+      bookAppt(selectedClientId);
+      return;
+    }
+
+    // Otherwise look up by name to avoid duplicates
     const existing = await fetchAllClients();
     const matched = existing.data?.find(
       (c) => norm(c.firstName) === norm(values.firstName) && norm(c.lastName) === norm(values.lastName)
     );
 
     if (matched) {
-      // Existing client — link appointment directly, no new record created
       bookAppt(matched.id);
     } else {
       createClient.mutate(
@@ -371,22 +399,67 @@ export default function AppointmentsPage() {
       </Card>
 
       {/* ── Quick-book dialog ── */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setIsDialogOpen(true); }}>
         <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>{t('appointments.create')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
-            {/* Name */}
+
+            {/* ── Client search / autocomplete ── */}
+            <div className="space-y-1.5">
+              <Label>Search existing client</Label>
+              <div className="relative">
+                <Input
+                  autoFocus
+                  placeholder="Type phone, name or email…"
+                  value={clientSearch}
+                  onChange={(e) => {
+                    setClientSearch(e.target.value);
+                    setShowSuggestions(true);
+                    if (!e.target.value) { setSelectedClientId(null); form.setValue('firstName', ''); form.setValue('lastName', ''); }
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  className={selectedClientId ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : ''}
+                />
+                {showSuggestions && clientSuggestions.length > 0 && (
+                  <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-md border border-border bg-popover shadow-lg overflow-hidden">
+                    {clientSuggestions.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        className="w-full text-left px-3 py-2.5 text-sm hover:bg-accent hover:text-accent-foreground flex flex-col gap-0.5 border-b border-border/50 last:border-0"
+                        onMouseDown={() => {
+                          form.setValue('firstName', c.firstName);
+                          form.setValue('lastName', c.lastName);
+                          setClientSearch(`${c.firstName} ${c.lastName}${c.phone ? ' · ' + c.phone : ''}`);
+                          setSelectedClientId(c.id);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        <span className="font-medium">{c.firstName} {c.lastName}</span>
+                        <span className="text-xs text-muted-foreground">{[c.phone, c.email].filter(Boolean).join(' · ')}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {selectedClientId && (
+                <p className="text-xs text-green-600 dark:text-green-400">✓ Existing client selected — appointment will be linked to their profile</p>
+              )}
+            </div>
+
+            {/* ── Name (auto-filled or manual) ── */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>{t('intake.first_name')}</Label>
-                <Input autoFocus {...form.register('firstName')} />
+                <Input {...form.register('firstName')} placeholder="First name" />
                 {form.formState.errors.firstName && <p className="text-destructive text-xs">{form.formState.errors.firstName.message}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>{t('intake.last_name')}</Label>
-                <Input {...form.register('lastName')} />
+                <Input {...form.register('lastName')} placeholder="Last name" />
                 {form.formState.errors.lastName && <p className="text-destructive text-xs">{form.formState.errors.lastName.message}</p>}
               </div>
             </div>
@@ -407,13 +480,9 @@ export default function AppointmentsPage() {
             <div className="space-y-1.5">
               <Label>Service</Label>
               <Select value={bookService} onValueChange={onServiceChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {SERVICES.map(s => (
-                    <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
-                  ))}
+                  {SERVICES.map(s => <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -422,14 +491,10 @@ export default function AppointmentsPage() {
             <div className="space-y-1.5">
               <Label>Duration</Label>
               <Select value={String(bookDuration)} onValueChange={v => setBookDuration(Number(v))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {availDurations.map(d => (
-                    <SelectItem key={d} value={String(d)}>
-                      {d} min — {formatCurrency(servicePrice(bookService, d))}
-                    </SelectItem>
+                    <SelectItem key={d} value={String(d)}>{d} min — {formatCurrency(servicePrice(bookService, d))}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -438,11 +503,10 @@ export default function AppointmentsPage() {
             {/* Summary */}
             <div className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
               {bookService} · {bookDuration} min · <span className="font-semibold text-foreground">{formatCurrency(servicePrice(bookService, bookDuration))}</span>
-              <span className="block mt-0.5 text-[10px]">You can add email, phone and other details afterwards.</span>
             </div>
 
             <DialogFooter className="pt-2 flex-col sm:flex-row gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">{t('action.cancel')}</Button>
+              <Button type="button" variant="outline" onClick={resetDialog} className="w-full sm:w-auto">{t('action.cancel')}</Button>
               <Button type="submit" disabled={createClient.isPending || createAppt.isPending} className="w-full sm:w-auto">{t('action.save')}</Button>
             </DialogFooter>
           </form>
