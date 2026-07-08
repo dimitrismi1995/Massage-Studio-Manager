@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, ChevronRight, Trash2, Pencil } from 'lucide-react';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { format, addDays, parseISO, isToday as isTodayFn, startOfWeek } from 'date-fns';
 import * as z from 'zod';
 
@@ -117,6 +118,7 @@ export default function AppointmentsPage() {
   const [isDialogOpen,  setIsDialogOpen]  = React.useState(false);
   const [selectedAppt,  setSelectedAppt]  = React.useState<Appt | null>(null);
   const [editClientId,  setEditClientId]  = React.useState<number | null>(null);
+  const [editPhone,     setEditPhone]     = React.useState('');
   const [now,           setNow]           = React.useState(() => new Date());
 
   /* Service / duration state for the booking form */
@@ -144,6 +146,10 @@ export default function AppointmentsPage() {
   const { data: editingClient } = useGetClient(editClientId ?? 0, {
     query: { enabled: !!editClientId, queryKey: getGetClientQueryKey(editClientId ?? 0) }
   });
+
+  React.useEffect(() => {
+    if (editingClient) setEditPhone(editingClient.phone ?? '');
+  }, [editingClient]);
 
   const completeAppt = useCompleteAppointment();
   const cancelAppt   = useCancelAppointment();
@@ -250,7 +256,7 @@ export default function AppointmentsPage() {
         firstName: fd.get('firstName') as string,
         lastName:  fd.get('lastName')  as string,
         email:     fd.get('email')     as string,
-        phone:     fd.get('phone')     as string,
+        phone:     editPhone,
         address:   fd.get('address') as string || undefined,
         floor:     fd.get('floor')   as string || undefined,
         plz:       fd.get('plz')     as string || undefined,
@@ -579,7 +585,7 @@ export default function AppointmentsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Telephone Number</Label>
-                <Input type="tel" name="phone" defaultValue={editingClient.phone} />
+                <PhoneInput value={editPhone} onChange={setEditPhone} placeholder="Phone number" />
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
 import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 type YesNo = 'yes' | 'no';
@@ -268,11 +269,16 @@ export default function ClientBooking() {
             </FieldRow>
 
             <FieldRow icon={Phone} label="Phone">
-              <input
-                type="tel"
-                {...register('phone')}
-                placeholder="Enter your phone number"
-                className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-3 text-sm sm:text-base box-border"
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Phone number"
+                  />
+                )}
               />
             </FieldRow>
 

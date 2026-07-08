@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useDateFormatter } from '@/lib/utils';
 import { Link } from 'wouter';
 import { Search, ChevronRight, UserCircle2, Pencil } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 type Client = {
   id: number;
@@ -41,7 +42,7 @@ function EditClientDialog({ client, onClose }: { client: Client; onClose: () => 
   const updateClient = useUpdateClient();
   const queryClient = useQueryClient();
 
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<EditFormValues>({
+  const { register, handleSubmit, control, formState: { isSubmitting } } = useForm<EditFormValues>({
     defaultValues: {
       firstName: client.firstName,
       lastName: client.lastName,
@@ -100,7 +101,13 @@ function EditClientDialog({ client, onClose }: { client: Client; onClose: () => 
           </div>
           <div>
             <label className={labelClass}>Phone</label>
-            <input type="tel" {...register('phone')} className={fieldClass} placeholder="+41..." />
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput value={field.value} onChange={field.onChange} placeholder="Phone number" />
+              )}
+            />
           </div>
           <div>
             <label className={labelClass}>Date of Birth</label>
