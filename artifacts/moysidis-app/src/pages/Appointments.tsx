@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useCreateClient, useUpdateClient, useGetClient, getGetClientQueryKey, getListClientsQueryKey } from '@workspace/api-client-react';
+import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useCreateClient, useUpdateClient, useGetClient, useListClients, getGetClientQueryKey, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, useDateFormatter, getStatusColor } from '@/lib/utils';
@@ -150,6 +150,7 @@ export default function AppointmentsPage() {
   const deleteAppt   = useDeleteAppointment();
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
+  const { refetch: fetchAllClients } = useListClients(undefined, { query: { enabled: false, queryKey: getListClientsQueryKey() } });
 
   const form = useForm<z.infer<typeof quickBookSchema>>({
     resolver: zodResolver(quickBookSchema),
@@ -175,20 +176,37 @@ export default function AppointmentsPage() {
     setBookDuration(svc.durations[0]);
   };
 
-  const onSubmit = (values: z.infer<typeof quickBookSchema>) => {
+  const onSubmit = async (values: z.infer<typeof quickBookSchema>) => {
     const price = servicePrice(bookService, bookDuration);
-    createClient.mutate(
-      { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: '' } },
-      {
-        onSuccess: (client) => {
-          queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
-          createAppt.mutate(
-            { data: { clientId: client.id, date: values.date, startTime: values.startTime, durationMinutes: bookDuration, serviceType: bookService, price } },
-            { onSuccess: () => { invalidateAppointments(); setIsDialogOpen(false); form.reset(); } }
-          );
-        }
-      }
+    const norm = (s: string) => s.trim().toLowerCase();
+
+    const bookAppt = (clientId: number) => {
+      createAppt.mutate(
+        { data: { clientId, date: values.date, startTime: values.startTime, durationMinutes: bookDuration, serviceType: bookService, price } },
+        { onSuccess: () => { invalidateAppointments(); setIsDialogOpen(false); form.reset(); } }
+      );
+    };
+
+    // Look up existing clients by name to avoid duplicates
+    const existing = await fetchAllClients();
+    const matched = existing.data?.find(
+      (c) => norm(c.firstName) === norm(values.firstName) && norm(c.lastName) === norm(values.lastName)
     );
+
+    if (matched) {
+      // Existing client — link appointment directly, no new record created
+      bookAppt(matched.id);
+    } else {
+      createClient.mutate(
+        { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: '' } },
+        {
+          onSuccess: (client) => {
+            queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
+            bookAppt(client.id);
+          },
+        }
+      );
+    }
   };
 
   const handleEditClient = (e: React.FormEvent<HTMLFormElement>) => {
