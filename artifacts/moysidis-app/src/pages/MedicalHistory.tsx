@@ -23,85 +23,15 @@ type ClientRow = {
   hasMedicalHistory?: boolean;
 };
 
-function EditableField({
-  label,
-  value,
-  onSave,
-  multiline = true,
-}: {
-  label: string;
-  value: string | null | undefined;
-  onSave: (val: string) => Promise<void>;
-  multiline?: boolean;
-}) {
-  const [editing, setEditing] = React.useState(false);
-  const [draft, setDraft] = React.useState(value ?? '');
-  const [saving, setSaving] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!editing) setDraft(value ?? '');
-  }, [value, editing]);
-
-  const handleSave = async () => {
-    setSaving(true);
-    await onSave(draft);
-    setSaving(false);
-    setEditing(false);
-  };
-
-  const handleCancel = () => {
-    setDraft(value ?? '');
-    setEditing(false);
-  };
-
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-0.5">
-        <dt className="font-semibold text-primary text-xs uppercase tracking-wide">{label}</dt>
-        {!editing && (
-          <button
-            onClick={() => { setDraft(value ?? ''); setEditing(true); }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={`Edit ${label}`}
-          >
-            <Pencil className="h-3 w-3" />
-          </button>
-        )}
-      </div>
-      {editing ? (
-        <div className="space-y-1.5">
-          {multiline ? (
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring min-h-[64px]"
-              autoFocus
-            />
-          ) : (
-            <input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              className="w-full h-8 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              autoFocus
-            />
-          )}
-          <div className="flex gap-2">
-            <Button size="sm" onClick={handleSave} disabled={saving} className="h-6 px-2 text-xs">
-              <Check className="h-3 w-3 mr-1" />
-              {saving ? 'Saving…' : 'Save'}
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleCancel} disabled={saving} className="h-6 px-2 text-xs">
-              <X className="h-3 w-3 mr-1" />
-              Cancel
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <dd className="mt-0.5 break-words text-sm">{value || <span className="text-muted-foreground italic">—</span>}</dd>
-      )}
-    </div>
-  );
-}
+type HistoryDraft = {
+  conditions: string;
+  allergies: string;
+  immuneIssues: string;
+  otherHealthIssues: string;
+  medications: string;
+  painAreas: string;
+  massageGoals: string;
+};
 
 function ClientHistoryCard({ client }: { client: ClientRow }) {
   const { t } = useLanguage();
@@ -111,15 +41,55 @@ function ClientHistoryCard({ client }: { client: ClientRow }) {
   });
   const updateMedicalHistory = useUpdateMedicalHistory();
 
-  const saveField = async (field: string, val: string) => {
+  const [editing, setEditing] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [draft, setDraft] = React.useState<HistoryDraft>({
+    conditions: '', allergies: '', immuneIssues: '', otherHealthIssues: '',
+    medications: '', painAreas: '', massageGoals: '',
+  });
+
+  const startEdit = () => {
     if (!history) return;
+    setDraft({
+      conditions:       history.conditions       ?? '',
+      allergies:        history.allergies        ?? '',
+      immuneIssues:     history.immuneIssues     ?? '',
+      otherHealthIssues:history.otherHealthIssues?? '',
+      medications:      history.medications      ?? '',
+      painAreas:        history.painAreas        ?? '',
+      massageGoals:     history.massageGoals     ?? '',
+    });
+    setEditing(true);
+  };
+
+  const handleSave = async () => {
+    if (!history) return;
+    setSaving(true);
     await updateMedicalHistory.mutateAsync({
       clientId: client.id,
       historyId: history.id,
-      data: { [field]: val || undefined },
+      data: {
+        conditions:        draft.conditions        || undefined,
+        allergies:         draft.allergies         || undefined,
+        immuneIssues:      draft.immuneIssues      || undefined,
+        otherHealthIssues: draft.otherHealthIssues || undefined,
+        medications:       draft.medications       || undefined,
+        painAreas:         draft.painAreas         || undefined,
+        massageGoals:      draft.massageGoals      || undefined,
+      },
     });
     await queryClient.invalidateQueries({ queryKey: getGetMedicalHistoryQueryKey(client.id) });
+    setSaving(false);
+    setEditing(false);
   };
+
+  const field = (key: keyof HistoryDraft) => (
+    <textarea
+      value={draft[key]}
+      onChange={(e) => setDraft(prev => ({ ...prev, [key]: e.target.value }))}
+      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring min-h-[56px] resize-none"
+    />
+  );
 
   return (
     <Card>
@@ -130,11 +100,28 @@ function ClientHistoryCard({ client }: { client: ClientRow }) {
               {client.firstName} {client.lastName}
             </Link>
           </CardTitle>
-          {history?.gdprAccepted && (
-            <Badge variant="outline" className="text-[10px] shrink-0 bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">
-              GDPR ✓
-            </Badge>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {history?.gdprAccepted && (
+              <Badge variant="outline" className="text-[10px] bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">
+                GDPR ✓
+              </Badge>
+            )}
+            {history && !editing && (
+              <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1" onClick={startEdit}>
+                <Pencil className="h-3 w-3" /> Edit
+              </Button>
+            )}
+            {editing && (
+              <>
+                <Button size="sm" className="h-7 px-2 text-xs gap-1" onClick={handleSave} disabled={saving}>
+                  <Check className="h-3 w-3" /> {saving ? 'Saving…' : 'Save'}
+                </Button>
+                <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1" onClick={() => setEditing(false)} disabled={saving}>
+                  <X className="h-3 w-3" /> Cancel
+                </Button>
+              </>
+            )}
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">
           {[client.email, client.phone].filter(Boolean).join(' • ')}
@@ -147,42 +134,35 @@ function ClientHistoryCard({ client }: { client: ClientRow }) {
           <p className="text-sm text-muted-foreground">Loading...</p>
         ) : history ? (
           <dl className="space-y-3 text-sm">
-            <EditableField
-              label={t('clients.history.conditions')}
-              value={history.conditions}
-              onSave={(v) => saveField('conditions', v)}
-            />
-            <EditableField
-              label={t('clients.history.allergies')}
-              value={history.allergies}
-              onSave={(v) => saveField('allergies', v)}
-            />
-            <EditableField
-              label={t('medical_history.immune')}
-              value={history.immuneIssues}
-              onSave={(v) => saveField('immuneIssues', v)}
-            />
-            <EditableField
-              label={t('medical_history.other_health')}
-              value={history.otherHealthIssues}
-              onSave={(v) => saveField('otherHealthIssues', v)}
-            />
-            <EditableField
-              label={t('clients.history.medications')}
-              value={history.medications}
-              onSave={(v) => saveField('medications', v)}
-            />
-            <EditableField
-              label={t('clients.history.pain')}
-              value={history.painAreas}
-              onSave={(v) => saveField('painAreas', v)}
-            />
-            <EditableField
-              label={t('medical_history.goals')}
-              value={history.massageGoals}
-              onSave={(v) => saveField('massageGoals', v)}
-            />
-            <div className="grid grid-cols-2 gap-3 pt-1 text-sm">
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('clients.history.conditions')}</dt>
+              {editing ? field('conditions') : <dd className="break-words">{history.conditions || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('clients.history.allergies')}</dt>
+              {editing ? field('allergies') : <dd className="break-words">{history.allergies || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('medical_history.immune')}</dt>
+              {editing ? field('immuneIssues') : <dd className="break-words">{history.immuneIssues || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('medical_history.other_health')}</dt>
+              {editing ? field('otherHealthIssues') : <dd className="break-words">{history.otherHealthIssues || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('clients.history.medications')}</dt>
+              {editing ? field('medications') : <dd className="break-words">{history.medications || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('clients.history.pain')}</dt>
+              {editing ? field('painAreas') : <dd className="break-words">{history.painAreas || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div>
+              <dt className="font-semibold text-primary text-xs uppercase tracking-wide mb-0.5">{t('medical_history.goals')}</dt>
+              {editing ? field('massageGoals') : <dd className="break-words">{history.massageGoals || <span className="text-muted-foreground italic">—</span>}</dd>}
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <div>
                 <dt className="font-semibold text-primary text-xs uppercase tracking-wide">{t('clients.history.pressure')}</dt>
                 <dd className="mt-0.5 capitalize">{history.preferredPressure || '—'}</dd>
