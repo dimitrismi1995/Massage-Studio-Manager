@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import logoSrc from '@assets/IMG_2593_1782977930405.png';
+import logoSrc from '@assets/logo_transparent.png';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
@@ -23,6 +23,8 @@ const navItems = [
   { href: '/medical-history', icon: HeartPulse, labelKey: 'nav.medical_history' },
 ];
 
+const WHITE_FILTER = { filter: 'brightness(0) invert(1)' } as const;
+
 export function Sidebar() {
   const [location] = useLocation();
   const { t } = useLanguage();
@@ -30,7 +32,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
       <div className="flex h-36 items-center justify-center border-b border-sidebar-border px-3">
-        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-32 w-auto object-contain" />
+        <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-32 w-auto object-contain" style={WHITE_FILTER} />
       </div>
 
       <div className="flex-1 overflow-y-auto py-6">
@@ -66,7 +68,7 @@ export function MobileHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
-      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-13 w-auto object-contain" />
+      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-13 w-auto object-contain" style={WHITE_FILTER} />
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
@@ -77,7 +79,7 @@ export function MobileHeader() {
 
         <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
           <div className="flex h-20 items-center border-b border-sidebar-border px-5">
-            <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-9 w-auto object-contain" />
+            <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-9 w-auto object-contain" style={WHITE_FILTER} />
           </div>
 
           <nav className="flex flex-col gap-1 px-3 pt-2">
