@@ -58,11 +58,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
-      <div className="flex h-40 shrink-0 items-center justify-center border-b border-sidebar-border px-3">
+      <div className="flex h-44 shrink-0 items-center justify-center border-b border-sidebar-border px-2">
         <img
           src={logoSrc}
           alt="Moysidis Mobile Massage"
-          className="w-full max-w-[220px] h-auto object-contain"
+          className="w-full max-w-[240px] h-auto object-contain"
           style={WHITE_LOGO}
         />
       </div>
@@ -84,7 +84,7 @@ export function MobileHeader() {
       <img
         src={logoSrc}
         alt="Moysidis Mobile Massage"
-        className="h-10 w-auto object-contain"
+        className="h-11 w-auto object-contain"
         style={WHITE_LOGO}
       />
 
@@ -104,11 +104,11 @@ export function MobileHeader() {
           side="left"
           className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border"
         >
-          <div className="flex h-20 shrink-0 items-center justify-between border-b border-sidebar-border px-4">
+          <div className="flex h-24 shrink-0 items-center justify-between border-b border-sidebar-border px-4">
             <img
               src={logoSrc}
               alt="Moysidis Mobile Massage"
-              className="h-12 w-auto object-contain"
+              className="h-14 w-auto object-contain"
               style={WHITE_LOGO}
             />
             <Button
