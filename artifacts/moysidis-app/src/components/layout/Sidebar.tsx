@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import logoSrc from '@assets/IMG_2593_1782977930405.png';
+import logoSrc from '@assets/Generated_Image_July_11,_2026_-_10_07AM_1783753648232.png';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
