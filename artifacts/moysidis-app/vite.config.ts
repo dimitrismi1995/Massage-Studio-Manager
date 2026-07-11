@@ -61,6 +61,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
+    target: ['es2020', 'safari14'],
     outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
   },

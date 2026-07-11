@@ -391,7 +391,7 @@ export default function AppointmentsPage() {
 
       {/* ── Quick-book dialog ── */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog(); else setIsDialogOpen(true); }}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto max-h-[90dvh] flex flex-col">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md mx-auto max-h-[90vh] flex flex-col">
           <DialogHeader className="shrink-0">
             <DialogTitle>{t('appointments.create')}</DialogTitle>
           </DialogHeader>
