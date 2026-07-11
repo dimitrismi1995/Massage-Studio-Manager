@@ -125,10 +125,8 @@ export default function AppointmentsPage() {
   const [bookService,   setBookService]   = React.useState(SERVICES[0].name);
   const [bookDuration,  setBookDuration]  = React.useState<number>(60);
 
-  /* Client autocomplete state */
-  const [clientSearch,     setClientSearch]     = React.useState('');
-  const [selectedClientId, setSelectedClientId] = React.useState<number | null>(null);
-  const [showSuggestions,  setShowSuggestions]  = React.useState(false);
+  /* New client phone state */
+  const [newClientPhone, setNewClientPhone] = React.useState('+41 ');
 
   React.useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
@@ -160,16 +158,6 @@ export default function AppointmentsPage() {
   const updateClient = useUpdateClient();
   const { data: allClients, refetch: fetchAllClients } = useListClients(undefined, { query: { enabled: true, queryKey: getListClientsQueryKey() } });
 
-  const clientSuggestions = React.useMemo(() => {
-    if (!clientSearch.trim() || !allClients) return [];
-    const q = clientSearch.toLowerCase();
-    return allClients.filter(c =>
-      c.phone?.includes(q) ||
-      `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
-      c.email?.toLowerCase().includes(q)
-    ).slice(0, 6);
-  }, [clientSearch, allClients]);
-
   const form = useForm<z.infer<typeof quickBookSchema>>({
     resolver: zodResolver(quickBookSchema),
   });
@@ -197,9 +185,7 @@ export default function AppointmentsPage() {
   const resetDialog = () => {
     setIsDialogOpen(false);
     form.reset();
-    setClientSearch('');
-    setSelectedClientId(null);
-    setShowSuggestions(false);
+    setNewClientPhone('+41 ');
   };
 
   const onSubmit = async (values: z.infer<typeof quickBookSchema>) => {
@@ -220,13 +206,7 @@ export default function AppointmentsPage() {
       );
     };
 
-    // If client was picked via autocomplete, use that ID directly
-    if (selectedClientId) {
-      bookAppt(selectedClientId);
-      return;
-    }
-
-    // Otherwise look up by name to avoid duplicates
+    // Look up by name to avoid duplicates
     const existing = await fetchAllClients();
     const matched = existing.data?.find(
       (c) => norm(c.firstName) === norm(values.firstName) && norm(c.lastName) === norm(values.lastName)
@@ -236,7 +216,7 @@ export default function AppointmentsPage() {
       bookAppt(matched.id);
     } else {
       createClient.mutate(
-        { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: '' } },
+        { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: newClientPhone.trim() === '+41' ? '' : newClientPhone.trim() } },
         {
           onSuccess: (client) => {
             queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
@@ -417,55 +397,11 @@ export default function AppointmentsPage() {
           </DialogHeader>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
 
-            {/* ── Client search / autocomplete ── */}
-            <div className="space-y-1.5">
-              <Label>Search existing client</Label>
-              <div className="relative">
-                <Input
-                  autoFocus
-                  placeholder="Type phone, name or email…"
-                  value={clientSearch}
-                  onChange={(e) => {
-                    setClientSearch(e.target.value);
-                    setShowSuggestions(true);
-                    if (!e.target.value) { setSelectedClientId(null); form.setValue('firstName', ''); form.setValue('lastName', ''); }
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                  className={selectedClientId ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : ''}
-                />
-                {showSuggestions && clientSuggestions.length > 0 && (
-                  <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-md border border-border bg-popover shadow-lg overflow-hidden">
-                    {clientSuggestions.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        className="w-full text-left px-3 py-2.5 text-sm hover:bg-accent hover:text-accent-foreground flex flex-col gap-0.5 border-b border-border/50 last:border-0"
-                        onMouseDown={() => {
-                          form.setValue('firstName', c.firstName);
-                          form.setValue('lastName', c.lastName);
-                          setClientSearch(`${c.firstName} ${c.lastName}${c.phone ? ' · ' + c.phone : ''}`);
-                          setSelectedClientId(c.id);
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        <span className="font-medium">{c.firstName} {c.lastName}</span>
-                        <span className="text-xs text-muted-foreground">{[c.phone, c.email].filter(Boolean).join(' · ')}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {selectedClientId && (
-                <p className="text-xs text-green-600 dark:text-green-400">✓ Existing client selected — appointment will be linked to their profile</p>
-              )}
-            </div>
-
-            {/* ── Name (auto-filled or manual) ── */}
+            {/* ── Name ── */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>{t('intake.first_name')}</Label>
-                <Input {...form.register('firstName')} placeholder="First name" />
+                <Input autoFocus {...form.register('firstName')} placeholder="First name" />
                 {form.formState.errors.firstName && <p className="text-destructive text-xs">{form.formState.errors.firstName.message}</p>}
               </div>
               <div className="space-y-1.5">
@@ -473,6 +409,16 @@ export default function AppointmentsPage() {
                 <Input {...form.register('lastName')} placeholder="Last name" />
                 {form.formState.errors.lastName && <p className="text-destructive text-xs">{form.formState.errors.lastName.message}</p>}
               </div>
+            </div>
+
+            {/* ── Telephone ── */}
+            <div className="space-y-1.5">
+              <Label>Telephone number</Label>
+              <PhoneInput
+                value={newClientPhone}
+                onChange={setNewClientPhone}
+                placeholder="Phone number"
+              />
             </div>
 
             {/* Date + Time */}
