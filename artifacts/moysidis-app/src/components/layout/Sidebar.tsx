@@ -9,7 +9,6 @@ import {
   TrendingUp,
   HeartPulse,
   Menu,
-  X,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -104,21 +103,13 @@ export function MobileHeader() {
           side="left"
           className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border"
         >
-          <div className="flex h-24 shrink-0 items-center justify-between border-b border-sidebar-border px-4">
+          <div className="flex h-24 shrink-0 items-center border-b border-sidebar-border px-4">
             <img
               src={logoSrc}
               alt="Moysidis Mobile Massage"
               className="h-14 w-auto object-contain"
               style={WHITE_LOGO}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setOpen(false)}
-              className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </div>
 
           <nav className="flex flex-col gap-0.5 px-3 pt-3">
