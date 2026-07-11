@@ -216,7 +216,7 @@ export default function AppointmentsPage() {
       bookAppt(matched.id);
     } else {
       createClient.mutate(
-        { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: newClientPhone.trim() === '+41' ? '' : newClientPhone.trim() } },
+        { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: newClientPhone.replace(/^\+\d+\s*/, '').trim() } },
         {
           onSuccess: (client) => {
             queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });

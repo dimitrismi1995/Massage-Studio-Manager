@@ -63,7 +63,7 @@ function EditClientDialog({ client, onClose }: { client: Client; onClose: () => 
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        phone: data.phone,
+        phone: data.phone.replace(/^\+\d+\s*/, '').trim(),
         dateOfBirth: data.dateOfBirth || undefined,
         address: data.address || undefined,
         floor: data.floor || undefined,
