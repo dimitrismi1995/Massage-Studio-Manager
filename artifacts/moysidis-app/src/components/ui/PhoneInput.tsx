@@ -72,11 +72,11 @@ export function PhoneInput({ value, onChange, placeholder = 'Phone number', inpu
         <button
           type="button"
           onClick={() => setOpen(v => !v)}
-          className="h-11 bg-muted border-r border-input px-3 flex items-center gap-1.5 focus:outline-none cursor-pointer hover:bg-muted/80 transition-colors"
-          style={{ minWidth: '3.25rem' }}
+          className="h-11 bg-muted border-r border-input px-3 flex items-center gap-1.5 focus:outline-none cursor-pointer hover:bg-muted/80 transition-colors text-sm font-medium whitespace-nowrap"
           aria-label="Select country code"
         >
-          <span className="text-xl leading-none">{selectedCountry.flag}</span>
+          <span className="text-base leading-none">{selectedCountry.flag}</span>
+          <span>{selectedCountry.code}</span>
           <span className="text-muted-foreground text-[10px] leading-none">▾</span>
         </button>
 
