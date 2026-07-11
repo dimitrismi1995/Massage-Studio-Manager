@@ -42,7 +42,7 @@ const translations: Translations = {
     'appointments.time': 'Time',
     'appointments.duration': 'Duration (min)',
     'appointments.service': 'Service',
-    'appointments.price': 'Price (EUR)',
+    'appointments.price': 'Price (CHF)',
     'appointments.notes': 'Notes',
     'appointments.status': 'Status',
     'status.scheduled': 'Scheduled',
@@ -98,7 +98,7 @@ const translations: Translations = {
     'expenses.create': 'Add Expense',
     'expenses.category': 'Category',
     'expenses.description': 'Description',
-    'expenses.amount': 'Amount (EUR)',
+    'expenses.amount': 'Amount (CHF)',
 
     // Finance
     'finance.title': 'Financial Overview',
