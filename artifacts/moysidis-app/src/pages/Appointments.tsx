@@ -106,7 +106,7 @@ function isSlotOccupiedIn(appts: Appt[], slotStart: number): boolean {
 }
 
 const slotTimes: number[] = [];
-for (let t = DAY_START_MIN; t < DAY_END_MIN; t += SLOT_MIN) slotTimes.push(t);
+for (let t = DAY_START_MIN; t <= DAY_END_MIN; t += SLOT_MIN) slotTimes.push(t);
 
 /* ══════════════════════════════════════════ */
 export default function AppointmentsPage() {
