@@ -1,29 +1,25 @@
 import React from 'react';
 
 const COUNTRY_CODES = [
-  { code: '+41', label: 'CH' },
-  { code: '+30', label: 'GR' },
-  { code: '+49', label: 'DE' },
-  { code: '+43', label: 'AT' },
-  { code: '+33', label: 'FR' },
-  { code: '+39', label: 'IT' },
-  { code: '+44', label: 'GB' },
-  { code: '+1',  label: 'US' },
-  { code: '+34', label: 'ES' },
-  { code: '+351',label: 'PT' },
-  { code: '+31', label: 'NL' },
-  { code: '+32', label: 'BE' },
-  { code: '+7',  label: 'RU' },
-  { code: '+86', label: 'CN' },
-  { code: '+91', label: 'IN' },
-  { code: '+61', label: 'AU' },
+  { code: '+41', flag: '🇨🇭', label: 'CH' },
+  { code: '+30', flag: '🇬🇷', label: 'GR' },
+  { code: '+49', flag: '🇩🇪', label: 'DE' },
+  { code: '+43', flag: '🇦🇹', label: 'AT' },
+  { code: '+33', flag: '🇫🇷', label: 'FR' },
+  { code: '+39', flag: '🇮🇹', label: 'IT' },
+  { code: '+44', flag: '🇬🇧', label: 'GB' },
+  { code: '+1',  flag: '🇺🇸', label: 'US' },
+  { code: '+34', flag: '🇪🇸', label: 'ES' },
+  { code: '+351',flag: '🇵🇹', label: 'PT' },
+  { code: '+31', flag: '🇳🇱', label: 'NL' },
+  { code: '+32', flag: '🇧🇪', label: 'BE' },
+  { code: '+7',  flag: '🇷🇺', label: 'RU' },
+  { code: '+86', flag: '🇨🇳', label: 'CN' },
+  { code: '+91', flag: '🇮🇳', label: 'IN' },
+  { code: '+61', flag: '🇦🇺', label: 'AU' },
 ];
 
 const DEFAULT_CODE = '+41';
-
-function flagUrl(label: string) {
-  return `https://flagcdn.com/w20/${label.toLowerCase()}.png`;
-}
 
 function parsePhone(value: string): { dialCode: string; number: string } {
   for (const c of COUNTRY_CODES) {
@@ -80,11 +76,7 @@ export function PhoneInput({ value, onChange, placeholder = 'Phone number', inpu
           style={{ minWidth: '3.25rem' }}
           aria-label="Select country code"
         >
-          <img
-            src={flagUrl(selectedCountry.label)}
-            alt={selectedCountry.label}
-            className="w-5 h-auto rounded-[2px] shadow-sm"
-          />
+          <span className="text-xl leading-none">{selectedCountry.flag}</span>
           <span className="text-muted-foreground text-[10px] leading-none">▾</span>
         </button>
 
@@ -97,11 +89,7 @@ export function PhoneInput({ value, onChange, placeholder = 'Phone number', inpu
                 onClick={() => selectCode(c.code)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${c.code === dialCode ? 'bg-accent/50 font-medium' : ''}`}
               >
-                <img
-                  src={flagUrl(c.label)}
-                  alt={c.label}
-                  className="w-5 h-auto rounded-[2px] shadow-sm shrink-0"
-                />
+                <span className="text-lg leading-none">{c.flag}</span>
                 <span className="text-muted-foreground">{c.code}</span>
                 <span className="ml-auto text-xs text-muted-foreground">{c.label}</span>
               </button>
