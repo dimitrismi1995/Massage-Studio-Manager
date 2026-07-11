@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import logoSrc from '@assets/logo_transparent.png';
+import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
@@ -23,10 +23,6 @@ const navItems = [
   { href: '/finance', icon: TrendingUp, labelKey: 'nav.finance' },
   { href: '/medical-history', icon: HeartPulse, labelKey: 'nav.medical_history' },
 ];
-
-const WHITE_LOGO = {
-  filter: 'brightness(0) invert(1)',
-} as const;
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
@@ -60,12 +56,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
-      <div className="flex h-28 shrink-0 items-center justify-center border-b border-sidebar-border px-6">
+      <div className="flex h-40 shrink-0 items-center justify-center border-b border-sidebar-border px-3">
         <img
           src={logoSrc}
           alt="Moysidis Mobile Massage"
-          className="w-full max-w-[168px] h-auto object-contain"
-          style={WHITE_LOGO}
+          className="w-full max-w-[220px] h-auto object-contain"
         />
       </div>
 
@@ -86,8 +81,7 @@ export function MobileHeader() {
       <img
         src={logoSrc}
         alt="Moysidis Mobile Massage"
-        className="h-9 w-auto object-contain"
-        style={WHITE_LOGO}
+        className="h-10 w-auto object-contain"
       />
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -106,12 +100,11 @@ export function MobileHeader() {
           side="left"
           className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border"
         >
-          <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-4">
+          <div className="flex h-20 shrink-0 items-center justify-between border-b border-sidebar-border px-4">
             <img
               src={logoSrc}
               alt="Moysidis Mobile Massage"
-              className="h-9 w-auto object-contain"
-              style={WHITE_LOGO}
+              className="h-12 w-auto object-contain"
             />
             <Button
               variant="ghost"
