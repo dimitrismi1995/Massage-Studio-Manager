@@ -125,13 +125,44 @@ export default function AppointmentsPage() {
   const [bookService,   setBookService]   = React.useState(SERVICES[0].name);
   const [bookDuration,  setBookDuration]  = React.useState<number>(60);
 
-  /* New client phone state */
+  /* New client phone state + auto-match */
   const [newClientPhone, setNewClientPhone] = React.useState('+41 ');
+  const [matchedClient, setMatchedClient]   = React.useState<{ id: number; firstName: string; lastName: string } | null>(null);
 
   React.useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);
   }, []);
+
+  const { data: allClients, refetch: fetchAllClients } = useListClients(undefined, { query: { enabled: true, queryKey: getListClientsQueryKey() } });
+
+  /* ── Phone lookup: auto-fill name when an existing client is recognised ── */
+  React.useEffect(() => {
+    const digitsOnly = (s: string) => s.replace(/\D/g, '');
+    // Strip the dial-code prefix (everything up to and including the first space)
+    const localPart  = newClientPhone.includes(' ')
+      ? newClientPhone.slice(newClientPhone.indexOf(' ') + 1)
+      : newClientPhone;
+    const queryDigits = digitsOnly(localPart);
+
+    if (queryDigits.length < 6 || !allClients) {
+      setMatchedClient(null);
+      return;
+    }
+
+    const found = allClients.find(c => {
+      const stored = digitsOnly(c.phone ?? '');
+      return stored.length >= 6 && (stored === queryDigits || stored.endsWith(queryDigits) || queryDigits.endsWith(stored));
+    });
+
+    if (found) {
+      setMatchedClient({ id: found.id, firstName: found.firstName, lastName: found.lastName });
+      form.setValue('firstName', found.firstName, { shouldValidate: true });
+      form.setValue('lastName',  found.lastName,  { shouldValidate: true });
+    } else {
+      setMatchedClient(null);
+    }
+  }, [newClientPhone, allClients]);
 
   const weekStart = startOfWeek(parseISO(selectedDate), { weekStartsOn: 1 });
   const weekDays  = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -156,7 +187,6 @@ export default function AppointmentsPage() {
   const deleteAppt   = useDeleteAppointment();
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
-  const { data: allClients, refetch: fetchAllClients } = useListClients(undefined, { query: { enabled: true, queryKey: getListClientsQueryKey() } });
 
   const form = useForm<z.infer<typeof quickBookSchema>>({
     resolver: zodResolver(quickBookSchema),
@@ -186,6 +216,7 @@ export default function AppointmentsPage() {
     setIsDialogOpen(false);
     form.reset();
     setNewClientPhone('+41 ');
+    setMatchedClient(null);
   };
 
   const onSubmit = async (values: z.infer<typeof quickBookSchema>) => {
@@ -206,14 +237,20 @@ export default function AppointmentsPage() {
       );
     };
 
-    // Look up by name to avoid duplicates
+    // If phone matched an existing client, use that client directly
+    if (matchedClient) {
+      bookAppt(matchedClient.id);
+      return;
+    }
+
+    // Otherwise look up by name to avoid duplicates, then create if needed
     const existing = await fetchAllClients();
-    const matched = existing.data?.find(
+    const found = existing.data?.find(
       (c) => norm(c.firstName) === norm(values.firstName) && norm(c.lastName) === norm(values.lastName)
     );
 
-    if (matched) {
-      bookAppt(matched.id);
+    if (found) {
+      bookAppt(found.id);
     } else {
       createClient.mutate(
         { data: { firstName: values.firstName, lastName: values.lastName, email: '', phone: newClientPhone.replace(/^\+\d+\s*/, '').trim() } },
@@ -397,21 +434,7 @@ export default function AppointmentsPage() {
           </DialogHeader>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
 
-            {/* ── Name ── */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>{t('intake.first_name')}</Label>
-                <Input autoFocus {...form.register('firstName')} placeholder="First name" />
-                {form.formState.errors.firstName && <p className="text-destructive text-xs">{form.formState.errors.firstName.message}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t('intake.last_name')}</Label>
-                <Input {...form.register('lastName')} placeholder="Last name" />
-                {form.formState.errors.lastName && <p className="text-destructive text-xs">{form.formState.errors.lastName.message}</p>}
-              </div>
-            </div>
-
-            {/* ── Telephone ── */}
+            {/* ── Telephone — lookup first ── */}
             <div className="space-y-1.5">
               <Label>Telephone number</Label>
               <PhoneInput
@@ -419,6 +442,26 @@ export default function AppointmentsPage() {
                 onChange={setNewClientPhone}
                 placeholder="Phone number"
               />
+              {matchedClient && (
+                <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-md px-2.5 py-1.5">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span>Existing client recognised: <strong>{matchedClient.firstName} {matchedClient.lastName}</strong></span>
+                </div>
+              )}
+            </div>
+
+            {/* ── Name ── */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>{t('intake.first_name')}</Label>
+                <Input autoFocus {...form.register('firstName')} placeholder="First name" readOnly={!!matchedClient} className={matchedClient ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''} />
+                {form.formState.errors.firstName && <p className="text-destructive text-xs">{form.formState.errors.firstName.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t('intake.last_name')}</Label>
+                <Input {...form.register('lastName')} placeholder="Last name" readOnly={!!matchedClient} className={matchedClient ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''} />
+                {form.formState.errors.lastName && <p className="text-destructive text-xs">{form.formState.errors.lastName.message}</p>}
+              </div>
             </div>
 
             {/* Date + Time */}
