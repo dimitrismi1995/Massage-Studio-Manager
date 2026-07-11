@@ -23,13 +23,21 @@ router.get("/", async (req, res) => {
   let filtered = clients;
   if (search) {
     const s = search.toLowerCase();
-    filtered = clients.filter(
-      (c) =>
+    const digitsOnly = (v: string) => v.replace(/\D/g, '');
+    const sDigits = digitsOnly(s);
+    filtered = clients.filter((c) => {
+      if (
         c.firstName.toLowerCase().includes(s) ||
         c.lastName.toLowerCase().includes(s) ||
         c.email.toLowerCase().includes(s) ||
-        c.phone.includes(s),
-    );
+        c.phone.toLowerCase().includes(s)
+      ) return true;
+      // Flexible phone match: compare digits only (ignores +, spaces, dashes)
+      if (sDigits.length >= 3) {
+        return digitsOnly(c.phone).includes(sDigits);
+      }
+      return false;
+    });
   }
 
   // Check which clients have medical history
