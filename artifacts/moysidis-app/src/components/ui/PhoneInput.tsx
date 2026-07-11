@@ -43,9 +43,22 @@ interface PhoneInputProps {
 
 export function PhoneInput({ value, onChange, placeholder = 'Phone number', inputClassName }: PhoneInputProps) {
   const { dialCode, number } = React.useMemo(() => parsePhone(value || ''), [value]);
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
 
-  const handleCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange(`${e.target.value} ${number}`);
+  const selectedCountry = COUNTRY_CODES.find(c => c.code === dialCode) ?? COUNTRY_CODES[0];
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selectCode = (code: string) => {
+    onChange(`${code} ${number}`);
+    setOpen(false);
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,25 +66,45 @@ export function PhoneInput({ value, onChange, placeholder = 'Phone number', inpu
   };
 
   return (
-    <div className="flex gap-0 rounded-md border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-      <select
-        value={dialCode}
-        onChange={handleCodeChange}
-        className="h-11 bg-muted border-r border-input px-2 text-sm font-medium focus:outline-none shrink-0 cursor-pointer"
-        style={{ minWidth: '5.5rem' }}
-      >
-        {COUNTRY_CODES.map((c) => (
-          <option key={c.code} value={c.code}>
-            {c.flag} {c.code}
-          </option>
-        ))}
-      </select>
+    <div className="flex gap-0 rounded-md border border-input overflow-visible focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+      {/* Flag trigger */}
+      <div ref={ref} className="relative shrink-0">
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          className="h-11 bg-muted border-r border-input px-3 text-lg flex items-center gap-1 focus:outline-none cursor-pointer hover:bg-muted/80 transition-colors"
+          style={{ minWidth: '3.25rem' }}
+          aria-label="Select country code"
+        >
+          <span>{selectedCountry.flag}</span>
+          <span className="text-muted-foreground text-[10px] leading-none">▾</span>
+        </button>
+
+        {open && (
+          <div className="absolute z-50 left-0 top-full mt-1 w-44 rounded-md border border-border bg-popover shadow-lg overflow-y-auto max-h-64">
+            {COUNTRY_CODES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => selectCode(c.code)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${c.code === dialCode ? 'bg-accent/50 font-medium' : ''}`}
+              >
+                <span className="text-base">{c.flag}</span>
+                <span className="text-muted-foreground">{c.code}</span>
+                <span className="ml-auto text-xs text-muted-foreground">{c.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Number input */}
       <input
         type="tel"
         value={number}
         onChange={handleNumberChange}
         placeholder={placeholder}
-        className={inputClassName ?? 'h-11 flex-1 min-w-0 bg-background px-3 text-sm sm:text-base focus:outline-none'}
+        className={inputClassName ?? 'h-11 flex-1 min-w-0 bg-background px-3 text-sm sm:text-base focus:outline-none rounded-r-md'}
       />
     </div>
   );
