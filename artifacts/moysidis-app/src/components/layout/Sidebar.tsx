@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import logoSrc from '@assets/Generated_Image_July_11,_2026_-_10_07AM_1783753648232.png';
+import logoSrc from '@assets/logo_new_transparent.png';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
@@ -23,6 +23,8 @@ const navItems = [
   { href: '/finance', icon: TrendingUp, labelKey: 'nav.finance' },
   { href: '/medical-history', icon: HeartPulse, labelKey: 'nav.medical_history' },
 ];
+
+const WHITE_LOGO = { filter: 'brightness(0) invert(1)' } as const;
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
@@ -61,6 +63,7 @@ export function Sidebar() {
           src={logoSrc}
           alt="Moysidis Mobile Massage"
           className="w-full max-w-[220px] h-auto object-contain"
+          style={WHITE_LOGO}
         />
       </div>
 
@@ -82,6 +85,7 @@ export function MobileHeader() {
         src={logoSrc}
         alt="Moysidis Mobile Massage"
         className="h-10 w-auto object-contain"
+        style={WHITE_LOGO}
       />
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -105,6 +109,7 @@ export function MobileHeader() {
               src={logoSrc}
               alt="Moysidis Mobile Massage"
               className="h-12 w-auto object-contain"
+              style={WHITE_LOGO}
             />
             <Button
               variant="ghost"
