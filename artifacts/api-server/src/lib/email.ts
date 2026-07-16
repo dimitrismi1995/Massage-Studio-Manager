@@ -6,7 +6,7 @@ function buildTransport() {
   const port = Number(process.env.SMTP_PORT || "587");
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || "Moysidis Mobile Massage <info@moysidismassage.ch>";
+  const from = "Moysidis Mobile Massage <info@moysidismassage.ch>";
 
   if (!host) return null;
 
