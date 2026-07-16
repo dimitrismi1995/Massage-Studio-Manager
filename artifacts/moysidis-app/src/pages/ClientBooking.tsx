@@ -131,13 +131,15 @@ export default function ClientBooking() {
   const [error, setError] = React.useState<string | null>(null);
   const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
   const [otherExpanded, setOtherExpanded] = React.useState(false);
+  const [matchedClientId, setMatchedClientId] = React.useState<number | null>(null);
 
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
   const createMedicalHistory = useCreateMedicalHistory();
+  const { data: allClients } = useListClients();
   const { refetch: findClients } = useListClients(undefined, { query: { enabled: false, queryKey: getListClientsQueryKey() } });
 
-  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -156,6 +158,31 @@ export default function ClientBooking() {
       gdprAccepted: false,
     },
   });
+
+  const phoneValue = watch('phone');
+
+  // Auto-fill personal info when phone matches an existing client
+  React.useEffect(() => {
+    if (!allClients) return;
+    const digits = phoneValue.replace(/\D/g, '');
+    if (digits.length < 6) {
+      setMatchedClientId(null);
+      return;
+    }
+    const match = allClients.find((c) => {
+      const stored = (c.phone ?? '').replace(/\D/g, '');
+      return stored.length >= 6 && (stored.endsWith(digits) || digits.endsWith(stored));
+    });
+    if (match) {
+      setMatchedClientId(match.id);
+      setValue('firstName', match.firstName, { shouldDirty: false });
+      setValue('lastName', match.lastName, { shouldDirty: false });
+      setValue('email', match.email ?? '', { shouldDirty: false });
+      setValue('dateOfBirth', match.dateOfBirth ?? '', { shouldDirty: false });
+    } else {
+      setMatchedClientId(null);
+    }
+  }, [phoneValue, allClients]);
 
   const hasAllergies = watch('hasAllergies');
   const hasMedicalConditions = watch('hasMedicalConditions');
@@ -243,31 +270,6 @@ export default function ClientBooking() {
               Personal Information
             </h2>
 
-            <FieldRow icon={User} label="Full Name">
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  {...register('firstName')}
-                  placeholder="First name"
-                  className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border"
-                />
-                <input
-                  {...register('lastName')}
-                  placeholder="Last name"
-                  className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-2 sm:px-3 text-sm sm:text-base box-border"
-                />
-              </div>
-            </FieldRow>
-
-            <FieldRow icon={Calendar} label="Date of Birth">
-              <Controller
-                name="dateOfBirth"
-                control={control}
-                render={({ field }) => (
-                  <DateOfBirthPicker value={field.value} onChange={field.onChange} />
-                )}
-              />
-            </FieldRow>
-
             <FieldRow icon={Phone} label="Phone">
               <Controller
                 name="phone"
@@ -282,12 +284,49 @@ export default function ClientBooking() {
               />
             </FieldRow>
 
+            {matchedClientId && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
+                <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                Existing client recognised — details auto-filled
+              </div>
+            )}
+
+            <FieldRow icon={User} label="Full Name">
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  {...register('firstName')}
+                  placeholder="First name"
+                  readOnly={!!matchedClientId}
+                  className={`w-full min-w-0 h-11 rounded-md border border-input px-2 sm:px-3 text-sm sm:text-base box-border ${matchedClientId ? 'bg-muted text-muted-foreground cursor-default' : 'bg-background'}`}
+                />
+                <input
+                  {...register('lastName')}
+                  placeholder="Last name"
+                  readOnly={!!matchedClientId}
+                  className={`w-full min-w-0 h-11 rounded-md border border-input px-2 sm:px-3 text-sm sm:text-base box-border ${matchedClientId ? 'bg-muted text-muted-foreground cursor-default' : 'bg-background'}`}
+                />
+              </div>
+            </FieldRow>
+
+            <FieldRow icon={Calendar} label="Date of Birth">
+              <Controller
+                name="dateOfBirth"
+                control={control}
+                render={({ field }) => (
+                  <div className={matchedClientId ? 'pointer-events-none opacity-60' : ''}>
+                    <DateOfBirthPicker value={field.value} onChange={field.onChange} />
+                  </div>
+                )}
+              />
+            </FieldRow>
+
             <FieldRow icon={Mail} label="Email">
               <input
                 type="email"
                 {...register('email')}
                 placeholder="Enter your email address"
-                className="w-full min-w-0 h-11 rounded-md border border-input bg-background px-3 text-sm sm:text-base box-border"
+                readOnly={!!matchedClientId}
+                className={`w-full min-w-0 h-11 rounded-md border border-input px-3 text-sm sm:text-base box-border ${matchedClientId ? 'bg-muted text-muted-foreground cursor-default' : 'bg-background'}`}
               />
             </FieldRow>
           </CardContent>
