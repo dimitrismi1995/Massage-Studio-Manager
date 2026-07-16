@@ -5,7 +5,7 @@ import { useLocation } from 'wouter';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
 
-  if (location === '/intake' || location === '/book') {
+  if (location === '/intake' || location === '/book' || location === '/review') {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 

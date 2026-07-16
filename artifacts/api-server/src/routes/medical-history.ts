@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { medicalHistoryTable, clientsTable, appointmentsTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { medicalHistoryTable, clientsTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
 import {
   CreateMedicalHistoryBody,
   UpdateMedicalHistoryBody,
 } from "@workspace/api-zod";
-import { sendNewClientThankYouEmail, sendReturningClientThankYouEmail } from "../lib/email";
+import { sendThankYouEmail } from "../lib/email";
 import { logger } from "../lib/logger";
 
 const router = Router({ mergeParams: true });
@@ -48,13 +48,6 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  // Check if client has any prior medical history (determines new vs returning)
-  const priorHistory = await db
-    .select({ id: medicalHistoryTable.id })
-    .from(medicalHistoryTable)
-    .where(eq(medicalHistoryTable.clientId, clientId));
-  const isNewClient = priorHistory.length === 0;
-
   const gdprAcceptedAt = new Date();
   const [record] = await db
     .insert(medicalHistoryTable)
@@ -73,23 +66,7 @@ router.post("/", async (req, res) => {
       const firstName = client.firstName;
       const toEmail = client.email;
 
-      if (isNewClient) {
-        // Try to find a review link from their most recent appointment
-        const appts = await db
-          .select({ id: appointmentsTable.id })
-          .from(appointmentsTable)
-          .where(eq(appointmentsTable.clientId, clientId))
-          .orderBy(desc(appointmentsTable.date))
-          .limit(1);
-
-        const reviewUrl = appts.length > 0
-          ? `${baseUrl}/review?appointmentId=${appts[0]!.id}`
-          : undefined;
-
-        await sendNewClientThankYouEmail({ toEmail, toName: firstName, reviewUrl });
-      } else {
-        await sendReturningClientThankYouEmail({ toEmail, toName: firstName });
-      }
+      await sendThankYouEmail({ toEmail, toName: firstName, clientId, baseUrl });
     } catch (err) {
       logger.error({ err, clientId }, "Error sending scheduled form thank-you email");
     }
