@@ -25,6 +25,27 @@ function buildTransport() {
   };
 }
 
+function buildHtml(reviewUrl?: string): string {
+  const reviewBlock = reviewUrl
+    ? `
+      <p style="margin:20px 0 8px;">Your feedback means a lot to my business. If you enjoyed your experience, I would truly appreciate it if you could take a minute to leave a review.</p>
+      <p style="margin:16px 0;">
+        <a href="${reviewUrl}" style="display:inline-block;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;font-size:15px;">Leave a Review ★★★★★</a>
+      </p>
+    `
+    : `<p style="margin:20px 0 8px;">Your feedback means a lot to my business. If you enjoyed your experience, I would truly appreciate it if you could take a minute to leave a review.</p>`;
+
+  return `
+    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.8;">
+      <p>Thank you very much for choosing Moysidis Mobile Massage today.</p>
+      <p>It was a pleasure taking care of you, and I hope you feel relaxed and refreshed after your session.</p>
+      ${reviewBlock}
+      <p style="margin-top:24px;">Thank you for your support, and I look forward to seeing you again soon.</p>
+      <p style="margin-top:24px;">Kind regards,<br/><strong>Panagiotis Moysidis</strong><br/>Moysidis Mobile Massage</p>
+    </div>
+  `;
+}
+
 export async function sendNewClientThankYouEmail(opts: {
   toEmail: string;
   toName: string;
@@ -32,29 +53,13 @@ export async function sendNewClientThankYouEmail(opts: {
 }): Promise<boolean> {
   const config = buildTransport();
   if (!config) {
-    logger.warn("SMTP_HOST not configured — skipping new client thank-you email");
+    logger.warn("SMTP_HOST not configured — skipping thank-you email");
     return false;
   }
 
   const { transporter, from } = config;
   const subject = "Thank you for choosing Moysidis Mobile Massage";
-
-  const reviewSection = opts.reviewUrl
-    ? `
-      <p style="margin-top:24px;">We'd love to hear about your experience — it only takes a moment:</p>
-      <a href="${opts.reviewUrl}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#1a2444;color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;font-size:15px;">Leave a Feedback ★★★★★</a>
-    `
-    : `<p style="margin-top:24px;">We hope you had a wonderful experience and we look forward to seeing you again.</p>`;
-
-  const html = `
-    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.7;">
-      <h2 style="color:#1a2444; margin-bottom:8px;">Thank you for choosing Moysidis Mobile Massage, ${opts.toName}!</h2>
-      <p>It was a pleasure to have you with us today.</p>
-      <p>We hope you feel relaxed, restored, and at ease. Your wellbeing is at the heart of everything we do.</p>
-      ${reviewSection}
-      <p style="color:#666; font-size:13px; margin-top:32px;">Until next time,<br/><strong>Moysidis Mobile Massage</strong></p>
-    </div>
-  `;
+  const html = buildHtml(opts.reviewUrl);
 
   try {
     await transporter.sendMail({ from, to: opts.toEmail, subject, html });
@@ -72,21 +77,13 @@ export async function sendReturningClientThankYouEmail(opts: {
 }): Promise<boolean> {
   const config = buildTransport();
   if (!config) {
-    logger.warn("SMTP_HOST not configured — skipping returning client thank-you email");
+    logger.warn("SMTP_HOST not configured — skipping thank-you email");
     return false;
   }
 
   const { transporter, from } = config;
-  const subject = "Thank you once again for choosing Moysidis Mobile Massage";
-
-  const html = `
-    <div style="font-family: Georgia, serif; max-width: 580px; margin: 0 auto; color: #1a2444; line-height: 1.7;">
-      <h2 style="color:#1a2444; margin-bottom:8px;">Thank you once again for choosing Moysidis Mobile Massage, ${opts.toName}!</h2>
-      <p>It is always a pleasure to welcome you back.</p>
-      <p>We hope today's session left you feeling relaxed and refreshed. Your wellbeing means the world to us.</p>
-      <p style="color:#666; font-size:13px; margin-top:32px;">Until next time,<br/><strong>Moysidis Mobile Massage</strong></p>
-    </div>
-  `;
+  const subject = "Thank you for choosing Moysidis Mobile Massage";
+  const html = buildHtml();
 
   try {
     await transporter.sendMail({ from, to: opts.toEmail, subject, html });
