@@ -72,7 +72,7 @@ router.post("/", async (req, res) => {
     }
   }, TWO_HOURS);
 
-  logger.info({ clientId, isNewClient, scheduledIn: "2h" }, "Thank-you email scheduled after form save");
+  logger.info({ clientId, scheduledIn: "2h" }, "Thank-you email scheduled after form save");
 
   res.status(201).json({
     ...record,
