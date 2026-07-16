@@ -13,7 +13,14 @@ function buildTransport() {
   const auth = user && pass ? { user, pass } : user ? { user, pass: "" } : undefined;
 
   return {
-    transporter: nodemailer.createTransport({ host, port, secure: port === 465, auth }),
+    transporter: nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth,
+      // Papaki shared hosting uses a *.papaki.gr cert — disable strict hostname check
+      tls: { rejectUnauthorized: false },
+    }),
     from,
   };
 }
