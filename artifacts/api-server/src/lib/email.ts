@@ -153,6 +153,24 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
 </html>`;
 }
 
+function buildText(opts: { baseUrl: string; clientId: number }): string {
+  const reviewUrl = `${opts.baseUrl}/review?clientId=${opts.clientId}&stars=5`;
+  return [
+    "Thank you very much for choosing Moysidis Mobile Massage today.",
+    "",
+    "It was a pleasure taking care of you, and I hope you feel relaxed and refreshed after your session.",
+    "",
+    "Your feedback means a lot to my business. If you enjoyed your experience, I would truly appreciate it if you could take a minute to leave a review:",
+    reviewUrl,
+    "",
+    "Thank you for your support, and I look forward to seeing you again soon.",
+    "",
+    "Kind regards,",
+    "Panagiotis Moysidis",
+    "Moysidis Mobile Massage",
+  ].join("\n");
+}
+
 export async function sendThankYouEmail(opts: {
   toEmail: string;
   toName: string;
@@ -173,6 +191,10 @@ export async function sendThankYouEmail(opts: {
       to: opts.toEmail,
       subject: "Thank you for choosing Moysidis Mobile Massage",
       html: buildHtml({ baseUrl: opts.baseUrl, clientId: opts.clientId }),
+      text: buildText({ baseUrl: opts.baseUrl, clientId: opts.clientId }),
+      headers: {
+        "X-Entity-Ref-ID": `moysidis-thankyou-${opts.clientId}-${Date.now()}`,
+      },
     });
 
     if (error) {

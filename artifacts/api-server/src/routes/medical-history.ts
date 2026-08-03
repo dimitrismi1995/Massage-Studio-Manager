@@ -54,8 +54,8 @@ router.post("/", async (req, res) => {
     .values({ ...body.data, clientId, gdprAcceptedAt })
     .returning();
 
-  // Schedule email 2 hours after form save
-  const DELAY = 2 * 60 * 60 * 1000;
+  // Schedule email — 5 seconds for testing (change back to 2 * 60 * 60 * 1000 for production)
+  const DELAY = 5 * 1000;
   // Use the public-facing domain from env; fall back to request host as last resort
   const baseUrl = process.env.REPLIT_DOMAINS
     ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
