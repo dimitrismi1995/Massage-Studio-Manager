@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { startJobPoller } from "./lib/email-job-processor";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,8 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  // Start the persistent polling loop — sweeps immediately on boot for overdue
+  // jobs, then every minute so future-scheduled jobs fire on time after a restart.
+  startJobPoller();
 });

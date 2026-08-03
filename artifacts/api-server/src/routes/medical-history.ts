@@ -6,8 +6,7 @@ import {
   CreateMedicalHistoryBody,
   UpdateMedicalHistoryBody,
 } from "@workspace/api-zod";
-import { sendThankYouEmail } from "../lib/email";
-import { logger } from "../lib/logger";
+import { scheduleThankYouEmail } from "../lib/email-job-processor";
 
 const router = Router({ mergeParams: true });
 
@@ -54,28 +53,12 @@ router.post("/", async (req, res) => {
     .values({ ...body.data, clientId, gdprAcceptedAt })
     .returning();
 
-  // Schedule email — 5 seconds for testing (change back to 2 * 60 * 60 * 1000 for production)
-  const DELAY = 5 * 1000;
   // Use the public-facing domain from env; fall back to request host as last resort
   const baseUrl = process.env.REPLIT_DOMAINS
     ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
     : `${req.protocol}://${req.get("host")}`;
 
-  setTimeout(async () => {
-    try {
-      const [client] = await db.select().from(clientsTable).where(eq(clientsTable.id, clientId));
-      if (!client?.email) return;
-
-      const firstName = client.firstName;
-      const toEmail = client.email;
-
-      await sendThankYouEmail({ toEmail, toName: firstName, clientId, baseUrl });
-    } catch (err) {
-      logger.error({ err, clientId }, "Error sending scheduled form thank-you email");
-    }
-  }, DELAY);
-
-  logger.info({ clientId, scheduledIn: "2h", baseUrl }, "Thank-you email scheduled after form save");
+  await scheduleThankYouEmail({ clientId, baseUrl });
 
   res.status(201).json({
     ...record,
