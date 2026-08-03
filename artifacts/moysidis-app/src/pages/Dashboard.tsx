@@ -49,7 +49,7 @@ export default function DashboardPage() {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/40" />
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
-          <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-16 w-auto object-contain drop-shadow-lg bg-white/90 rounded-xl p-2" />
+          <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-16 w-auto object-contain drop-shadow-lg bg-white/90 rounded-xl p-2" draggable={false} onContextMenu={e => e.preventDefault()} />
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white drop-shadow">Moysidis Mobile Massage</h1>
             <p className="text-white/90 mt-1 text-sm sm:text-base">Professional mobile massage therapy — booked with care, delivered to you.</p>

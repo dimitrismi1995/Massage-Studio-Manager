@@ -96,7 +96,7 @@ export default function IntakeForm() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex justify-center items-center mb-8">
-        <img src={logoSrc} alt="Moysidis Logo" className="h-12 w-auto object-contain" />
+        <img src={logoSrc} alt="Moysidis Logo" className="h-12 w-auto object-contain" draggable={false} onContextMenu={e => e.preventDefault()} />
       </div>
 
       <div className="mb-10 text-center">

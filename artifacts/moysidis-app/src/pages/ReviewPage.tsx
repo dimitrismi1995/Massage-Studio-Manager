@@ -45,7 +45,7 @@ export default function ReviewPage() {
   return (
     <div className="min-h-screen bg-[hsl(216,65%,11%)] flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
-      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-20 w-auto object-contain mb-10" style={WHITE_LOGO} />
+      <img src={logoSrc} alt="Moysidis Mobile Massage" className="h-20 w-auto object-contain mb-10" style={WHITE_LOGO} draggable={false} onContextMenu={e => e.preventDefault()} />
 
       <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-8 text-center">
         {submitted ? (

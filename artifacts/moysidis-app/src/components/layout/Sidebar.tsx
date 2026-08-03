@@ -63,6 +63,8 @@ export function Sidebar() {
           alt="Moysidis Mobile Massage"
           className="w-full max-w-[240px] h-auto object-contain"
           style={WHITE_LOGO}
+          draggable={false}
+          onContextMenu={e => e.preventDefault()}
         />
       </div>
 
@@ -85,6 +87,8 @@ export function MobileHeader() {
         alt="Moysidis Mobile Massage"
         className="h-11 w-auto object-contain"
         style={WHITE_LOGO}
+        draggable={false}
+        onContextMenu={e => e.preventDefault()}
       />
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -109,6 +113,8 @@ export function MobileHeader() {
               alt="Moysidis Mobile Massage"
               className="h-14 w-auto object-contain"
               style={WHITE_LOGO}
+              draggable={false}
+              onContextMenu={e => e.preventDefault()}
             />
           </div>
 
