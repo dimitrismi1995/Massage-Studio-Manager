@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'wouter';
 import { useCreateClient, useUpdateClient, useListClients, useCreateMedicalHistory, getListClientsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -253,9 +252,8 @@ export default function ClientBooking() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex justify-center items-center mb-6">
-        <Link href="/">
-          <img src={logoSrc} alt="Moysidis Massage" className="h-14 w-auto object-contain cursor-pointer" />
-        </Link>
+        <img src={logoSrc} alt="Moysidis Massage" className="h-14 w-auto object-contain"
+             draggable={false} onContextMenu={e => e.preventDefault()} />
       </div>
 
       <div className="mb-8 text-center">
