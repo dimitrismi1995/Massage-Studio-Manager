@@ -11,6 +11,10 @@ export const emailJobsTable = pgTable("email_jobs", {
   /** Set only after a confirmed successful send. */
   sentAt: timestamp("sent_at"),
   failed: boolean("failed").notNull().default(false),
+  /** Number of failed send attempts so far. */
+  retryCount: integer("retry_count").notNull().default(0),
+  /** Earliest time this job may be retried; null means it is due immediately. */
+  nextRetryAt: timestamp("next_retry_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
