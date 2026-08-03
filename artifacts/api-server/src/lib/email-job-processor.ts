@@ -4,8 +4,12 @@ import { eq, and, isNull, lte, or, lt } from "drizzle-orm";
 import { sendThankYouEmail } from "./email";
 import { logger } from "./logger";
 
-const DELAY_MS = 2 * 60 * 60 * 1000; // 2 hours
-const POLL_INTERVAL_MS = 60 * 1000;   // sweep every 60 s
+const DELAY_MS = process.env.NODE_ENV === "development"
+  ? 5 * 1000              // 5 s in dev (for testing)
+  : 2 * 60 * 60 * 1000;  // 2 h in production
+const POLL_INTERVAL_MS = process.env.NODE_ENV === "development"
+  ? 5 * 1000   // poll every 5 s in dev
+  : 60 * 1000; // poll every 60 s in production
 // If processing_started_at is older than this, the job is considered stale
 // (crashed mid-send) and can be reclaimed.
 const LEASE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
