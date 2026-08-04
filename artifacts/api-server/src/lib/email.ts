@@ -15,11 +15,11 @@ const LOGO_URL = `${SITE}/Group-101.png`;
 const HERO_URL = `${SITE}/professional-male-masseur-gives-shoulder-massage-young-woman-beautiful-woman-is-resting-blue-spa-bed.png`;
 const PHOTO_URL = `${SITE}/Group-108-1.png`;
 
-// ── Hosted icon URLs (served from the Vite public folder) ─────────────────────
-const APP_URL   = "https://massage-studio-manager.replit.app";
-const ICON_CARE   = `${APP_URL}/icon-care.svg`;
-const ICON_RELAX  = `${APP_URL}/icon-relax.svg`;
-const ICON_REVIEW = `${APP_URL}/icon-review.svg`;
+// ── Icon glyphs (Unicode symbols — no external files, 100% email-client safe) ──
+// Rendered white on a solid brand-blue circle
+const ICON_CARE   = "&#x2665;"; // ♥  solid heart
+const ICON_RELAX  = "&#x273F;"; // ✿  florette / lotus flower
+const ICON_REVIEW = "&#x2726;"; // ✦  four-pointed star / quality
 
 // ── Google Fonts — Comfortaa only (single brand font) ────────────────────────
 const GFONTS = "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap";
@@ -35,8 +35,8 @@ const DIAMOND_SEP = `
   <line x1="41" y1="12" x2="52" y2="12" stroke="${BLUE}" stroke-width="0.9" opacity="0.4"/>
 </svg>`;
 
-// ── Icon row using hosted SVG images ─────────────────────────────────────────
-function iconRow(iconUrl: string, html: string): string {
+// ── Icon row — Unicode glyph (white on solid blue circle, no external files) ──
+function iconRow(glyph: string, html: string): string {
   return `<tr>
     <td style="padding:10px 36px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -45,12 +45,13 @@ function iconRow(iconUrl: string, html: string): string {
             <table cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td width="56" height="56" align="center" valign="middle"
-                    style="width:56px;height:56px;min-width:56px;background:${ICON_BG};
-                           border-radius:50%;border:1.5px solid ${BORDER};">
-                  <img src="${iconUrl}" width="28" height="28"
-                       style="width:28px;height:28px;display:block;margin:0 auto;
-                              -webkit-user-drag:none;user-drag:none;"
-                       alt=""/>
+                    style="width:56px;height:56px;min-width:56px;
+                           background:${BLUE};border-radius:50%;
+                           font-family:Arial,Helvetica,sans-serif;
+                           font-size:26px;color:#FFFFFF;
+                           text-align:center;line-height:56px;
+                           mso-line-height-rule:exactly;">
+                  ${glyph}
                 </td>
               </tr>
             </table>
