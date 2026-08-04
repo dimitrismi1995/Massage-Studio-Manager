@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- speech bubble body -->
+  <path fill="#5B9BD0" d="M40 4H8C5.79 4 4 5.79 4 8v24c0 2.21 1.79 4 4 4h8l4 8 4-8h20c2.21 0 4-1.79 4-4V8c0-2.21-1.79-4-4-4z"/>
+  <!-- star inside bubble (white) -->
+  <polygon fill="white"
+    points="24,10 26.47,18.29 35.39,18.29 28.46,23.41 30.93,31.71 24,26.59 17.07,31.71 19.54,23.41 12.61,18.29 21.53,18.29"/>
+</svg>

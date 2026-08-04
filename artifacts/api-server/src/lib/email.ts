@@ -15,6 +15,12 @@ const LOGO_URL = `${SITE}/Group-101.png`;
 const HERO_URL = `${SITE}/professional-male-masseur-gives-shoulder-massage-young-woman-beautiful-woman-is-resting-blue-spa-bed.png`;
 const PHOTO_URL = `${SITE}/Group-108-1.png`;
 
+// ── Hosted icon URLs (served from the Vite public folder) ─────────────────────
+const APP_URL   = "https://massage-studio-manager.replit.app";
+const ICON_CARE   = `${APP_URL}/icon-care.svg`;
+const ICON_RELAX  = `${APP_URL}/icon-relax.svg`;
+const ICON_REVIEW = `${APP_URL}/icon-review.svg`;
+
 // ── Google Fonts — Comfortaa only (single brand font) ────────────────────────
 const GFONTS = "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap";
 // Font stack with web-safe fallback
@@ -29,20 +35,22 @@ const DIAMOND_SEP = `
   <line x1="41" y1="12" x2="52" y2="12" stroke="${BLUE}" stroke-width="0.9" opacity="0.4"/>
 </svg>`;
 
-// ── Emoji icon row (universally supported across all email clients) ────────────
-function iconRow(emoji: string, html: string): string {
+// ── Icon row using hosted SVG images ─────────────────────────────────────────
+function iconRow(iconUrl: string, html: string): string {
   return `<tr>
     <td style="padding:10px 36px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr>
-          <td width="60" valign="middle" style="padding-right:16px;">
+          <td width="68" valign="middle" style="padding-right:16px;">
             <table cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td width="52" height="52" align="center" valign="middle"
-                    style="width:52px;height:52px;min-width:52px;background:${ICON_BG};
-                           border-radius:50%;border:1.5px solid ${BORDER};
-                           font-size:24px;text-align:center;line-height:52px;">
-                  ${emoji}
+                <td width="56" height="56" align="center" valign="middle"
+                    style="width:56px;height:56px;min-width:56px;background:${ICON_BG};
+                           border-radius:50%;border:1.5px solid ${BORDER};">
+                  <img src="${iconUrl}" width="28" height="28"
+                       style="width:28px;height:28px;display:block;margin:0 auto;
+                              -webkit-user-drag:none;user-drag:none;"
+                       alt=""/>
                 </td>
               </tr>
             </table>
@@ -63,7 +71,7 @@ function buildStarLinks(baseUrl: string, clientId: number): string {
     const url = `${baseUrl}/review?clientId=${clientId}&stars=${n}`;
     return `<a href="${url}" style="font-size:44px;color:${BLUE};text-decoration:none;
               display:inline-block;line-height:1;padding:0 4px;"
-              title="${n} star${n > 1 ? "s" : ""}">★</a>`;
+              title="${n} star${n > 1 ? "s" : ""}">&#9734;</a>`;
   }).join("");
 }
 
@@ -175,9 +183,9 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
   <tr>
     <td class="dm-white" style="background:${WHITE};padding:16px 0 20px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        ${iconRow("❤️", `Thank you very much for choosing <strong>Moysidis Mobile Massage</strong> today.`)}
-        ${iconRow("🌿", `It was a pleasure taking care of you, and I hope you feel relaxed and refreshed after your session.`)}
-        ${iconRow("⭐", `Your feedback means a lot to my business. If you enjoyed your experience, I would truly appreciate it if you could take a minute to leave a review.`)}
+        ${iconRow(ICON_CARE,   `Thank you very much for choosing <strong>Moysidis Mobile Massage</strong> today.`)}
+        ${iconRow(ICON_RELAX,  `It was a pleasure taking care of you, and I hope you feel relaxed and refreshed after your session.`)}
+        ${iconRow(ICON_REVIEW, `Your feedback means a lot to my business. If you enjoyed your experience, I would truly appreciate it if you could take a minute to leave a review.`)}
       </table>
     </td>
   </tr>
@@ -230,18 +238,14 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
                               object-fit:cover;-webkit-user-drag:none;user-drag:none;"/>
                 </td>
                 <td valign="middle">
-                  <p class="dm-text" style="margin:0 0 5px;
-                       font-family:${FONT};font-size:14px;color:${DARK};
-                       font-weight:400;line-height:1.6;">
-                    Thank you for your support,
-                  </p>
-                  <p style="margin:0 0 7px;
-                       font-family:${FONT};font-size:15px;font-weight:600;
-                       color:${BLUE};line-height:1.45;font-style:italic;">
+                  <p class="dm-text" style="margin:0 0 6px;
+                       font-family:${FONT};font-size:15px;color:${DARK};
+                       font-weight:400;line-height:1.65;">
+                    Thank you for your support,<br/>
                     and I look forward to seeing you again!
                   </p>
                   <p class="dm-text" style="margin:0;
-                       font-family:${FONT};font-size:14px;
+                       font-family:${FONT};font-size:15px;
                        font-weight:700;color:${DARK};">
                     – Panagiotis
                   </p>
