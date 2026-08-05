@@ -21,8 +21,9 @@ const ICON_RELAX  = "&#x273F;"; // ✿  florette / lotus flower
 const ICON_REVIEW = "&#x2726;"; // ✦  four-pointed star / quality
 
 // ── App static asset base (footer pin icon hosted here) ──────────────────────
-const APP_STATIC = "https://moysidismobilemassage.com";
-const PIN_ICON_URL = `${APP_STATIC}/icon-pin.svg`;
+const APP_STATIC    = "https://moysidismobilemassage.com";
+const PIN_ICON_URL  = `${APP_STATIC}/icon-pin.svg`;
+const GLOBE_ICON_URL = `${APP_STATIC}/icon-globe.svg`;
 
 // ── Google Fonts — Comfortaa only (single brand font) ────────────────────────
 const GFONTS = "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap";
@@ -289,8 +290,8 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
           </td>
           <!-- Website -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
-            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
-                 font-size:20px;line-height:1;color:#FFFFFF;">&#x25CB;</p>
+            <img src="${GLOBE_ICON_URL}" width="22" height="22" alt=""
+                 style="width:22px;height:22px;display:block;margin:0 auto 5px;"/>
             <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:700;
                  color:#FFFFFF;line-height:1.55;">
               <a href="https://www.moysidismassage.ch"

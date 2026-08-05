@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Outer circle -->
+  <circle cx="12" cy="12" r="10"/>
+  <!-- Vertical centre ellipse (longitude) -->
+  <ellipse cx="12" cy="12" rx="4" ry="10"/>
+  <!-- Horizontal lines (latitude) -->
+  <line x1="2" y1="12" x2="22" y2="12"/>
+  <path d="M4.93 6.93 C7 8 9.4 8.5 12 8.5 C14.6 8.5 17 8 19.07 6.93"/>
+  <path d="M4.93 17.07 C7 16 9.4 15.5 12 15.5 C14.6 15.5 17 16 19.07 17.07"/>
+</svg>
