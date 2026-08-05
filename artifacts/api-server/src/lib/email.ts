@@ -12,7 +12,7 @@ const WHITE     = "#FFFFFF";
 // ── Website image URLs ────────────────────────────────────────────────────────
 const SITE     = "https://moysidismassage.ch/wp-content/uploads/2026/07";
 const LOGO_URL = `${SITE}/Group-101.png`;
-const HERO_URL = `${SITE}/professional-male-masseur-gives-shoulder-massage-young-woman-beautiful-woman-is-resting-blue-spa-bed.png`;
+const HERO_URL = "https://moysidismobilemassage.com/email-hero.png";
 const PHOTO_URL = `${SITE}/Group-108-1.png`;
 
 // ── Icon glyphs (Unicode symbols — no external files, 100% email-client safe) ──
@@ -263,33 +263,37 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
   <tr>
     <td style="background:${FOOTER_BG};padding:28px 20px 24px;border-radius:0 0 18px 18px;">
 
-      <!-- 4-col contact -->
+      <!-- 4-col contact — all text forced #FFFFFF; icons are plain Unicode (no emoji) so CSS color applies -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
              style="margin-bottom:22px;">
         <tr>
           <!-- Phone -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
-            <p style="margin:0 0 6px;font-size:22px;line-height:1;">📞</p>
-            <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:600;
-                 color:${WHITE};line-height:1.5;">+41 783118433</p>
+            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
+                 font-size:20px;line-height:1;color:#FFFFFF;">&#x260E;</p>
+            <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:700;
+                 color:#FFFFFF;line-height:1.55;">+41 783118433</p>
           </td>
           <!-- Email -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
-            <p style="margin:0 0 6px;font-size:22px;line-height:1;">✉️</p>
-            <p style="margin:0;font-family:${FONT};font-size:11px;font-weight:600;
-                 color:${WHITE};line-height:1.5;">info@moysidismassage.ch</p>
+            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
+                 font-size:20px;line-height:1;color:#FFFFFF;">&#x2709;</p>
+            <p style="margin:0;font-family:${FONT};font-size:11px;font-weight:700;
+                 color:#FFFFFF;line-height:1.55;">info@moysidismassage.ch</p>
           </td>
           <!-- Website -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
-            <p style="margin:0 0 6px;font-size:22px;line-height:1;">🌐</p>
-            <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:600;
-                 color:${WHITE};line-height:1.5;">moysidismassage.ch</p>
+            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
+                 font-size:20px;line-height:1;color:#FFFFFF;">&#x25CB;</p>
+            <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:700;
+                 color:#FFFFFF;line-height:1.55;">moysidismassage.ch</p>
           </td>
           <!-- Location -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
-            <p style="margin:0 0 6px;font-size:22px;line-height:1;">📍</p>
-            <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:600;
-                 color:${WHITE};line-height:1.5;">Zürich &amp;<br/>Surrounding Area</p>
+            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
+                 font-size:20px;line-height:1;color:#FFFFFF;">&#x25BE;</p>
+            <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:700;
+                 color:#FFFFFF;line-height:1.55;">Zürich &amp;<br/>Surrounding Area</p>
           </td>
         </tr>
       </table>
@@ -298,7 +302,7 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
              style="margin-bottom:16px;">
         <tr>
-          <td style="border-top:1px solid rgba(255,255,255,0.3);
+          <td style="border-top:1px solid rgba(255,255,255,0.4);
                      font-size:0;line-height:0;">&nbsp;</td>
         </tr>
       </table>
@@ -306,12 +310,12 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
       <!-- Tagline -->
       <p style="margin:0 0 6px;text-align:center;
            font-family:${FONT};font-size:12px;font-weight:700;
-           letter-spacing:0.18em;text-transform:uppercase;color:${WHITE};">
+           letter-spacing:0.18em;text-transform:uppercase;color:#FFFFFF;">
         MOBILE MASSAGE. PREMIUM EXPERIENCE.
       </p>
       <p style="margin:0;text-align:center;
            font-family:${FONT};font-size:20px;font-weight:600;
-           font-style:italic;color:rgba(255,255,255,0.88);">
+           font-style:italic;color:#FFFFFF;">
         Wherever you are.
       </p>
 
