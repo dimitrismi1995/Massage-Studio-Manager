@@ -282,14 +282,20 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
             <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
                  font-size:20px;line-height:1;color:#FFFFFF;">&#x2709;</p>
             <p style="margin:0;font-family:${FONT};font-size:11px;font-weight:700;
-                 color:#FFFFFF;line-height:1.55;">info@moysidismassage.ch</p>
+                 color:#FFFFFF;line-height:1.55;">
+              <a href="mailto:info@moysidismassage.ch"
+                 style="color:#FFFFFF;text-decoration:none;">info@moysidismassage.ch</a>
+            </p>
           </td>
           <!-- Website -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
             <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
                  font-size:20px;line-height:1;color:#FFFFFF;">&#x25CB;</p>
             <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:700;
-                 color:#FFFFFF;line-height:1.55;">moysidismassage.ch</p>
+                 color:#FFFFFF;line-height:1.55;">
+              <a href="https://www.moysidismassage.ch"
+                 style="color:#FFFFFF;text-decoration:none;">moysidismassage.ch</a>
+            </p>
           </td>
           <!-- Location -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
