@@ -16,10 +16,13 @@ const HERO_URL = "https://moysidismobilemassage.com/email-hero.png";
 const PHOTO_URL = `${SITE}/Group-108-1.png`;
 
 // ── Icon glyphs (Unicode symbols — no external files, 100% email-client safe) ──
-// Rendered white on a solid brand-blue circle
 const ICON_CARE   = "&#x2665;"; // ♥  solid heart
 const ICON_RELAX  = "&#x273F;"; // ✿  florette / lotus flower
 const ICON_REVIEW = "&#x2726;"; // ✦  four-pointed star / quality
+
+// ── App static asset base (footer pin icon hosted here) ──────────────────────
+const APP_STATIC = "https://moysidismobilemassage.com";
+const PIN_ICON_URL = `${APP_STATIC}/icon-pin.svg`;
 
 // ── Google Fonts — Comfortaa only (single brand font) ────────────────────────
 const GFONTS = "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap";
@@ -146,9 +149,9 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
   <!-- ══ 2 · HERO: Massage photo, centered ═══════════════════════════════ -->
   <tr>
     <td class="dm-white" style="background:${WHITE};padding:0;text-align:center;line-height:0;">
-      <img src="${HERO_URL}" alt="Mobile massage therapy"
+      <img src="${HERO_URL}" alt=""
            width="600"
-           style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto;"/>
+           style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto;-webkit-user-drag:none;user-drag:none;"/>
     </td>
   </tr>
 
@@ -290,8 +293,8 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
           </td>
           <!-- Location -->
           <td width="25%" align="center" valign="top" style="padding:0 4px;">
-            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;
-                 font-size:20px;line-height:1;color:#FFFFFF;">&#x25BE;</p>
+            <img src="${PIN_ICON_URL}" width="22" height="22" alt=""
+                 style="width:22px;height:22px;display:block;margin:0 auto 5px;"/>
             <p style="margin:0;font-family:${FONT};font-size:12px;font-weight:700;
                  color:#FFFFFF;line-height:1.55;">Zürich &amp;<br/>Surrounding Area</p>
           </td>
