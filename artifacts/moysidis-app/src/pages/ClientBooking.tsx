@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
 import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { Link } from 'react-router-dom';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 type YesNo = 'yes' | 'no';
@@ -252,10 +253,10 @@ export default function ClientBooking() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex justify-center items-center mb-6">
-        <a href="/" aria-label="Go to homepage">
+        <Link to="/" aria-label="Go to homepage">
           <img src={logoSrc} alt="Moysidis Massage" className="h-14 w-auto object-contain cursor-pointer"
                draggable={false} onContextMenu={e => e.preventDefault()} />
-        </a>
+        </Link>
       </div>
 
       <div className="mb-8 text-center">
