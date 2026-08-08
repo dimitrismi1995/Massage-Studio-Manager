@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
 import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/PhoneInput';
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
 
 type YesNo = 'yes' | 'no';
