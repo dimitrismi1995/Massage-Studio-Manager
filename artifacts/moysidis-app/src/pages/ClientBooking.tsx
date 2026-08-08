@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm, Controller } from 'react-hook-form';
-import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle } from 'lucide-react';
+import { User, Calendar, Phone, Mail, HeartPulse, Save, ChevronRight, MessageCircle, MapPin, FileText } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { Link } from 'wouter';
 import logoSrc from '@assets/IMG_2593_1782977930405.png';
@@ -17,6 +17,10 @@ type FormValues = {
   dateOfBirth: string;
   phone: string;
   email: string;
+  address: string;
+  floor: string;
+  plz: string;
+  notes: string;
   hasAllergies: YesNo;
   allergies: string;
   hasMedicalConditions: YesNo;
@@ -146,6 +150,10 @@ export default function ClientBooking() {
       dateOfBirth: '',
       phone: '',
       email: '',
+      address: '',
+      floor: '',
+      plz: '',
+      notes: '',
       hasAllergies: 'no',
       allergies: '',
       hasMedicalConditions: 'no',
@@ -179,6 +187,10 @@ export default function ClientBooking() {
       setValue('lastName', match.lastName, { shouldDirty: false });
       setValue('email', match.email ?? '', { shouldDirty: false });
       setValue('dateOfBirth', match.dateOfBirth ?? '', { shouldDirty: false });
+      setValue('address', match.address ?? '', { shouldDirty: false });
+      setValue('floor', match.floor ?? '', { shouldDirty: false });
+      setValue('plz', match.plz ?? '', { shouldDirty: false });
+      setValue('notes', match.notes ?? '', { shouldDirty: false });
     } else {
       setMatchedClientId(null);
     }
@@ -208,6 +220,10 @@ export default function ClientBooking() {
         email: data.email,
         phone: data.phone.replace(/^\+\d+\s*/, '').trim(),
         dateOfBirth: data.dateOfBirth || undefined,
+        address: data.address || undefined,
+        floor: data.floor || undefined,
+        plz: data.plz || undefined,
+        notes: data.notes || undefined,
       };
 
       const clientId = match
@@ -328,6 +344,38 @@ export default function ClientBooking() {
                 placeholder="Enter your email address"
                 readOnly={!!matchedClientId}
                 className={`w-full min-w-0 h-11 rounded-md border border-input px-3 text-sm sm:text-base box-border ${matchedClientId ? 'bg-muted text-muted-foreground cursor-default' : 'bg-background'}`}
+              />
+            </FieldRow>
+
+            <FieldRow icon={MapPin} label="Address">
+              <div className="grid grid-cols-3 gap-2">
+                <input
+                  {...register('address')}
+                  placeholder="Street & number"
+                  className="col-span-2 w-full min-w-0 h-11 rounded-md border border-input px-3 text-sm sm:text-base box-border bg-background"
+                />
+                <input
+                  {...register('floor')}
+                  placeholder="Floor"
+                  className="w-full min-w-0 h-11 rounded-md border border-input px-3 text-sm sm:text-base box-border bg-background"
+                />
+              </div>
+            </FieldRow>
+
+            <FieldRow icon={MapPin} label="PLZ / Postcode">
+              <input
+                {...register('plz')}
+                placeholder="e.g. 8050"
+                className="w-full min-w-0 h-11 rounded-md border border-input px-3 text-sm sm:text-base box-border bg-background"
+              />
+            </FieldRow>
+
+            <FieldRow icon={FileText} label="Notes">
+              <textarea
+                {...register('notes')}
+                placeholder="Any private notes about this client…"
+                rows={3}
+                className="w-full min-w-0 rounded-md border border-input px-3 py-2 text-sm sm:text-base box-border bg-background resize-y"
               />
             </FieldRow>
           </CardContent>
