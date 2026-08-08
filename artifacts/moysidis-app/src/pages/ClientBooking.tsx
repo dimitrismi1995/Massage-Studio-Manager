@@ -252,8 +252,10 @@ export default function ClientBooking() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex justify-center items-center mb-6">
-        <img src={logoSrc} alt="Moysidis Massage" className="h-14 w-auto object-contain"
-             draggable={false} onContextMenu={e => e.preventDefault()} />
+        <a href="/" aria-label="Go to homepage">
+          <img src={logoSrc} alt="Moysidis Massage" className="h-14 w-auto object-contain cursor-pointer"
+               draggable={false} onContextMenu={e => e.preventDefault()} />
+        </a>
       </div>
 
       <div className="mb-8 text-center">
