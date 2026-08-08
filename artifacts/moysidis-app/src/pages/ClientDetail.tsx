@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useDateFormatter, getStatusColor } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQueryClient } from '@tanstack/react-query';
-import { Trash2, Pencil, Check, X } from 'lucide-react';
+import { Trash2, Pencil, Check, X, MapPin, FileText } from 'lucide-react';
 
 function EditableField({
   label,
@@ -112,6 +112,11 @@ export default function ClientDetail() {
     await queryClient.invalidateQueries({ queryKey: getGetMedicalHistoryQueryKey(clientId) });
   };
 
+  const saveClientField = async (field: string, val: string) => {
+    await updateClient.mutateAsync({ clientId, data: { [field]: val || undefined } });
+    await queryClient.invalidateQueries({ queryKey: getGetClientQueryKey(clientId) });
+  };
+
   const handleDelete = () => {
     if (confirm('Are you sure you want to delete this client?')) {
       deleteClient.mutate({ clientId }, {
@@ -148,6 +153,43 @@ export default function ClientDetail() {
           Delete Client
         </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MapPin className="h-4 w-4 text-accent" />
+            Contact &amp; Address
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid gap-5 sm:grid-cols-2">
+            <EditableField
+              label="Address"
+              value={client.address}
+              multiline={false}
+              onSave={(v) => saveClientField('address', v)}
+            />
+            <EditableField
+              label="Floor"
+              value={client.floor}
+              multiline={false}
+              onSave={(v) => saveClientField('floor', v)}
+            />
+            <EditableField
+              label="PLZ / Postcode"
+              value={client.plz}
+              multiline={false}
+              onSave={(v) => saveClientField('plz', v)}
+            />
+            <EditableField
+              label="Notes"
+              value={client.notes}
+              multiline={true}
+              onSave={(v) => saveClientField('notes', v)}
+            />
+          </dl>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
