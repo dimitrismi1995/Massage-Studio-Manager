@@ -9,10 +9,12 @@ import {
   TrendingUp,
   HeartPulse,
   Menu,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import logoSrc from '@assets/logo_new_transparent.png';
+import { useAuth } from '@/lib/useAuth';
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
@@ -55,6 +57,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function Sidebar() {
+  const { logout } = useAuth();
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-sidebar text-sidebar-foreground md:flex">
       <div className="flex h-44 shrink-0 items-center justify-center border-b border-sidebar-border px-2">
@@ -73,12 +76,23 @@ export function Sidebar() {
           <NavLinks />
         </nav>
       </div>
+
+      <div className="shrink-0 border-t border-sidebar-border px-3 py-4">
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <LogOut className="h-5 w-5 shrink-0" />
+          Sign out
+        </button>
+      </div>
     </aside>
   );
 }
 
 export function MobileHeader() {
   const [open, setOpen] = React.useState(false);
+  const { logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between bg-sidebar px-4 md:hidden">
@@ -105,7 +119,7 @@ export function MobileHeader() {
 
         <SheetContent
           side="left"
-          className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border"
+          className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border flex flex-col"
         >
           <div className="flex h-24 shrink-0 items-center border-b border-sidebar-border px-4">
             <img
@@ -118,9 +132,19 @@ export function MobileHeader() {
             />
           </div>
 
-          <nav className="flex flex-col gap-0.5 px-3 pt-3">
+          <nav className="flex flex-col gap-0.5 px-3 pt-3 flex-1">
             <NavLinks onNavigate={() => setOpen(false)} />
           </nav>
+
+          <div className="shrink-0 border-t border-sidebar-border px-3 py-4">
+            <button
+              onClick={() => { setOpen(false); logout(); }}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
+              Sign out
+            </button>
+          </div>
         </SheetContent>
       </Sheet>
     </header>
