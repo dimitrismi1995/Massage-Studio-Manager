@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from '@/lib/i18n';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useAuth } from '@/lib/useAuth';
 
 import Dashboard from '@/pages/Dashboard';
 import Appointments from '@/pages/Appointments';
@@ -14,6 +15,7 @@ import Expenses from '@/pages/Expenses';
 import Finance from '@/pages/Finance';
 import MedicalHistory from '@/pages/MedicalHistory';
 import ReviewPage from '@/pages/ReviewPage';
+import LoginPage from '@/pages/LoginPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,23 +34,32 @@ function NotFound() {
   );
 }
 
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <div className="min-h-screen bg-[#deedf8]" />;
+  if (!isAuthenticated) return <LoginPage />;
+  return <>{children}</>;
+}
+
 function Router() {
   return (
-    <AppLayout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/appointments" component={Appointments} />
-        <Route path="/clients" component={Clients} />
-        <Route path="/clients/:id" component={ClientDetail} />
-        <Route path="/intake" component={IntakeForm} />
-        <Route path="/book" component={ClientBooking} />
-        <Route path="/expenses" component={Expenses} />
-        <Route path="/finance" component={Finance} />
-        <Route path="/medical-history" component={MedicalHistory} />
-        <Route path="/review" component={ReviewPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+    <AuthGate>
+      <AppLayout>
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/appointments" component={Appointments} />
+          <Route path="/clients" component={Clients} />
+          <Route path="/clients/:id" component={ClientDetail} />
+          <Route path="/intake" component={IntakeForm} />
+          <Route path="/book" component={ClientBooking} />
+          <Route path="/expenses" component={Expenses} />
+          <Route path="/finance" component={Finance} />
+          <Route path="/medical-history" component={MedicalHistory} />
+          <Route path="/review" component={ReviewPage} />
+          <Route component={NotFound} />
+        </Switch>
+      </AppLayout>
+    </AuthGate>
   );
 }
 
