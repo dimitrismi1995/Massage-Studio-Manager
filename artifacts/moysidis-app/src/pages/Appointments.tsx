@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n';
-import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useCreateClient, useUpdateClient, useGetClient, useListClients, getGetClientQueryKey, getListClientsQueryKey } from '@workspace/api-client-react';
+import { useListAppointments, getListAppointmentsQueryKey, useCompleteAppointment, useCancelAppointment, useMarkAppointmentNoShow, useCreateAppointment, useDeleteAppointment, useCreateClient, useUpdateClient, useGetClient, useListClients, getGetClientQueryKey, getListClientsQueryKey, getGetFinanceSummaryQueryKey, getGetMonthlyBreakdownQueryKey, getGetTopServicesQueryKey, getGetDashboardStatsQueryKey } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, useDateFormatter, getStatusColor } from '@/lib/utils';
@@ -196,6 +196,13 @@ export default function AppointmentsPage() {
     queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() });
   };
 
+  const invalidateFinancials = () => {
+    queryClient.invalidateQueries({ queryKey: getGetFinanceSummaryQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetMonthlyBreakdownQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetTopServicesQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
+  };
+
   const activeAppts: Appt[] = (allAppointments || []).filter(
     (a: Appt) => a.status === 'scheduled' || a.status === 'completed'
   );
@@ -230,7 +237,14 @@ export default function AppointmentsPage() {
           onSuccess: (appt) => {
             completeAppt.mutate(
               { appointmentId: appt.id },
-              { onSuccess: () => { invalidateAppointments(); resetDialog(); } }
+              {
+                onSuccess: () => {
+                  setSelectedDate(values.date);
+                  invalidateAppointments();
+                  invalidateFinancials();
+                  resetDialog();
+                },
+              }
             );
           },
         }
@@ -282,7 +296,7 @@ export default function AppointmentsPage() {
     );
   };
 
-  const handleComplete = (id: number) => completeAppt.mutate({ appointmentId: id }, { onSuccess: () => { invalidateAppointments(); setSelectedAppt(null); } });
+  const handleComplete = (id: number) => completeAppt.mutate({ appointmentId: id }, { onSuccess: () => { invalidateAppointments(); invalidateFinancials(); setSelectedAppt(null); } });
   const handleCancel   = (id: number) => cancelAppt.mutate({ appointmentId: id },   { onSuccess: () => { invalidateAppointments(); setSelectedAppt(null); } });
   const handleNoShow   = (id: number) => noShowAppt.mutate({ appointmentId: id },   { onSuccess: () => { invalidateAppointments(); setSelectedAppt(null); } });
   const handleDelete   = (id: number) => {
