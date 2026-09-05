@@ -14,6 +14,7 @@ const SITE     = "https://moysidismassage.ch/wp-content/uploads/2026/07";
 const LOGO_URL = `${SITE}/Group-101.png`;
 const HERO_URL = "https://moysidismobilemassage.com/email-hero.png";
 const PHOTO_URL = `${SITE}/Group-108-1.png`;
+const GOOGLE_REVIEW_URL = "https://share.google/s4a76PsdwF9ivcWO5";
 
 // ── Icon glyphs (Unicode symbols — no external files, 100% email-client safe) ──
 const ICON_CARE   = "&#x2665;"; // ♥  solid heart
@@ -89,6 +90,9 @@ function buildText(opts: { baseUrl: string; clientId: number }): string {
     "",
     "Please rate your experience:",
     `${opts.baseUrl}/review?clientId=${opts.clientId}&stars=5`,
+    "",
+    "Leave a Google review:",
+    GOOGLE_REVIEW_URL,
     "",
     "Thank you for your support, and I look forward to seeing you again!",
     "",
@@ -220,6 +224,21 @@ function buildHtml(opts: { baseUrl: string; clientId: number }): string {
                  font-size:12px;color:#7aA6C6;letter-spacing:0.04em;">
               Tap a star to leave your rating
             </p>
+             <table cellpadding="0" cellspacing="0" border="0" align="center"
+                    style="margin:22px auto 0;">
+               <tr>
+                 <td align="center" bgcolor="${BLUE}"
+                     style="background:${BLUE};border-radius:24px;">
+                   <a href="${GOOGLE_REVIEW_URL}"
+                      target="_blank"
+                      style="display:inline-block;padding:13px 24px;
+                             font-family:${FONT};font-size:14px;font-weight:700;
+                             color:#FFFFFF;text-decoration:none;border-radius:24px;">
+                     Leave a Google Review
+                   </a>
+                 </td>
+               </tr>
+             </table>
           </td>
         </tr>
       </table>
