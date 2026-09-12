@@ -14,7 +14,7 @@ const SITE     = "https://moysidismassage.ch/wp-content/uploads/2026/07";
 const LOGO_URL = `${SITE}/Group-101.png`;
 const HERO_URL = "https://moysidismobilemassage.com/email-hero.png";
 const PHOTO_URL = `${SITE}/Group-108-1.png`;
-const GOOGLE_REVIEW_URL = "https://share.google/s4a76PsdwF9ivcWO5";
+const GOOGLE_REVIEW_URL = "https://www.google.com/search?sca_esv=12e2dcfd274873dd&biw=402&bih=684&sxsrf=APpeQnvnUd68x-VTy2GRW_Pfl4FPr3Ylzw:1788597512480&kgmid=/g/11zdr_q5lz&q=Moysidis+Premium+Mobile+Massage&shem=epsd1,ltae,rimspwouoe&shndl=30&source=sh/x/loc/act/m1/3&kgs=6bf36dca77cf2898&utm_source=epsd1,ltae,rimspwouoe,sh/x/loc/act/m1/3";
 
 // ── Icon glyphs (Unicode symbols — no external files, 100% email-client safe) ──
 const ICON_CARE   = "&#x2665;"; // ♥  solid heart
