@@ -4,3 +4,5 @@ export * from "./appointments";
 export * from "./expenses";
 export * from "./reviews";
 export * from "./email-jobs";
+export * from "./admin-users";
+export * from "./admin-invites";

@@ -398,3 +398,71 @@ export async function sendThankYouEmail(opts: {
     return false;
   }
 }
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character] ?? character);
+}
+
+export async function sendAdminInviteEmail(opts: {
+  toEmail: string;
+  role: "viewer" | "editor";
+  inviteUrl: string;
+}): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    logger.warn("RESEND_API_KEY not configured — skipping admin invitation email");
+    return false;
+  }
+
+  const resend = new Resend(apiKey);
+  const roleLabel = opts.role === "editor" ? "Editor" : "Viewer";
+  const safeRole = escapeHtml(roleLabel);
+
+  try {
+    const { error } = await resend.emails.send({
+      from: "Moysidis Mobile Massage <info@moysidismassage.ch>",
+      to: opts.toEmail,
+      subject: "You have been invited to Moysidis Mobile Massage",
+      html: `<!DOCTYPE html>
+<html lang="en">
+  <body style="margin:0;padding:32px;background:#deedf8;font-family:Arial,Helvetica,sans-serif;color:#1A2E4A;">
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #C8DFF2;border-radius:18px;padding:36px;">
+      <h1 style="margin:0 0 12px;color:#5B9BD0;font-size:25px;">Moysidis Mobile Massage</h1>
+      <p style="font-size:16px;line-height:1.6;">You have been invited to access the private admin console as a <strong>${safeRole}</strong>.</p>
+      <p style="font-size:14px;line-height:1.6;color:#50657d;">This secure link is single-use and expires in 7 days.</p>
+      <p style="margin:28px 0;text-align:center;">
+        <a href="${escapeHtml(opts.inviteUrl)}" style="display:inline-block;padding:14px 24px;border-radius:24px;background:#5B9BD0;color:#ffffff;text-decoration:none;font-weight:700;">Open admin console</a>
+      </p>
+      <p style="font-size:12px;line-height:1.5;color:#71849a;">If you were not expecting this invitation, you can ignore this email.</p>
+    </div>
+  </body>
+</html>`,
+      text: [
+        "You have been invited to access the Moysidis Mobile Massage private admin console.",
+        `Access level: ${roleLabel}`,
+        "",
+        "Open this single-use link within 7 days:",
+        opts.inviteUrl,
+        "",
+        "If you were not expecting this invitation, you can ignore this email.",
+      ].join("\n"),
+    });
+
+    if (error) {
+      logger.error({ error, to: opts.toEmail }, "Resend API error sending admin invitation");
+      return false;
+    }
+
+    logger.info({ to: opts.toEmail, role: opts.role }, "Admin invitation sent via Resend");
+    return true;
+  } catch (err) {
+    logger.error({ err, to: opts.toEmail }, "Failed to send admin invitation");
+    return false;
+  }
+}

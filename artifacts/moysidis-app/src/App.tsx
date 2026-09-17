@@ -16,6 +16,7 @@ import Finance from '@/pages/Finance';
 import MedicalHistory from '@/pages/MedicalHistory';
 import ReviewPage from '@/pages/ReviewPage';
 import LoginPage from '@/pages/LoginPage';
+import AdminUsers from '@/pages/AdminUsers';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +57,7 @@ function Router() {
           <Route path="/finance" component={Finance} />
           <Route path="/medical-history" component={MedicalHistory} />
           <Route path="/review" component={ReviewPage} />
+          <Route path="/admin/users" component={AdminUsers} />
           <Route component={NotFound} />
         </Switch>
       </AppLayout>

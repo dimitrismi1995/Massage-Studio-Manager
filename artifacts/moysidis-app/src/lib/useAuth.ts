@@ -2,7 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const API = '/api/auth';
 
-async function fetchMe(): Promise<{ authenticated: boolean }> {
+export type AuthState = {
+  authenticated: boolean;
+  role?: 'owner' | 'editor' | 'viewer';
+  email?: string | null;
+};
+
+async function fetchMe(): Promise<AuthState> {
   const res = await fetch(`${API}/me`, { credentials: 'include' });
   if (!res.ok) return { authenticated: false };
   return res.json();
@@ -32,6 +38,23 @@ export function useAuth() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['auth'] }),
   });
 
+  const acceptInviteMutation = useMutation({
+    mutationFn: async (token: string) => {
+      const res = await fetch(`${API}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || 'This invitation is invalid or has expired');
+      }
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['auth'] }),
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
@@ -41,10 +64,13 @@ export function useAuth() {
 
   return {
     isAuthenticated: data?.authenticated ?? false,
+    role: data?.role,
+    email: data?.email,
     isLoading,
     login: loginMutation.mutateAsync,
     loginPending: loginMutation.isPending,
     loginError: loginMutation.error,
+    acceptInvite: acceptInviteMutation.mutateAsync,
     logout: () => logoutMutation.mutate(),
   };
 }

@@ -5,7 +5,21 @@ import logoSrc from '@assets/IMG_2593_1782977930405.png';
 export default function LoginPage() {
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
-  const { login, loginPending } = useAuth();
+  const [acceptingInvite, setAcceptingInvite] = React.useState(false);
+  const { login, loginPending, acceptInvite } = useAuth();
+
+  React.useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('adminToken');
+    if (!token) return;
+
+    window.history.replaceState({}, '', window.location.pathname);
+    setAcceptingInvite(true);
+    acceptInvite(token)
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'This invitation is invalid or has expired');
+      })
+      .finally(() => setAcceptingInvite(false));
+  }, [acceptInvite]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +52,9 @@ export default function LoginPage() {
             Moysidis Mobile Massage · Admin
           </p>
 
+            {acceptingInvite ? (
+              <p className="text-center text-sm text-[#50657d]">Opening your invitation…</p>
+            ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#1A2E4A] mb-1.5">
@@ -67,6 +84,7 @@ export default function LoginPage() {
               {loginPending ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
+            )}
         </div>
 
         <p className="text-center text-xs text-[#4A87BB] mt-6">

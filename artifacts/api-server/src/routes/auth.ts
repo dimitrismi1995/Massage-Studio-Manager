@@ -1,12 +1,34 @@
 import { Router } from "express";
+import { and, eq, isNull } from "drizzle-orm";
+import { createHash } from "node:crypto";
+import { adminInvitesTable, adminUsersTable, db } from "@workspace/db";
 import { logger } from "../lib/logger.js";
+import {
+  clearSessionCookie,
+  getSession,
+  setSessionCookie,
+} from "../lib/auth-session.js";
 
 const router = Router();
-const COOKIE = "mmm_auth";
-const MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+function hashInviteToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 router.get("/me", (req, res) => {
-  res.json({ authenticated: req.signedCookies?.[COOKIE] === "1" });
+  getSession(req)
+    .then((session) => {
+      if (!session) {
+        res.json({ authenticated: false });
+        return;
+      }
+      res.json({
+        authenticated: true,
+        role: session.role,
+        email: session.email,
+      });
+    })
+    .catch(() => res.status(500).json({ error: "Unable to read session" }));
 });
 
 router.post("/login", (req, res) => {
@@ -20,13 +42,7 @@ router.post("/login", (req, res) => {
   }
 
   if (password === adminPassword) {
-    res.cookie(COOKIE, "1", {
-      signed: true,
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: MAX_AGE,
-      secure: process.env.NODE_ENV === "production",
-    });
+    setSessionCookie(res, "owner");
     res.json({ ok: true });
   } else {
     res.status(401).json({ error: "Wrong password" });
@@ -34,12 +50,51 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/logout", (_req, res) => {
-  res.clearCookie(COOKIE, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  clearSessionCookie(res);
   res.json({ ok: true });
+});
+
+router.post("/accept", async (req, res) => {
+  const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
+  if (!token) {
+    res.status(400).json({ error: "Invitation token is required" });
+    return;
+  }
+
+  const [invite] = await db
+    .select()
+    .from(adminInvitesTable)
+    .where(
+      and(
+        eq(adminInvitesTable.tokenHash, hashInviteToken(token)),
+        isNull(adminInvitesTable.usedAt),
+      ),
+    )
+    .limit(1);
+
+  if (!invite || invite.expiresAt <= new Date()) {
+    res.status(401).json({ error: "This invitation is invalid or has expired" });
+    return;
+  }
+
+  const [user] = await db
+    .update(adminUsersTable)
+    .set({ active: true, role: invite.role, lastLoginAt: new Date() })
+    .where(eq(adminUsersTable.email, invite.email))
+    .returning();
+
+  if (!user || (user.role !== "viewer" && user.role !== "editor")) {
+    res.status(401).json({ error: "This invitation is no longer active" });
+    return;
+  }
+
+  await db
+    .update(adminInvitesTable)
+    .set({ usedAt: new Date() })
+    .where(eq(adminInvitesTable.id, invite.id));
+
+  setSessionCookie(res, `user:${user.id}`);
+  res.json({ ok: true, role: user.role });
 });
 
 export default router;

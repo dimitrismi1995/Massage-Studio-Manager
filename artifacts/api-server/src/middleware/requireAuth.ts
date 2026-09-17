@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-
-const COOKIE = "mmm_auth";
+import { getSession, type AuthSession } from "../lib/auth-session";
 
 // Only these are allowed without a valid session cookie
 const PUBLIC: Array<{ method: string; re: RegExp }> = [
@@ -9,13 +8,38 @@ const PUBLIC: Array<{ method: string; re: RegExp }> = [
   { method: "POST", re: /^\/auth\// },
 ];
 
-export function requireAuth(req: Request, res: Response, next: NextFunction): void {
+declare global {
+  namespace Express {
+    interface Request {
+      adminSession?: AuthSession;
+    }
+  }
+}
+
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const isPublic = PUBLIC.some(
     (r) => r.method === req.method && r.re.test(req.path),
   );
   if (isPublic) { next(); return; }
 
-  if (req.signedCookies?.[COOKIE] === "1") { next(); return; }
+  const session = await getSession(req);
+  if (!session) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
 
-  res.status(401).json({ error: "Unauthorized" });
+  req.adminSession = session;
+  if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && session.role === "viewer") {
+    res.status(403).json({ error: "Read-only access" });
+    return;
+  }
+  next();
+}
+
+export function requireOwner(req: Request, res: Response, next: NextFunction): void {
+  if (req.adminSession?.role === "owner") {
+    next();
+    return;
+  }
+  res.status(403).json({ error: "Owner access required" });
 }

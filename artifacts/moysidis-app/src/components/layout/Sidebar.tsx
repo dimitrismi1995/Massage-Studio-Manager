@@ -10,6 +10,7 @@ import {
   HeartPulse,
   Menu,
   LogOut,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -30,6 +31,7 @@ const WHITE_LOGO = { filter: 'brightness(0) invert(1)' } as const;
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
   const { t } = useLanguage();
+  const { role } = useAuth();
   return (
     <>
       {navItems.map((item) => {
@@ -52,6 +54,20 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           </Link>
         );
       })}
+      {role === 'owner' && (
+        <Link
+          href="/admin/users"
+          onClick={onNavigate}
+          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+            location.startsWith('/admin')
+              ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+              : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+          }`}
+        >
+          <ShieldCheck className="h-5 w-5 shrink-0" />
+          Admin access
+        </Link>
+      )}
     </>
   );
 }
